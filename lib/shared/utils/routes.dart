@@ -4,6 +4,8 @@ class Routes {
   static const String columns = '/columns';
   static const String listView = '/listView';
   static const String listViewBuilder = '/listViewBuilder';
+  static const String gridView = '/gridView';
+  static const String stack = '/stack';
 
   static const String register = '/register';
   static const String profile = '/profile';

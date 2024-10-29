@@ -66,6 +66,22 @@ class DrawerMenu extends StatelessWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.grid_4x4),
+            title: const Text('GridView'),
+            onTap: () {
+              Navigator.popUntil(context, ModalRoute.withName(Routes.home));
+              Navigator.pushNamed(context, Routes.gridView);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.stacked_bar_chart),
+            title: const Text('Stack'),
+            onTap: () {
+              Navigator.popUntil(context, ModalRoute.withName(Routes.home));
+              Navigator.pushNamed(context, Routes.stack);
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),
             onTap: () {

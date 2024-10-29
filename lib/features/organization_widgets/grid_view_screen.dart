@@ -1,30 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:leak_guard/shared/widgets/drawer_menu.dart';
 
-class ListViewBuilderScreen extends StatelessWidget {
-  const ListViewBuilderScreen({super.key});
+class GridViewScreen extends StatelessWidget {
+  const GridViewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    List names = [
-      'John',
-      'Doe',
-      'Smith',
-      'Alex',
-      'Max',
-      'Janek',
-      'Denis',
-      'Kamil',
-      'Krzysztof',
-      'Marek',
-      'Piotr',
-      'Tomek',
-    ];
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "ListView.builder",
+          "GridView",
           style: TextStyle(
             fontSize: 25,
             fontWeight: FontWeight.bold,
@@ -54,19 +39,24 @@ class ListViewBuilderScreen extends StatelessWidget {
         ],
       ),
       drawer: const DrawerMenu(),
-      body: ListView.builder(
-        itemCount: names.length,
-        itemBuilder: (context, index) => Container(
-          color: Colors.deepPurple[100],
-          height: 100,
-          width: double.infinity,
-          margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-          child: Center(
-            child: Text(
-              names[index],
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: GridView.builder(
+          itemCount: 100,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+          ),
+          itemBuilder: (context, index) => Container(
+            color: Color.fromARGB(50 + index, 93, 0, 255),
+            child: Center(
+              child: Text(
+                'Item ${index + 1}',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),

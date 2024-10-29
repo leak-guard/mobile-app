@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:leak_guard/features/home/screens/collumn_screen.dart';
-import 'package:leak_guard/features/home/screens/list_view_builder.dart';
-import 'package:leak_guard/features/home/screens/list_view_screen.dart';
+import 'package:leak_guard/features/organization_widgets/collumn_screen.dart';
+import 'package:leak_guard/features/organization_widgets/grid_view_screen.dart';
+import 'package:leak_guard/features/organization_widgets/list_view_builder_screen.dart';
+import 'package:leak_guard/features/organization_widgets/list_view_screen.dart';
+import 'package:leak_guard/features/organization_widgets/stack_screen.dart';
 import 'package:leak_guard/shared/utils/routes.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/settings/screens/settings_screen.dart';
@@ -28,6 +30,8 @@ class MyApp extends StatelessWidget {
         Routes.columns: (context) => const CollumnScreen(),
         Routes.listView: (context) => const ListViewScreen(),
         Routes.listViewBuilder: (context) => const ListViewBuilderScreen(),
+        Routes.gridView: (context) => const GridViewScreen(),
+        Routes.stack: (context) => const StackScreen(),
       },
     );
   }

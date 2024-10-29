@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:leak_guard/shared/widgets/bottom_navigation_bar.dart';
 import '../../../shared/widgets/drawer_menu.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -10,25 +11,20 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
-  // Kontroler animacji
   late AnimationController _controller;
-  // Flaga określająca czy serduszko jest "aktywne"
   bool isLiked = false;
+  int currentIndex = 1;
 
-  @override
-  void initState() {
-    super.initState();
-    // Inicjalizacja kontrolera animacji
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-  }
+  List<IconData> icons = const [
+    Icons.face_sharp,
+    Icons.favorite,
+    Icons.water_drop,
+  ];
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void _onIndexChanged(int index) {
+    setState(() {
+      currentIndex = index;
+    });
   }
 
   void _handleTap() {
@@ -40,6 +36,21 @@ class _HomeScreenState extends State<HomeScreen>
         _controller.reverse();
       }
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -69,6 +80,8 @@ class _HomeScreenState extends State<HomeScreen>
           )
         ],
       ),
+      bottomNavigationBar: MyBottomNavigationBar(
+          currentIndex: currentIndex, onTap: _onIndexChanged),
       drawer: const DrawerMenu(),
       body: Center(
         child: Container(
@@ -86,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen>
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 child: Icon(
-                  Icons.favorite,
+                  icons[currentIndex],
                   color: isLiked ? Colors.red : Colors.deepPurple[400],
                   size: 100,
                 ),
