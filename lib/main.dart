@@ -4,6 +4,7 @@ import 'package:leak_guard/features/organization_widgets/grid_view_screen.dart';
 import 'package:leak_guard/features/organization_widgets/list_view_builder_screen.dart';
 import 'package:leak_guard/features/organization_widgets/list_view_screen.dart';
 import 'package:leak_guard/features/organization_widgets/stack_screen.dart';
+import 'package:leak_guard/features/todo/screens/todo_screen.dart';
 import 'package:leak_guard/shared/utils/routes.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/settings/screens/settings_screen.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         Routes.listViewBuilder: (context) => const ListViewBuilderScreen(),
         Routes.gridView: (context) => const GridViewScreen(),
         Routes.stack: (context) => const StackScreen(),
+        Routes.todo: (context) => const TodoScreen(),
       },
     );
   }

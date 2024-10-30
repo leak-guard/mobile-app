@@ -6,6 +6,7 @@ class Routes {
   static const String listViewBuilder = '/listViewBuilder';
   static const String gridView = '/gridView';
   static const String stack = '/stack';
+  static const String todo = '/todo';
 
   static const String register = '/register';
   static const String profile = '/profile';

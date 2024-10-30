@@ -42,6 +42,14 @@ class DrawerMenu extends StatelessWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.checklist_rtl),
+            title: const Text('Todo List'),
+            onTap: () {
+              Navigator.popUntil(context, ModalRoute.withName(Routes.home));
+              Navigator.pushNamed(context, Routes.todo);
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.collections_bookmark_outlined),
             title: const Text('Collumns'),
             onTap: () {
