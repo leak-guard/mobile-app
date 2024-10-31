@@ -1,7 +1,9 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
+import 'package:leak_guard/widgets/horizontal_group_list.dart';
 import 'package:leak_guard/widgets/panel.dart';
 
 class MainScreen extends StatefulWidget {
@@ -12,79 +14,67 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  Widget _buildTab(String text, {bool selected = false}) {
-    return NeumorphicButton(
-      style: NeumorphicStyle(
-        depth: selected ? -2 : 2, // Wciśnięty efekt dla wybranej zakładki
-        intensity: 0.8,
-        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      onPressed: () {},
-      child: Text(
-        text,
-        style: TextStyle(
-          color: selected ? Colors.blue : Colors.grey,
-          fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-    );
-  }
+  final groups = [
+    Group(name: 'KotłowniaKotłowniaKotłowniaKotłowniaKotłowniaKotłownia'),
+    Group(name: 'Toaleta'),
+    Group(name: 'Duży salon'),
+    Group(name: 'Mały salon'),
+    Group(name: 'Kuchnia'),
+    Group(name: 'Sypialnia'),
+    Group(name: 'Łazienka'),
+    Group(name: 'Garaż'),
+    Group(name: "Piwnica"),
+    Group(name: "Taras"),
+    Group(name: "Ogród"),
+    Group(name: "Kotłownia"),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(150), // Zwiększona wysokość AppBara
+        preferredSize: Size.fromHeight(120),
         child: NeumorphicAppBar(
+          padding: 0,
           titleSpacing: 0,
           actionSpacing: 0,
           centerTitle: true,
           title: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Górny rząd z logo i przyciskami
-              Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween, // Rozłożenie elementów
-                children: [
-                  NeumorphicButton(
-                    padding: EdgeInsets.all(8),
-                    style: NeumorphicStyle(
-                      boxShape: NeumorphicBoxShape.roundRect(
-                          BorderRadius.circular(10)),
-                      depth: 5,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    NeumorphicButton(
+                      padding: EdgeInsets.all(8),
+                      style: NeumorphicStyle(
+                        boxShape: NeumorphicBoxShape.roundRect(
+                            BorderRadius.circular(10)),
+                        depth: 5,
+                      ),
+                      onPressed: () {},
+                      child: Icon(Icons.menu),
                     ),
-                    onPressed: () {},
-                    child: Icon(Icons.menu),
-                  ),
-                  Text(
-                    MyStrings.appName,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  NeumorphicButton(
-                    padding: EdgeInsets.all(8),
-                    style: NeumorphicStyle(
-                      boxShape: NeumorphicBoxShape.roundRect(
-                          BorderRadius.circular(10)),
-                      depth: 5,
+                    Text(
+                      MyStrings.appName,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    onPressed: () {},
-                    child: Icon(Icons.refresh),
-                  ),
-                ],
+                    NeumorphicButton(
+                      padding: EdgeInsets.all(8),
+                      style: NeumorphicStyle(
+                        boxShape: NeumorphicBoxShape.roundRect(
+                            BorderRadius.circular(10)),
+                        depth: 5,
+                      ),
+                      onPressed: () {},
+                      child: Icon(Icons.refresh),
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(height: 8), // Odstęp między rzędami
-              // Dolny rząd z zakładkami
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildTab("Kotłownia", selected: true),
-                  _buildTab("Toplota"),
-                  _buildTab("Drugie piętro"),
-                ],
-              ),
-              SizedBox(height: 8),
+              HorizontalGroupList(groups: groups)
             ],
           ),
         ),
