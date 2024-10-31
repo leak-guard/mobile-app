@@ -44,11 +44,7 @@ class Panel extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(name,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge!
-                        .copyWith(color: MyColors.blue)),
+                Text(name, style: Theme.of(context).textTheme.titleLarge!),
                 Icon(
                   Icons.arrow_forward_ios,
                   color: MyColors.blue,

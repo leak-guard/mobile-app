@@ -24,9 +24,10 @@ class MyApp extends StatelessWidget {
         lightSource: LightSource.topLeft,
         shadowDarkColorEmboss: MyColors.darkShadow,
         shadowDarkColor: MyColors.darkShadow,
+        iconTheme: IconThemeData(color: MyColors.blue, size: 30),
         textTheme: GoogleFonts.latoTextTheme().copyWith(
             titleLarge: TextStyle(
-                color: MyColors.lightThemeFont,
+                color: MyColors.blue,
                 fontSize: 25,
                 fontWeight: FontWeight.w600)),
         depth: 10,
