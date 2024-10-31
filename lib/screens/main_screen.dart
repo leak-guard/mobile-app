@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/utils/colors.dart';
@@ -5,6 +7,7 @@ import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
 import 'package:leak_guard/widgets/horizontal_group_list.dart';
 import 'package:leak_guard/widgets/panel.dart';
+import 'package:leak_guard/widgets/water_block_button.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -29,8 +32,25 @@ class _MainScreenState extends State<MainScreen> {
     Group(name: "Kotłownia"),
   ];
 
+  List<double> waterUsages = [
+    2.5,
+    0.2,
+    12.2,
+    133.2,
+  ];
+
+  void _getWaterUsage() {
+    setState(() {
+      waterUsage = waterUsages.elementAt(Random().nextInt(waterUsages.length));
+    });
+  }
+
+  double waterUsage = 2.5;
+
   @override
   Widget build(BuildContext context) {
+    Group currentGroup = groups[1];
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(120),
@@ -68,7 +88,7 @@ class _MainScreenState extends State<MainScreen> {
                             BorderRadius.circular(10)),
                         depth: 5,
                       ),
-                      onPressed: () {},
+                      onPressed: _getWaterUsage,
                       child: Icon(Icons.refresh),
                     ),
                   ],
@@ -84,7 +104,28 @@ class _MainScreenState extends State<MainScreen> {
         height: 30,
         child: ListView(
           children: [
-            SizedBox(height: 20),
+            SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Neumorphic(
+                  style: NeumorphicStyle(
+                    boxShape: NeumorphicBoxShape.roundRect(
+                      BorderRadius.circular(10),
+                    ),
+                    depth: 5,
+                    intensity: 1,
+                    color: MyColors.blue,
+                  ),
+                  child: SizedBox(
+                    height: 160,
+                    width: 160,
+                  ),
+                ),
+                WaterBlockButton(group: currentGroup),
+              ],
+            ),
+            SizedBox(height: 30),
             Panel(
               name: "Water usage",
               child: Neumorphic(
