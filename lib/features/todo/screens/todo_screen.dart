@@ -12,6 +12,8 @@ class _TodoScreenState extends State<TodoScreen> {
   // * text editing controller to get access to what the user typed
   TextEditingController myController = TextEditingController();
 
+  void greetUser() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,31 +42,44 @@ class _TodoScreenState extends State<TodoScreen> {
         ],
       ),
       body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          height: 70,
-          width: 250,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.deepPurple[300]!,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              height: 70,
+              width: 250,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.deepPurple[300]!,
+                  ),
+                  BoxShadow(
+                    color: Colors.deepPurple[200]!,
+                    spreadRadius: -2.0,
+                    blurRadius: 10.0,
+                    offset: const Offset(5, 5),
+                  ),
+                ],
               ),
-              BoxShadow(
-                color: Colors.deepPurple[200]!,
-                spreadRadius: -2.0,
-                blurRadius: 10.0,
-                offset: const Offset(5, 5),
+              child: Center(
+                child: TextField(
+                  controller: myController,
+                  decoration: const InputDecoration.collapsed(
+                    hintText: 'Type group name',
+                  ),
+                ),
               ),
-            ],
-          ),
-          child: Center(
-              child: TextField(
-            controller: myController,
-            decoration: const InputDecoration.collapsed(
-              hintText: 'Type group name',
             ),
-          )),
+            ElevatedButton(
+              onPressed: greetUser,
+              child: Text("Tap"),
+              style: ButtonStyle(
+                  backgroundColor:
+                      WidgetStateProperty.all(Colors.deepPurple[300])),
+            )
+          ],
         ),
       ),
     );
