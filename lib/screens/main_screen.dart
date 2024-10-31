@@ -1,8 +1,4 @@
-import 'dart:ui';
-
-import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
