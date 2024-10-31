@@ -21,11 +21,11 @@ class Group {
     status = BlockStatus.noBlocked;
   }
 
-  double TodaysWaterUsage() {
+  double todaysWaterUsage() {
     return 16;
   }
 
-  double YesterdayWaterUsage() {
+  double yesterdayWaterUsage() {
     return 32;
   }
 

@@ -122,7 +122,7 @@ class _HorizontalGroupListState extends State<HorizontalGroupList> {
                             widget.groups[index].name,
                             style: TextStyle(
                               color: _selectedIndex == index
-                                  ? MyColors.blue
+                                  ? MyColors.lightThemeFont
                                   : MyColors.darkShadow,
                               fontWeight: _selectedIndex == index
                                   ? FontWeight.bold

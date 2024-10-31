@@ -8,6 +8,7 @@ import 'package:leak_guard/widgets/blurred_top_edge.dart';
 import 'package:leak_guard/widgets/horizontal_group_list.dart';
 import 'package:leak_guard/widgets/panel.dart';
 import 'package:leak_guard/widgets/water_block_button.dart';
+import 'package:leak_guard/widgets/water_usage_arc.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -108,21 +109,19 @@ class _MainScreenState extends State<MainScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Neumorphic(
-                  style: NeumorphicStyle(
-                    boxShape: NeumorphicBoxShape.roundRect(
-                      BorderRadius.circular(10),
-                    ),
-                    depth: 5,
-                    intensity: 1,
-                    color: MyColors.blue,
-                  ),
-                  child: SizedBox(
-                    height: 160,
-                    width: 160,
+                SizedBox(
+                  width: 170,
+                  height: 170,
+                  child: WaterUsageArc(
+                    currentUsage: 1000.0,
+                    maxUsage: 2225.0,
+                    flowRate: 2.5,
                   ),
                 ),
-                WaterBlockButton(group: currentGroup),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
+                  child: WaterBlockButton(group: currentGroup),
+                ),
               ],
             ),
             SizedBox(height: 30),

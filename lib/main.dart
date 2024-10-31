@@ -22,11 +22,15 @@ class MyApp extends StatelessWidget {
         lightSource: LightSource.topLeft,
         shadowDarkColorEmboss: MyColors.darkShadow,
         shadowDarkColor: MyColors.darkShadow,
-        iconTheme: IconThemeData(color: MyColors.blue, size: 30),
+        iconTheme: IconThemeData(color: MyColors.lightThemeFont, size: 30),
         textTheme: GoogleFonts.latoTextTheme().copyWith(
             titleLarge: TextStyle(
-                color: MyColors.blue,
+                color: MyColors.lightThemeFont,
                 fontSize: 25,
+                fontWeight: FontWeight.w600),
+            displaySmall: TextStyle(
+                color: MyColors.lightThemeFont,
+                fontSize: 17,
                 fontWeight: FontWeight.w600)),
         depth: 10,
       ),

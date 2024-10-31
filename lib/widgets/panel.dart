@@ -46,7 +46,6 @@ class Panel extends StatelessWidget {
                 Text(name, style: Theme.of(context).textTheme.titleLarge!),
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: MyColors.blue,
                 ),
               ],
             ),
