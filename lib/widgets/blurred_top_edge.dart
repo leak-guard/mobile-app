@@ -8,8 +8,8 @@ class BlurredTopEdge extends StatelessWidget {
   const BlurredTopEdge({
     required this.child,
     this.height = 50.0,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
