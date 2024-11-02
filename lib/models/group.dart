@@ -12,6 +12,7 @@ class BlockStatus {
 class Group {
   String name;
   BlockStatus status = BlockStatus.noBlocked;
+  List<int> blockedHours = [];
 
   Group({required this.name});
 
@@ -63,5 +64,10 @@ class Group {
       WaterUsageData(2021, 10, 1, 23, 2.5),
     ];
     return waterUsageData.sublist(waterUsageData.length - lastHours);
+  }
+
+  void blockHours(List<int> hours) {
+    print('Block for hours: $hours');
+    blockedHours = hours;
   }
 }

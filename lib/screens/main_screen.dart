@@ -4,6 +4,7 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/strings.dart';
+import 'package:leak_guard/widgets/block_time_clock.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
 import 'package:leak_guard/widgets/horizontal_group_list.dart';
 import 'package:leak_guard/widgets/panel.dart';
@@ -122,7 +123,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 7),
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
                   child: WaterBlockButton(group: currentGroup),
                 ),
               ],
@@ -131,17 +132,17 @@ class _MainScreenState extends State<MainScreen> {
             Panel(
               name: "Water usage",
               child: WaterUsageChart(
-                data: currentGroup.getWaterUsageData(12),
+                data: currentGroup.getWaterUsageData(
+                  12,
+                ),
+                maxHeight: 150,
               ),
               onTap: () {},
             ),
             Panel(
               name: "Block time",
-              child: Neumorphic(
-                child: SizedBox(
-                  height: 200,
-                  width: double.infinity,
-                ),
+              child: BlockTimeClock(
+                currentGroup: currentGroup,
               ),
               onTap: () {},
             ),
