@@ -46,12 +46,12 @@ class _WaterBlockButtonState extends State<WaterBlockButton> {
   @override
   Widget build(BuildContext context) {
     return NeumorphicButton(
-      padding: EdgeInsets.all(8),
+      padding: EdgeInsets.all(14),
       duration: Duration(milliseconds: 200),
       style: NeumorphicStyle(
         shape: NeumorphicShape.convex,
         boxShape: NeumorphicBoxShape.circle(),
-        depth: 10,
+        depth: 8,
         intensity: 5,
         surfaceIntensity: 0.5,
         color: _getButtonColor(),

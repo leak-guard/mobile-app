@@ -8,4 +8,5 @@ class MyColors {
   static Color red = const Color.fromARGB(255, 249, 118, 118);
   static Color yellow = const Color.fromARGB(255, 244, 227, 117);
   static Color lightThemeFont = const Color.fromARGB(255, 7, 67, 157);
+  static Color lightButtonClock = const Color.fromARGB(255, 240, 235, 235);
 }

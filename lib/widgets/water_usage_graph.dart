@@ -25,7 +25,7 @@ class WaterUsageChart extends StatelessWidget {
         return Column(
           children: [
             SizedBox(
-              height: maxHeight + 50,
+              height: maxHeight + 40,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.end,

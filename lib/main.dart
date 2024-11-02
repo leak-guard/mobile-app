@@ -22,6 +22,8 @@ class MyApp extends StatelessWidget {
         lightSource: LightSource.topLeft,
         shadowDarkColorEmboss: MyColors.darkShadow,
         shadowDarkColor: MyColors.darkShadow,
+        shadowLightColorEmboss: Colors.white,
+        shadowLightColor: Colors.white,
         iconTheme: IconThemeData(color: MyColors.lightThemeFont, size: 30),
         textTheme: GoogleFonts.latoTextTheme().copyWith(
             titleLarge: TextStyle(
