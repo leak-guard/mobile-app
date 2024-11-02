@@ -58,7 +58,7 @@ class _WaterBlockButtonState extends State<WaterBlockButton> {
       ),
       onPressed: _handleButtonPress,
       child: Padding(
-        padding: const EdgeInsets.all(30),
+        padding: const EdgeInsets.all(31),
         child: NeumorphicIcon(
           _getButtonIcon(),
           size: 80,

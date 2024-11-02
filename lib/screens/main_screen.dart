@@ -122,7 +122,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 7),
                   child: WaterBlockButton(group: currentGroup),
                 ),
               ],
