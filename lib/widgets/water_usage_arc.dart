@@ -87,9 +87,11 @@ class _WaterUsageArcState extends State<WaterUsageArc>
             Positioned.fill(
               child: Neumorphic(
                 style: NeumorphicStyle(
-                  depth: 5,
+                  depth: 0,
                   intensity: 0.8,
+                  surfaceIntensity: 0.5,
                   color: MyColors.blue,
+                  shape: NeumorphicShape.convex,
                   boxShape: NeumorphicBoxShape.path(
                     ArcPathProvider(
                       sweepAngle: widget.currentUsage / widget.maxUsage < 1
@@ -107,6 +109,9 @@ class _WaterUsageArcState extends State<WaterUsageArc>
                 children: [
                   Column(
                     children: [
+                      SizedBox(
+                        height: 52,
+                      ),
                       Text(
                         '${widget.currentUsage.toStringAsFixed(1)} l',
                         style: Theme.of(context).textTheme.displaySmall,
@@ -123,7 +128,7 @@ class _WaterUsageArcState extends State<WaterUsageArc>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 15),
                   Text(
                     '${widget.flowRate.toStringAsFixed(1)}\nl/min',
                     textAlign: TextAlign.center,
