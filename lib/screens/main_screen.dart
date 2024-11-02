@@ -113,8 +113,8 @@ class _MainScreenState extends State<MainScreen> {
                   width: 170,
                   height: 170,
                   child: WaterUsageArc(
-                    currentUsage: 1000.0,
-                    maxUsage: 2225.0,
+                    currentUsage: 100,
+                    maxUsage: 1000,
                     flowRate: 2.5,
                   ),
                 ),
@@ -124,7 +124,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 10),
             Panel(
               name: "Water usage",
               child: Neumorphic(
