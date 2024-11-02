@@ -9,6 +9,7 @@ import 'package:leak_guard/widgets/horizontal_group_list.dart';
 import 'package:leak_guard/widgets/panel.dart';
 import 'package:leak_guard/widgets/water_block_button.dart';
 import 'package:leak_guard/widgets/water_usage_arc.dart';
+import 'package:leak_guard/widgets/water_usage_graph.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -70,6 +71,7 @@ class _MainScreenState extends State<MainScreen> {
                   children: [
                     NeumorphicButton(
                       padding: EdgeInsets.all(8),
+                      minDistance: -3,
                       style: NeumorphicStyle(
                         boxShape: NeumorphicBoxShape.roundRect(
                             BorderRadius.circular(10)),
@@ -84,6 +86,7 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     NeumorphicButton(
                       padding: EdgeInsets.all(8),
+                      minDistance: -3,
                       style: NeumorphicStyle(
                         boxShape: NeumorphicBoxShape.roundRect(
                             BorderRadius.circular(10)),
@@ -113,7 +116,7 @@ class _MainScreenState extends State<MainScreen> {
                   width: 170,
                   height: 170,
                   child: WaterUsageArc(
-                    currentUsage: 100,
+                    currentUsage: 600,
                     maxUsage: 1000,
                     flowRate: 2.5,
                   ),
@@ -127,11 +130,8 @@ class _MainScreenState extends State<MainScreen> {
             SizedBox(height: 10),
             Panel(
               name: "Water usage",
-              child: Neumorphic(
-                child: SizedBox(
-                  height: 200,
-                  width: double.infinity,
-                ),
+              child: WaterUsageChart(
+                data: currentGroup.getWaterUsageData(12),
               ),
               onTap: () {},
             ),
