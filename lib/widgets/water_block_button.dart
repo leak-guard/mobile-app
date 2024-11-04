@@ -25,6 +25,7 @@ class _WaterBlockButtonState extends State<WaterBlockButton> {
   IconData _getButtonIcon() {
     if (widget.group.status == BlockStatus.noBlocked) {
       return Icons.lock_open;
+      // return CustomIcons.leak_probe;
     } else if (widget.group.status == BlockStatus.allBlocked) {
       return Icons.lock_outline;
     } else if (widget.group.status == BlockStatus.someBlocked) {
@@ -33,7 +34,7 @@ class _WaterBlockButtonState extends State<WaterBlockButton> {
     return Icons.lock_open;
   }
 
-  void _handleButtonPress() async {
+  void _handleButtonPress() {
     setState(() {
       if (widget.group.status == BlockStatus.noBlocked) {
         widget.group.block();

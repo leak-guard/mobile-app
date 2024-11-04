@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/strings.dart';
@@ -48,7 +49,7 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  double waterUsage = 2.5;
+  double waterUsage = 2222.5;
 
   @override
   Widget build(BuildContext context) {
@@ -117,9 +118,9 @@ class _MainScreenState extends State<MainScreen> {
                   width: 170,
                   height: 170,
                   child: WaterUsageArc(
-                    currentUsage: 600,
-                    maxUsage: 1000,
-                    flowRate: 2.5,
+                    currentUsage: currentGroup.todaysUsage(),
+                    maxUsage: currentGroup.maxUsage(),
+                    flowRate: currentGroup.flowRate(),
                   ),
                 ),
                 Padding(
@@ -148,21 +149,122 @@ class _MainScreenState extends State<MainScreen> {
             ),
             Panel(
               name: "Leak probes",
-              child: Neumorphic(
-                child: SizedBox(
-                  height: 200,
-                  width: double.infinity,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 70,
+                          child: Center(
+                            child: NeumorphicIcon(
+                              CustomIcons.leak_probe,
+                              size: 80,
+                              style: NeumorphicStyle(
+                                color: MyColors.blue,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          // "9999",
+                          currentGroup.leakProbeNumber().toString(),
+                          style:
+                              Theme.of(context).textTheme.titleLarge!.copyWith(
+                                    color: MyColors.blue,
+                                    fontSize: 50,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      SizedBox(
+                        height: 80,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(13, 0, 0, 0),
+                          child: Center(
+                            child: NeumorphicIcon(
+                              CustomIcons.battery_low,
+                              size: 50,
+                              style: NeumorphicStyle(
+                                color: MyColors.blue,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        currentGroup.leakProbeLowBatteryNumber().toString(),
+                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                              color: MyColors.blue,
+                              fontSize: 50,
+                            ),
+                      ),
+                    ],
+                  )
+                ],
               ),
               onTap: () {},
             ),
             Panel(
               name: "Central units",
-              child: Neumorphic(
-                child: SizedBox(
-                  height: 200,
-                  width: double.infinity,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    children: [
+                      SizedBox(
+                        height: 70,
+                        child: Center(
+                          child: NeumorphicIcon(
+                            CustomIcons.central_unit,
+                            size: 70,
+                            style: NeumorphicStyle(
+                              color: MyColors.blue,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        // "9999",
+                        currentGroup.centralUnitsNumber().toString(),
+                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                              color: MyColors.blue,
+                              fontSize: 50,
+                            ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      SizedBox(
+                        height: 80,
+                        child: Center(
+                          child: NeumorphicIcon(
+                            CustomIcons.broken_pipe,
+                            size: 50,
+                            style: NeumorphicStyle(
+                              color: MyColors.blue,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        currentGroup.centralUnitsLeaksNumber().toString(),
+                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                              color: MyColors.blue,
+                              fontSize: 50,
+                            ),
+                      ),
+                    ],
+                  )
+                ],
               ),
               onTap: () {},
             ),

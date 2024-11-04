@@ -12,6 +12,18 @@ class WaterUsageChart extends StatelessWidget {
     this.maxHeight = 200,
   });
 
+  double getFontSize(double waterUsage) {
+    if (waterUsage < 100) {
+      return 9;
+    } else if (waterUsage < 1000) {
+      return 8;
+    } else if (waterUsage < 10000) {
+      return 7;
+    } else {
+      return 6;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (data.isEmpty) return const SizedBox();
@@ -39,7 +51,7 @@ class WaterUsageChart extends StatelessWidget {
                         '${(item.usage * 10).roundToDouble() / 10}',
                         style: TextStyle(
                           color: MyColors.blue,
-                          fontSize: 10,
+                          fontSize: getFontSize(item.usage),
                           fontWeight: FontWeight.bold,
                         ),
                       ),

@@ -22,6 +22,16 @@ class _WaterUsageArcState extends State<WaterUsageArc>
     with SingleTickerProviderStateMixin {
   final double _thickness = 16;
 
+  Color _arcColor() {
+    if (widget.currentUsage / widget.maxUsage <= 0.9) {
+      return MyColors.blue;
+    } else if (widget.currentUsage / widget.maxUsage <= 1) {
+      return MyColors.yellow;
+    } else {
+      return MyColors.red;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -45,7 +55,7 @@ class _WaterUsageArcState extends State<WaterUsageArc>
                   depth: 0,
                   intensity: 0.8,
                   surfaceIntensity: 0.5,
-                  color: MyColors.blue,
+                  color: _arcColor(),
                   shape: NeumorphicShape.convex,
                   boxShape: NeumorphicBoxShape.path(
                     ArcPathProvider(

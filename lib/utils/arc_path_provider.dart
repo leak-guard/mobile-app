@@ -31,10 +31,36 @@ class ArcPathProvider extends NeumorphicPathProvider {
       sweepAngleRad,
     );
 
+    Offset centerEnd = Offset(
+        center.dx +
+            (radius + thickness / 2.0) *
+                math.cos(startAngleRad + sweepAngleRad),
+        center.dy +
+            (radius + thickness / 2.0) *
+                math.sin(startAngleRad + sweepAngleRad));
+
+    path.arcTo(
+      Rect.fromCircle(center: centerEnd, radius: thickness / 2.0),
+      startAngleRad + sweepAngleRad,
+      math.pi,
+      false,
+    );
+
     path.arcTo(
       Rect.fromCircle(center: center, radius: radius),
       startAngleRad + sweepAngleRad,
       -sweepAngleRad,
+      false,
+    );
+
+    Offset centerStart = Offset(
+        center.dx + (radius + thickness / 2.0) * math.cos(startAngleRad),
+        center.dy + (radius + thickness / 2.0) * math.sin(startAngleRad));
+
+    path.arcTo(
+      Rect.fromCircle(center: centerStart, radius: thickness / 2.0),
+      startAngleRad,
+      -math.pi,
       false,
     );
 
