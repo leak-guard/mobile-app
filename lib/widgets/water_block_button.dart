@@ -3,8 +3,10 @@ import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/utils/colors.dart';
 
 class WaterBlockButton extends StatefulWidget {
-  const WaterBlockButton({super.key, required this.group});
+  const WaterBlockButton(
+      {super.key, required this.group, required this.handleButtonPress});
   final Group group;
+  final VoidCallback handleButtonPress;
 
   @override
   State<WaterBlockButton> createState() => _WaterBlockButtonState();
@@ -34,16 +36,6 @@ class _WaterBlockButtonState extends State<WaterBlockButton> {
     return Icons.lock_open;
   }
 
-  void _handleButtonPress() {
-    setState(() {
-      if (widget.group.status == BlockStatus.noBlocked) {
-        widget.group.block();
-      } else {
-        widget.group.unBlock();
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return NeumorphicButton(
@@ -57,7 +49,7 @@ class _WaterBlockButtonState extends State<WaterBlockButton> {
         surfaceIntensity: 0.5,
         color: _getButtonColor(),
       ),
-      onPressed: _handleButtonPress,
+      onPressed: () => widget.handleButtonPress(),
       child: Padding(
         padding: const EdgeInsets.all(30),
         child: NeumorphicIcon(
