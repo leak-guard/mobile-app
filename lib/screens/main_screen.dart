@@ -133,10 +133,10 @@ class _MainScreenState extends State<MainScreen> {
         ),
         backgroundColor: MyColors.background,
         body: BlurredTopEdge(
-          height: 30,
+          height: 20,
           child: ListView(
             children: [
-              SizedBox(height: 30),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -172,7 +172,7 @@ class _MainScreenState extends State<MainScreen> {
               Panel(
                 name: "Block time",
                 child: BlockTimeClock(
-                  currentGroup: currentGroup,
+                  group: currentGroup,
                 ),
                 onTap: () {},
               ),

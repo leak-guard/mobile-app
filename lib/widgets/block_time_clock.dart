@@ -46,11 +46,11 @@ class ArcPathProvider extends NeumorphicPathProvider {
 }
 
 class BlockTimeClock extends StatefulWidget {
-  final Group currentGroup;
+  final Group group;
 
   const BlockTimeClock({
     super.key,
-    required this.currentGroup,
+    required this.group,
   });
 
   @override
@@ -64,17 +64,29 @@ class _BlockTimeClockState extends State<BlockTimeClock> {
   @override
   void initState() {
     super.initState();
-    _selectedHours = Set.from(widget.currentGroup.blockedHours);
+    _selectedHours = Set.from(widget.group.blockedHours);
+    _isLocked = widget.group.isTimeBlockSetted;
+  }
+
+  @override
+  void didUpdateWidget(BlockTimeClock oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.group != oldWidget.group) {
+      _selectedHours = Set.from(widget.group.blockedHours);
+      _isLocked = widget.group.isTimeBlockSetted;
+    }
   }
 
   void _toggleHour(int hour) {
     setState(() {
-      if (_isLocked) widget.currentGroup.blockHours([]);
+      widget.group.isTimeBlockSetted = false;
       _isLocked = false;
 
       if (_selectedHours.contains(hour)) {
+        widget.group.blockedHours.remove(hour);
         _selectedHours.remove(hour);
       } else {
+        widget.group.blockedHours.add(hour);
         _selectedHours.add(hour);
       }
     });
@@ -82,36 +94,33 @@ class _BlockTimeClockState extends State<BlockTimeClock> {
 
   void _applyBlockedHours() {
     if (_selectedHours.isEmpty) return;
-    if (_isLocked)
-      widget.currentGroup.blockHours([]);
-    else
-      widget.currentGroup.blockHours(_selectedHours.toList());
 
     setState(() {
       _isLocked = !_isLocked;
+      widget.group.isTimeBlockSetted = !widget.group.isTimeBlockSetted;
     });
   }
 
-  Widget _buildCenterContent() {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: NeumorphicButton(
-        key: const ValueKey('block_hours_button'),
-        minDistance: 6,
-        style: NeumorphicStyle(
-          depth: 6,
-          surfaceIntensity: 0.5,
-          intensity: 0.5,
-          color: _isLocked ? MyColors.red : MyColors.lightButtonClock,
-          shape: NeumorphicShape.convex,
-          boxShape: const NeumorphicBoxShape.circle(),
-        ),
-        onPressed: _applyBlockedHours,
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
+  Widget _buildCenterContent(double innerRadius) {
+    return NeumorphicButton(
+      key: const ValueKey('block_hours_button'),
+      minDistance: 6,
+      style: NeumorphicStyle(
+        depth: 6,
+        surfaceIntensity: 0.5,
+        intensity: 0.5,
+        color: _isLocked ? MyColors.red : MyColors.lightButtonClock,
+        shape: NeumorphicShape.convex,
+        boxShape: const NeumorphicBoxShape.circle(),
+      ),
+      onPressed: _applyBlockedHours,
+      child: SizedBox(
+        width: innerRadius,
+        height: innerRadius,
+        child: Center(
           child: NeumorphicIcon(
             _isLocked ? Icons.lock_outline : Icons.lock_open,
-            size: 35,
+            size: 40,
             style: NeumorphicStyle(
               color: _isLocked ? Colors.white : Colors.black,
               depth: 1,
@@ -129,7 +138,7 @@ class _BlockTimeClockState extends State<BlockTimeClock> {
         hour.toString(),
         style: TextStyle(
           color: Colors.black,
-          fontSize: 9,
+          fontSize: 12,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -158,25 +167,22 @@ class _BlockTimeClockState extends State<BlockTimeClock> {
         child: SizedBox(
           width: buttonSize,
           height: buttonSize,
-          child: Center(
-            child: NeumorphicButton(
-              key: ValueKey('hour_button_$hour'),
-              onPressed: () => _toggleHour(hour),
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-              style: NeumorphicStyle(
-                shape: isSelected
-                    ? NeumorphicShape.convex
-                    : NeumorphicShape.concave,
-                depth: isSelected ? 0 : -2,
-                intensity: 1,
-                surfaceIntensity: 0.7,
-                color: isSelected
-                    ? MyColors.red.withOpacity(0.9)
-                    : MyColors.lightButtonClock,
-                boxShape: const NeumorphicBoxShape.circle(),
-              ),
-              child: _buildButtonContent(hour, buttonSize, isSelected),
+          child: NeumorphicButton(
+            key: ValueKey('hour_button_$hour'),
+            onPressed: () => _toggleHour(hour),
+            padding: const EdgeInsets.all(0),
+            style: NeumorphicStyle(
+              shape:
+                  isSelected ? NeumorphicShape.convex : NeumorphicShape.concave,
+              depth: isSelected ? 0 : -2,
+              intensity: 1,
+              surfaceIntensity: 0.7,
+              color: isSelected
+                  ? MyColors.red.withOpacity(0.9)
+                  : MyColors.lightButtonClock,
+              boxShape: const NeumorphicBoxShape.circle(),
             ),
+            child: _buildButtonContent(hour, buttonSize, isSelected),
           ),
         ),
       ),
@@ -312,10 +318,7 @@ class _BlockTimeClockState extends State<BlockTimeClock> {
                   ),
                 ),
                 Center(
-                  child: SizedBox(
-                    width: innerRadius * 1.2,
-                    child: _buildCenterContent(),
-                  ),
+                  child: _buildCenterContent(innerRadius * 0.7),
                 ),
               ],
             ),

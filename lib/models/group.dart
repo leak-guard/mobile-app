@@ -14,6 +14,7 @@ class BlockStatus {
 class Group {
   String name;
   BlockStatus status = BlockStatus.noBlocked;
+  bool isTimeBlockSetted = false;
   List<int> blockedHours = [];
 
   Group({required this.name});

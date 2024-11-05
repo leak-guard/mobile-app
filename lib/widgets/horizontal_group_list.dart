@@ -38,10 +38,14 @@ class _HorizontalGroupListState extends State<HorizontalGroupList> {
     });
   }
 
-  void _initializeKeys() {
-    _keys.clear();
-    for (int i = 0; i < widget.groups.length; i++) {
-      _keys.add(GlobalKey());
+  @override
+  void didUpdateWidget(HorizontalGroupList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.groups.length != oldWidget.groups.length) {
+      _initializeKeys();
+    }
+    if (widget.selectedIndex != oldWidget.selectedIndex) {
+      _scrollToIndex(widget.selectedIndex);
     }
   }
 
@@ -49,6 +53,13 @@ class _HorizontalGroupListState extends State<HorizontalGroupList> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _initializeKeys() {
+    _keys.clear();
+    for (int i = 0; i < widget.groups.length; i++) {
+      _keys.add(GlobalKey());
+    }
   }
 
   void _scrollToIndex(int index) {
@@ -148,16 +159,5 @@ class _HorizontalGroupListState extends State<HorizontalGroupList> {
         },
       ),
     );
-  }
-
-  @override
-  void didUpdateWidget(HorizontalGroupList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.groups.length != oldWidget.groups.length) {
-      _initializeKeys();
-    }
-    if (widget.selectedIndex != oldWidget.selectedIndex) {
-      _scrollToIndex(widget.selectedIndex);
-    }
   }
 }
