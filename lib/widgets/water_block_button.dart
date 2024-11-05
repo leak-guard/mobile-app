@@ -6,7 +6,7 @@ class WaterBlockButton extends StatefulWidget {
   const WaterBlockButton(
       {super.key, required this.group, required this.handleButtonPress});
   final Group group;
-  final Function handleButtonPress;
+  final VoidCallback handleButtonPress;
 
   @override
   State<WaterBlockButton> createState() => _WaterBlockButtonState();

@@ -3,8 +3,16 @@ import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/utils/colors.dart';
 
 class HorizontalGroupList extends StatefulWidget {
-  const HorizontalGroupList({super.key, required this.groups});
+  const HorizontalGroupList({
+    super.key,
+    required this.groups,
+    required this.selectedIndex,
+    required this.onIndexChanged,
+  });
+
   final List<Group> groups;
+  final int selectedIndex;
+  final Function(int) onIndexChanged;
 
   @override
   State<HorizontalGroupList> createState() => _HorizontalGroupListState();
@@ -12,7 +20,6 @@ class HorizontalGroupList extends StatefulWidget {
 
 class _HorizontalGroupListState extends State<HorizontalGroupList> {
   late ScrollController _scrollController;
-  int _selectedIndex = 0;
   final List<GlobalKey> _keys = [];
 
   // Stałe do zarządzania paddingami
@@ -26,6 +33,9 @@ class _HorizontalGroupListState extends State<HorizontalGroupList> {
     super.initState();
     _scrollController = ScrollController();
     _initializeKeys();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToIndex(widget.selectedIndex);
+    });
   }
 
   void _initializeKeys() {
@@ -101,13 +111,11 @@ class _HorizontalGroupListState extends State<HorizontalGroupList> {
                         child: NeumorphicButton(
                           key: _keys[index],
                           onPressed: () {
-                            setState(() {
-                              _selectedIndex = index;
-                            });
+                            widget.onIndexChanged(index);
                             _scrollToIndex(index);
                           },
                           style: NeumorphicStyle(
-                            depth: _selectedIndex == index ? 4 : -4,
+                            depth: widget.selectedIndex == index ? 4 : -4,
                             intensity: 0.6,
                             boxShape: NeumorphicBoxShape.roundRect(
                               BorderRadius.circular(12),
@@ -121,10 +129,10 @@ class _HorizontalGroupListState extends State<HorizontalGroupList> {
                           child: Text(
                             widget.groups[index].name,
                             style: TextStyle(
-                              color: _selectedIndex == index
+                              color: widget.selectedIndex == index
                                   ? MyColors.lightThemeFont
                                   : MyColors.darkShadow,
-                              fontWeight: _selectedIndex == index
+                              fontWeight: widget.selectedIndex == index
                                   ? FontWeight.bold
                                   : FontWeight.normal,
                             ),
@@ -147,6 +155,9 @@ class _HorizontalGroupListState extends State<HorizontalGroupList> {
     super.didUpdateWidget(oldWidget);
     if (widget.groups.length != oldWidget.groups.length) {
       _initializeKeys();
+    }
+    if (widget.selectedIndex != oldWidget.selectedIndex) {
+      _scrollToIndex(widget.selectedIndex);
     }
   }
 }

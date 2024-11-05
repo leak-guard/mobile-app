@@ -39,6 +39,28 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {});
   }
 
+  void _handleGroupChange(int newIndex) {
+    setState(() {
+      groupIndex = newIndex;
+    });
+  }
+
+  void _handleSwipe(DragEndDetails details) {
+    if (details.primaryVelocity == null) return;
+
+    if (details.primaryVelocity! > 0) {
+      // Swipe w prawo
+      if (groupIndex > 0) {
+        _handleGroupChange(groupIndex - 1);
+      }
+    } else {
+      // Swipe w lewo
+      if (groupIndex < groups.length - 1) {
+        _handleGroupChange(groupIndex + 1);
+      }
+    }
+  }
+
   void _handleBlockButtonTap(Group group) {
     setState(() {
       if (group.status == BlockStatus.noBlocked) {
@@ -54,6 +76,7 @@ class _MainScreenState extends State<MainScreen> {
     Group currentGroup = groups[groupIndex];
 
     return GestureDetector(
+      onHorizontalDragEnd: _handleSwipe,
       child: Scaffold(
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(120),
@@ -99,7 +122,11 @@ class _MainScreenState extends State<MainScreen> {
                     ],
                   ),
                 ),
-                HorizontalGroupList(groups: groups)
+                HorizontalGroupList(
+                  groups: groups,
+                  selectedIndex: groupIndex,
+                  onIndexChanged: _handleGroupChange,
+                )
               ],
             ),
           ),
