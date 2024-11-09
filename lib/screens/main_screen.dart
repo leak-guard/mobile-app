@@ -1,7 +1,9 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/utils/floating_data_generator.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/block_time_clock.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
@@ -19,24 +21,31 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int groupIndex = 1;
-  final groups = [
-    Group(name: 'KotłowniaKotłowniaKotłowniaKotłowniaKotłowniaKotłownia'),
-    Group(name: 'Toaleta'),
-    Group(name: 'Duży salon'),
-    Group(name: 'Mały salon'),
-    Group(name: 'Kuchnia'),
-    Group(name: 'Sypialnia'),
-    Group(name: 'Łazienka'),
-    Group(name: 'Garaż'),
-    Group(name: "Piwnica"),
-    Group(name: "Taras"),
-    Group(name: "Ogród"),
-    Group(name: "Kotłownia"),
-  ];
+  int groupIndex = 0;
+  List<Group> groups = [];
+  final _db = DatabaseService.instance;
+  late Future<void> _loadDataFuture;
 
-  void _getWaterUsage() {
-    setState(() {});
+  @override
+  void initState() {
+    super.initState();
+    _loadDataFuture = _loadData();
+  }
+
+  Future<void> _loadData() async {
+    // Pobierz grupy
+    groups = await _db.getGroups();
+
+    // Załaduj dane dla każdej grupy
+    for (var group in groups) {
+      await group.loadCentralUnits();
+    }
+  }
+
+  Future<void> _refreshData() async {
+    setState(() {
+      _loadDataFuture = _loadData();
+    });
   }
 
   void _handleGroupChange(int newIndex) {
@@ -73,239 +82,313 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Group currentGroup = groups[groupIndex];
+    return FutureBuilder<void>(
+      future: _loadDataFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            backgroundColor: MyColors.background,
+            body: const Center(child: SizedBox()),
+          );
+        }
 
-    return GestureDetector(
-      onHorizontalDragEnd: _handleSwipe,
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(120),
-          child: NeumorphicAppBar(
-            padding: 0,
-            titleSpacing: 0,
-            actionSpacing: 0,
-            centerTitle: true,
-            title: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      NeumorphicButton(
-                        padding: EdgeInsets.all(8),
-                        minDistance: -3,
-                        style: NeumorphicStyle(
-                          boxShape: NeumorphicBoxShape.roundRect(
-                              BorderRadius.circular(10)),
-                          depth: 5,
-                        ),
-                        onPressed: () {},
-                        child: Icon(Icons.menu),
-                      ),
-                      Text(
-                        MyStrings.appName,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      NeumorphicButton(
-                        padding: EdgeInsets.all(8),
-                        minDistance: -3,
-                        style: NeumorphicStyle(
-                          boxShape: NeumorphicBoxShape.roundRect(
-                              BorderRadius.circular(10)),
-                          depth: 5,
-                        ),
-                        onPressed: _getWaterUsage,
-                        child: Icon(Icons.refresh),
-                      ),
-                    ],
-                  ),
-                ),
-                HorizontalGroupList(
-                  groups: groups,
-                  selectedIndex: groupIndex,
-                  onIndexChanged: _handleGroupChange,
-                )
-              ],
-            ),
-          ),
-        ),
-        backgroundColor: MyColors.background,
-        body: BlurredTopEdge(
-          height: 20,
-          child: ListView(
-            children: [
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        if (snapshot.hasError) {
+          return Scaffold(
+            backgroundColor: MyColors.background,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    width: 170,
-                    height: 170,
-                    child: WaterUsageArc(
-                      currentUsage: currentGroup.todaysUsage(),
-                      maxUsage: currentGroup.maxUsage(),
-                      flowRate: currentGroup.flowRate(),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
-                    child: WaterBlockButton(
-                        group: currentGroup,
-                        handleButtonPress: () =>
-                            _handleBlockButtonTap(currentGroup)),
+                  Text('Error: ${snapshot.error}'),
+                  ElevatedButton(
+                    onPressed: _refreshData,
+                    child: const Text('Retry'),
                   ),
                 ],
               ),
-              SizedBox(height: 10),
-              Panel(
-                name: "Water usage",
-                child: WaterUsageChart(
-                  data: currentGroup.getWaterUsageData(
-                    12,
-                  ),
-                  maxHeight: 150,
-                ),
-                onTap: () {},
-              ),
-              Panel(
-                name: "Block time",
-                child: BlockTimeClock(
-                  group: currentGroup,
-                ),
-                onTap: () {},
-              ),
-              Panel(
-                name: "Leak probes",
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+            ),
+          );
+        }
+
+        if (groups.isEmpty) {
+          return Scaffold(
+            backgroundColor: MyColors.background,
+            body: Center(
+              child: Text('No groups found'),
+            ),
+            floatingActionButton: GenerateTestDataButton(
+              onComplete: _refreshData,
+            ),
+          );
+        }
+
+        Group currentGroup = groups[groupIndex];
+
+        return GestureDetector(
+          onHorizontalDragEnd: _handleSwipe,
+          child: Scaffold(
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(120),
+              child: NeumorphicAppBar(
+                padding: 0,
+                titleSpacing: 0,
+                actionSpacing: 0,
+                centerTitle: true,
+                title: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                      child: Column(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SizedBox(
-                            height: 70,
-                            child: Center(
-                              child: NeumorphicIcon(
-                                CustomIcons.leak_probe,
-                                size: 80,
-                                style: NeumorphicStyle(
-                                  color: MyColors.blue,
-                                ),
-                              ),
+                          NeumorphicButton(
+                            padding: EdgeInsets.all(8),
+                            minDistance: -3,
+                            style: NeumorphicStyle(
+                              boxShape: NeumorphicBoxShape.roundRect(
+                                  BorderRadius.circular(10)),
+                              depth: 5,
                             ),
+                            onPressed: () {},
+                            child: Icon(Icons.menu),
                           ),
-                          SizedBox(height: 10),
                           Text(
-                            // "9999",
-                            currentGroup.leakProbeNumber().toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .copyWith(
-                                  color: MyColors.blue,
-                                  fontSize: 50,
-                                ),
+                            MyStrings.appName,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          NeumorphicButton(
+                            padding: EdgeInsets.all(8),
+                            minDistance: -3,
+                            style: NeumorphicStyle(
+                              boxShape: NeumorphicBoxShape.roundRect(
+                                  BorderRadius.circular(10)),
+                              depth: 5,
+                            ),
+                            onPressed: _refreshData,
+                            child: Icon(Icons.refresh),
                           ),
                         ],
                       ),
                     ),
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: 80,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(13, 0, 0, 0),
-                            child: Center(
-                              child: NeumorphicIcon(
-                                CustomIcons.battery_low,
-                                size: 50,
-                                style: NeumorphicStyle(
-                                  color: MyColors.blue,
+                    HorizontalGroupList(
+                      groups: groups,
+                      selectedIndex: groupIndex,
+                      onIndexChanged: _handleGroupChange,
+                    )
+                  ],
+                ),
+              ),
+            ),
+            backgroundColor: MyColors.background,
+            body: FutureBuilder<Map<String, dynamic>>(
+              // Pobierz wszystkie potrzebne dane na raz
+              future: Future.wait([
+                currentGroup.todaysWaterUsage(),
+                currentGroup.yesterdayWaterUsage(),
+                currentGroup.flowRate(),
+                currentGroup.getWaterUsageData(12),
+              ]).then((results) => {
+                    'todaysUsage': results[0],
+                    'maxUsage': results[1],
+                    'flowRate': results[2],
+                    'waterUsageData': results[3],
+                  }),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final data = snapshot.data!;
+
+                return BlurredTopEdge(
+                  height: 20,
+                  child: ListView(
+                    children: [
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          SizedBox(
+                            width: 170,
+                            height: 170,
+                            child: WaterUsageArc(
+                              currentUsage: data['todaysUsage'],
+                              maxUsage: data['maxUsage'],
+                              flowRate: data['flowRate'],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                            child: WaterBlockButton(
+                              group: currentGroup,
+                              handleButtonPress: () =>
+                                  _handleBlockButtonTap(currentGroup),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Panel(
+                        name: "Water usage",
+                        child: WaterUsageChart(
+                          data: data['waterUsageData'],
+                          maxHeight: 150,
+                        ),
+                        onTap: () {},
+                      ),
+                      Panel(
+                        name: "Block time",
+                        child: BlockTimeClock(
+                          group: currentGroup,
+                        ),
+                        onTap: () {},
+                      ),
+                      Panel(
+                        name: "Leak probes",
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: 70,
+                                    child: Center(
+                                      child: NeumorphicIcon(
+                                        CustomIcons.leak_probe,
+                                        size: 80,
+                                        style: NeumorphicStyle(
+                                          color: MyColors.blue,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    currentGroup.leakProbeNumber().toString(),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge!
+                                        .copyWith(
+                                          color: MyColors.blue,
+                                          fontSize: 50,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                SizedBox(
+                                  height: 80,
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(13, 0, 0, 0),
+                                    child: Center(
+                                      child: NeumorphicIcon(
+                                        CustomIcons.battery_low,
+                                        size: 50,
+                                        style: NeumorphicStyle(
+                                          color: MyColors.blue,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
+                                Text(
+                                  currentGroup
+                                      .leakProbeLowBatteryNumber()
+                                      .toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(
+                                        color: MyColors.blue,
+                                        fontSize: 50,
+                                      ),
+                                ),
+                              ],
+                            )
+                          ],
                         ),
-                        Text(
-                          currentGroup.leakProbeLowBatteryNumber().toString(),
-                          style:
-                              Theme.of(context).textTheme.titleLarge!.copyWith(
-                                    color: MyColors.blue,
-                                    fontSize: 50,
+                        onTap: () {},
+                      ),
+                      Panel(
+                        name: "Central units",
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Column(
+                              children: [
+                                SizedBox(
+                                  height: 70,
+                                  child: Center(
+                                    child: NeumorphicIcon(
+                                      CustomIcons.central_unit,
+                                      size: 70,
+                                      style: NeumorphicStyle(
+                                        color: MyColors.blue,
+                                      ),
+                                    ),
                                   ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-                onTap: () {},
-              ),
-              Panel(
-                name: "Central units",
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: 70,
-                          child: Center(
-                            child: NeumorphicIcon(
-                              CustomIcons.central_unit,
-                              size: 70,
-                              style: NeumorphicStyle(
-                                color: MyColors.blue,
-                              ),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  currentGroup.centralUnitsNumber().toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(
+                                        color: MyColors.blue,
+                                        fontSize: 50,
+                                      ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          // "9999",
-                          currentGroup.centralUnitsNumber().toString(),
-                          style:
-                              Theme.of(context).textTheme.titleLarge!.copyWith(
-                                    color: MyColors.blue,
-                                    fontSize: 50,
+                            Column(
+                              children: [
+                                SizedBox(
+                                  height: 80,
+                                  child: Center(
+                                    child: NeumorphicIcon(
+                                      CustomIcons.broken_pipe,
+                                      size: 50,
+                                      style: NeumorphicStyle(
+                                        color: MyColors.blue,
+                                      ),
+                                    ),
                                   ),
+                                ),
+                                Text(
+                                  currentGroup
+                                      .centralUnitsLeaksNumber()
+                                      .toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(
+                                        color: MyColors.blue,
+                                        fontSize: 50,
+                                      ),
+                                ),
+                              ],
+                            )
+                          ],
                         ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: 80,
-                          child: Center(
-                            child: NeumorphicIcon(
-                              CustomIcons.broken_pipe,
-                              size: 50,
-                              style: NeumorphicStyle(
-                                color: MyColors.blue,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          currentGroup.centralUnitsLeaksNumber().toString(),
-                          style:
-                              Theme.of(context).textTheme.titleLarge!.copyWith(
-                                    color: MyColors.blue,
-                                    fontSize: 50,
-                                  ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-                onTap: () {},
-              ),
-            ],
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
