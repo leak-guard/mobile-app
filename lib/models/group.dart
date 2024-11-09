@@ -1,7 +1,6 @@
-import 'dart:math';
-
 import 'package:leak_guard/models/central_unit.dart';
-import 'package:leak_guard/models/water_usage_data.dart';
+import 'package:leak_guard/models/flow.dart';
+import 'package:leak_guard/services/database_service.dart';
 
 class BlockStatus {
   static const noBlocked = BlockStatus._(0);
@@ -12,6 +11,16 @@ class BlockStatus {
   const BlockStatus._(this.value);
 }
 
+class WaterUsageData {
+  final int year;
+  final int month;
+  final int day;
+  final int hour;
+  final double usage;
+
+  WaterUsageData(this.year, this.month, this.day, this.hour, this.usage);
+}
+
 class Group {
   int? groupdID;
   String name;
@@ -19,92 +28,157 @@ class Group {
   bool isTimeBlockSetted = false;
   List<int> blockedHours = [];
   List<CentralUnit> centralUnits = [];
+  final _db = DatabaseService.instance;
 
   Group({required this.name});
 
+  // Update block status based on central units
+  void _updateBlockStatus() {
+    if (centralUnits.isEmpty) {
+      status = BlockStatus.noBlocked;
+      return;
+    }
+
+    bool allBlocked = centralUnits.every((unit) => unit.isBlocked);
+    bool someBlocked = centralUnits.any((unit) => unit.isBlocked);
+
+    if (allBlocked) {
+      status = BlockStatus.allBlocked;
+    } else if (someBlocked) {
+      status = BlockStatus.someBlocked;
+    } else {
+      status = BlockStatus.noBlocked;
+    }
+  }
+
   void block() {
+    for (var unit in centralUnits) {
+      unit.isBlocked = true;
+    }
     status = BlockStatus.allBlocked;
   }
 
   void unBlock() {
+    for (var unit in centralUnits) {
+      unit.isBlocked = false;
+    }
     status = BlockStatus.noBlocked;
   }
 
-  double todaysWaterUsage() {
-    return 16;
+  // Get flow data for specified time range
+  Future<List<Flow>> _getFlowData(DateTime start, DateTime end) async {
+    List<Flow> allFlows = [];
+    for (var unit in centralUnits) {
+      if (unit.centralUnitID != null) {
+        final flows = await _db.getCentralUnitFlowsBetweenDates(
+          unit.centralUnitID!,
+          start,
+          end,
+        );
+        allFlows.addAll(flows);
+      }
+    }
+    return allFlows;
   }
 
-  double yesterdayWaterUsage() {
-    return 32;
+// Calculate water usage for a specific time period
+  Future<double> _calculateWaterUsage(DateTime start, DateTime end) async {
+    final flows = await _getFlowData(start, end);
+    double total = 0.0;
+    for (var flow in flows) {
+      total += flow.volume.toDouble();
+    }
+    return total;
   }
 
-  double actWaterUsage() {
-    return 2.5;
+  Future<double> todaysWaterUsage() async {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    return await _calculateWaterUsage(startOfDay, now);
   }
 
-  List<WaterUsageData> getWaterUsageData(int lastHours) {
-    List<WaterUsageData> waterUsageData = [
-      WaterUsageData(2021, 10, 1, 0),
-      WaterUsageData(2021, 10, 1, 1),
-      WaterUsageData(2021, 10, 1, 2),
-      WaterUsageData(2021, 10, 1, 3),
-      WaterUsageData(2021, 10, 1, 4),
-      WaterUsageData(2021, 10, 1, 5),
-      WaterUsageData(2021, 10, 1, 6),
-      WaterUsageData(2021, 10, 1, 7),
-      WaterUsageData(2021, 10, 1, 8),
-      WaterUsageData(2021, 10, 1, 9),
-      WaterUsageData(2021, 10, 1, 10),
-      WaterUsageData(2021, 10, 1, 11),
-      WaterUsageData(2021, 10, 1, 12),
-      WaterUsageData(2021, 10, 1, 13),
-      WaterUsageData(2021, 10, 1, 14),
-      WaterUsageData(2021, 10, 1, 15),
-      WaterUsageData(2021, 10, 1, 16),
-      WaterUsageData(2021, 10, 1, 17),
-      WaterUsageData(2021, 10, 1, 18),
-      WaterUsageData(2021, 10, 1, 19),
-      WaterUsageData(2021, 10, 1, 20),
-      WaterUsageData(2021, 10, 1, 21),
-      WaterUsageData(2021, 10, 1, 22),
-      WaterUsageData(2021, 10, 1, 23),
-    ];
-    return waterUsageData.sublist(waterUsageData.length - lastHours);
+  Future<double> yesterdayWaterUsage() async {
+    final now = DateTime.now();
+    final startOfYesterday = DateTime(now.year, now.month, now.day - 1);
+    final endOfYesterday = DateTime(now.year, now.month, now.day);
+    return await _calculateWaterUsage(startOfYesterday, endOfYesterday);
+  }
+
+  Future<List<WaterUsageData>> getWaterUsageData(int lastHours) async {
+    final now = DateTime.now();
+    final startTime = now.subtract(Duration(hours: lastHours));
+    final flows = await _getFlowData(startTime, now);
+
+    // Group flows by hour and calculate average usage
+    Map<String, List<Flow>> flowsByHour = {};
+    for (var flow in flows) {
+      final hourKey =
+          '${flow.date.year}-${flow.date.month}-${flow.date.day}-${flow.date.hour}';
+      flowsByHour.putIfAbsent(hourKey, () => []).add(flow);
+    }
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < lastHours; i++) {
+      final time = now.subtract(Duration(hours: i));
+      final hourKey = '${time.year}-${time.month}-${time.day}-${time.hour}';
+      final hourFlows = flowsByHour[hourKey] ?? [];
+      final usage = hourFlows.isEmpty
+          ? 0.0
+          : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble()) /
+              hourFlows.length;
+
+      result.add(WaterUsageData(
+        time.year,
+        time.month,
+        time.day,
+        time.hour,
+        usage,
+      ));
+    }
+
+    return result.reversed.toList();
+  }
+
+  Future<void> loadCentralUnits() async {
+    if (groupdID != null) {
+      centralUnits = await _db.getGroupCentralUnits(groupdID!);
+      for (var unit in centralUnits) {
+        unit.leakProbes =
+            await _db.getCentralUnitLeakProbes(unit.centralUnitID!);
+      }
+      _updateBlockStatus();
+    }
+  }
+
+  int centralUnitsNumber() => centralUnits.length;
+
+  int centralUnitsLeaksNumber() => centralUnits.fold(
+      0,
+      (sum, unit) =>
+          sum + unit.leakProbes.where((probe) => probe.leakDetected).length);
+
+  int leakProbeNumber() =>
+      centralUnits.fold(0, (sum, unit) => sum + unit.leakProbes.length);
+
+  int leakProbeLowBatteryNumber() => centralUnits.fold(
+      0,
+      (sum, unit) =>
+          sum + unit.leakProbes.where((probe) => probe.lowBattery).length);
+
+  Future<double> flowRate() async {
+    if (status == BlockStatus.allBlocked) return 0;
+
+    final now = DateTime.now();
+    final lastHour = now.subtract(const Duration(minutes: 60));
+    final recentFlows = await _getFlowData(lastHour, now);
+
+    if (recentFlows.isEmpty) return 0;
+    return recentFlows.map((f) => f.volume.toDouble()).reduce((a, b) => a + b) /
+        recentFlows.length;
   }
 
   void blockHours(List<int> hours) {
-    print('Block for hours: $hours');
     blockedHours = hours;
-  }
-
-  int centralUnitsNumber() {
-    return Random().nextInt(10) + 1;
-  }
-
-  int centralUnitsLeaksNumber() {
-    return Random().nextInt(10) + 1;
-  }
-
-  int leakProbeNumber() {
-    return Random().nextInt(10) + 1;
-  }
-
-  int leakProbeLowBatteryNumber() {
-    return Random().nextInt(10) + 1;
-  }
-
-  double todaysUsage() {
-    return Random().nextDouble() * 1100;
-  }
-
-  double maxUsage() {
-    return 1000;
-  }
-
-  double flowRate() {
-    if (status == BlockStatus.allBlocked) {
-      return 0;
-    }
-    return Random().nextDouble() * 10;
+    isTimeBlockSetted = hours.isNotEmpty;
   }
 }

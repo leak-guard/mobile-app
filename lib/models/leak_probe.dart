@@ -2,6 +2,8 @@ class LeakProbe {
   int? leakProbeID;
   int? centralUnitID;
   String name;
+  bool leakDetected = false;
+  bool lowBattery = false;
   String? description;
   String? imagePath;
 
