@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
 
 class BlockStatus {
@@ -12,10 +13,12 @@ class BlockStatus {
 }
 
 class Group {
+  int? groupdID;
   String name;
   BlockStatus status = BlockStatus.noBlocked;
   bool isTimeBlockSetted = false;
   List<int> blockedHours = [];
+  List<CentralUnit> centralUnits = [];
 
   Group({required this.name});
 
