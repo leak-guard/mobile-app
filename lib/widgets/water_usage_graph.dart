@@ -28,7 +28,8 @@ class WaterUsageChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (data.isEmpty) return const SizedBox();
 
-    final maxUsage = data.map((d) => d.usage).reduce((a, b) => a > b ? a : b);
+    double maxUsage = data.map((d) => d.usage).reduce((a, b) => a > b ? a : b);
+    if (maxUsage == 0) maxUsage = 12;
 
     return LayoutBuilder(
       builder: (context, constraints) {

@@ -2,6 +2,8 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/models/group_central_relation.dart';
+import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/floating_data_generator.dart';
@@ -37,22 +39,30 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _loadData() async {
-    groups = await _db.getGroups();
-    Map<int, CentralUnit> centrals = await _db.getCentralUnitsAndIDs();
+    final futures = await Future.wait([
+      _db.getGroups(),
+      _db.getCentralUnitsAndIDs(),
+      _db.getAllGroupCentralRelations(),
+      _db.getAllLeakProbes(),
+    ]);
 
-    for (var group in groups) {
-      List<int> centralUnitsIDs =
-          await _db.getGroupCentralUnitsIDs(group.groupdID!);
+    groups = futures[0] as List<Group>;
+    final centrals = futures[1] as Map<int, CentralUnit>;
+    final relations = futures[2] as List<GroupCentralRelation>;
+    final leakProbes = futures[3] as List<LeakProbe>;
 
-      group.centralUnits = centralUnitsIDs
-          .where((id) => centrals.containsKey(id))
-          .map((id) => centrals[id]!)
-          .toList();
+    for (var probe in leakProbes) {
+      if (centrals.containsKey(probe.centralUnitID)) {
+        centrals[probe.centralUnitID]!.leakProbes.add(probe);
+      }
     }
 
-    for (var central in centrals.values) {
-      central.leakProbes =
-          await _db.getCentralUnitLeakProbes(central.centralUnitID!);
+    for (var group in groups) {
+      group.centralUnits = relations
+          .where((relation) => relation.groupId == group.groupdID)
+          .map((relation) => centrals[relation.centralUnitId])
+          .whereType<CentralUnit>()
+          .toList();
     }
   }
 

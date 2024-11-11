@@ -1,3 +1,4 @@
+import 'package:leak_guard/models/group_central_relation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:leak_guard/models/central_unit.dart';
@@ -378,6 +379,17 @@ class DatabaseService {
     );
   }
 
+  Future<List<GroupCentralRelation>> getAllGroupCentralRelations() async {
+    final db = await database;
+    final data = await db.query(_groupCentralTableName);
+    return data
+        .map((e) => GroupCentralRelation(
+              groupId: e[_groupCentralGroupIDColumnName] as int,
+              centralUnitId: e[_groupCentralCentralUnitIDColumnName] as int,
+            ))
+        .toList();
+  }
+
   // LeakProbe CRUD operations
   Future<int> addLeakProbe(LeakProbe probe) async {
     final db = await database;
@@ -399,6 +411,24 @@ class DatabaseService {
       where: '$_leakProbesCentralUnitIDColumnName = ?',
       whereArgs: [centralUnitID],
     );
+    return data
+        .map((e) => LeakProbe(
+              name: e[_leakProbesNameColumnName] as String,
+              centralUnitID: e[_leakProbesCentralUnitIDColumnName] as int,
+              description: e[_leakProbesDescriptionColumnName] as String?,
+              imagePath: e[_leakProbesImagePathColumnName] as String?,
+            )..leakProbeID = e[_leakProbesLeakProbeIDColumnName] as int)
+        .toList();
+  }
+
+  Future<List<LeakProbe>> getAllLeakProbes() async {
+    final db = await database;
+    final data = await db.query(
+      _leakProbesTableName,
+      orderBy:
+          '$_leakProbesCentralUnitIDColumnName ASC, $_leakProbesNameColumnName ASC',
+    );
+
     return data
         .map((e) => LeakProbe(
               name: e[_leakProbesNameColumnName] as String,

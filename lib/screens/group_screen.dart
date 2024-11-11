@@ -20,7 +20,10 @@ class _GroupScreenState extends State<GroupScreen> {
     return Scaffold(
       appBar: CustomNeumorphicAppBar(
         height: 80,
-        onLeadingTap: () => Navigator.pop(context),
+        onLeadingTap: () {
+          Navigator.pop(context);
+          Navigator.pushNamed(context, Routes.main);
+        },
         title: MyStrings.manageGroups,
         trailingIcon: const Icon(Icons.refresh),
         onTrailingTap: () {},
