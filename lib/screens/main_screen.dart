@@ -7,6 +7,7 @@ import 'package:leak_guard/utils/floating_data_generator.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/block_time_clock.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
+import 'package:leak_guard/widgets/drawer_menu.dart';
 import 'package:leak_guard/widgets/horizontal_group_list.dart';
 import 'package:leak_guard/widgets/panel.dart';
 import 'package:leak_guard/widgets/water_block_button.dart';
@@ -21,6 +22,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int groupIndex = 0;
   List<Group> groups = [];
   final _db = DatabaseService.instance;
@@ -33,10 +35,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _loadData() async {
-    // Pobierz grupy
     groups = await _db.getGroups();
 
-    // Załaduj dane dla każdej grupy
     for (var group in groups) {
       await group.loadCentralUnits();
     }
@@ -78,6 +78,10 @@ class _MainScreenState extends State<MainScreen> {
         group.unBlock();
       }
     });
+  }
+
+  void _openDrawer() {
+    _scaffoldKey.currentState?.openDrawer();
   }
 
   @override
@@ -127,10 +131,13 @@ class _MainScreenState extends State<MainScreen> {
         return GestureDetector(
           onHorizontalDragEnd: _handleSwipe,
           child: Scaffold(
+            key: _scaffoldKey,
+            drawer: DrawerMenu(),
             appBar: PreferredSize(
               preferredSize: Size.fromHeight(120),
               child: NeumorphicAppBar(
                 padding: 0,
+                automaticallyImplyLeading: false,
                 titleSpacing: 0,
                 actionSpacing: 0,
                 centerTitle: true,
@@ -150,7 +157,7 @@ class _MainScreenState extends State<MainScreen> {
                                   BorderRadius.circular(10)),
                               depth: 5,
                             ),
-                            onPressed: () {},
+                            onPressed: _openDrawer,
                             child: Icon(Icons.menu),
                           ),
                           Text(
