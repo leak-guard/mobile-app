@@ -253,6 +253,26 @@ class DatabaseService {
         .toList();
   }
 
+  Future<Map<int, CentralUnit>> getCentralUnitsAndIDs() async {
+    final db = await database;
+    final data = await db.query(_centralUnitsTableName);
+
+    return data.fold<Map<int, CentralUnit>>({}, (map, e) {
+      final unit = CentralUnit(
+        name: e[_centralUnitsNameColumnName] as String,
+        addressIP: e[_centralUnitsAddressIPColumnName] as String,
+        addressMAC: e[_centralUnitsAddressMACColumnName] as String,
+        description: e[_centralUnitsDescriptionColumnName] as String?,
+        imagePath: e[_centralUnitsImagePathColumnName] as String?,
+      )
+        ..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int
+        ..password = e[_centralUnitsPasswordColumnName] as String;
+
+      map[unit.centralUnitID!] = unit;
+      return map;
+    });
+  }
+
   Future<List<CentralUnit>> getGroupCentralUnits(int groupID) async {
     final db = await database;
     final data = await db.rawQuery('''
@@ -273,6 +293,21 @@ class DatabaseService {
             )
               ..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int
               ..password = e[_centralUnitsPasswordColumnName] as String)
+        .toList();
+  }
+
+  Future<List<int>> getGroupCentralUnitsIDs(int groupID) async {
+    final db = await database;
+    final data = await db.rawQuery('''
+      SELECT cu.* 
+      FROM $_centralUnitsTableName cu
+      INNER JOIN $_groupCentralTableName gc 
+        ON cu.$_centralUnitsCentralUnitIDColumnName = gc.$_groupCentralCentralUnitIDColumnName
+      WHERE gc.$_groupCentralGroupIDColumnName = ?
+    ''', [groupID]);
+
+    return data
+        .map((e) => e[_centralUnitsCentralUnitIDColumnName] as int)
         .toList();
   }
 

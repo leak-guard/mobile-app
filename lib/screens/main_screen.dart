@@ -1,5 +1,6 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
+import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
@@ -37,9 +38,21 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> _loadData() async {
     groups = await _db.getGroups();
+    Map<int, CentralUnit> centrals = await _db.getCentralUnitsAndIDs();
 
     for (var group in groups) {
-      await group.loadCentralUnits();
+      List<int> centralUnitsIDs =
+          await _db.getGroupCentralUnitsIDs(group.groupdID!);
+
+      group.centralUnits = centralUnitsIDs
+          .where((id) => centrals.containsKey(id))
+          .map((id) => centrals[id]!)
+          .toList();
+    }
+
+    for (var central in centrals.values) {
+      central.leakProbes =
+          await _db.getCentralUnitLeakProbes(central.centralUnitID!);
     }
   }
 
