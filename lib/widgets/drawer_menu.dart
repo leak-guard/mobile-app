@@ -37,6 +37,14 @@ class DrawerMenu extends StatelessWidget {
               Navigator.popUntil(context, ModalRoute.withName(Routes.main));
             },
           ),
+          NeumorphicListTile(
+            leading: Icon(Icons.home, color: MyColors.lightThemeFont),
+            title: Text('Manage gorups',
+                style: Theme.of(context).textTheme.displaySmall),
+            onTap: () {
+              Navigator.popUntil(context, ModalRoute.withName(Routes.main));
+            },
+          ),
         ],
       ),
     );
