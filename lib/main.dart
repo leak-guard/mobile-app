@@ -1,6 +1,5 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:leak_guard/screens/main_screen.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 
@@ -33,6 +32,10 @@ class MyApp extends StatelessWidget {
             displaySmall: TextStyle(
                 color: MyColors.lightThemeFont,
                 fontSize: 17,
+                fontWeight: FontWeight.w600),
+            displayMedium: TextStyle(
+                color: MyColors.lightThemeFont,
+                fontSize: 20,
                 fontWeight: FontWeight.w600)),
         depth: 10,
       ),
@@ -42,9 +45,7 @@ class MyApp extends StatelessWidget {
         depth: 10,
       ),
       initialRoute: Routes.main,
-      routes: {
-        Routes.main: (context) => const MainScreen(),
-      },
+      onGenerateRoute: Routes.onGenerateRoute,
     );
   }
 }

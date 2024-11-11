@@ -1,10 +1,12 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/models/group.dart';
 import '../utils/colors.dart';
 import '../utils/routes.dart';
 import '../utils/strings.dart';
 
 class DrawerMenu extends StatelessWidget {
-  const DrawerMenu({super.key});
+  const DrawerMenu({super.key, required this.groups});
+  final List<Group> groups;
 
   @override
   Widget build(BuildContext context) {
@@ -34,15 +36,18 @@ class DrawerMenu extends StatelessWidget {
             title:
                 Text('Home', style: Theme.of(context).textTheme.displaySmall),
             onTap: () {
-              Navigator.popUntil(context, ModalRoute.withName(Routes.main));
+              Navigator.pop(context);
             },
           ),
           NeumorphicListTile(
-            leading: Icon(Icons.home, color: MyColors.lightThemeFont),
+            leading: Icon(Icons.room_preferences_rounded,
+                color: MyColors.lightThemeFont),
             title: Text('Manage gorups',
                 style: Theme.of(context).textTheme.displaySmall),
             onTap: () {
-              Navigator.popUntil(context, ModalRoute.withName(Routes.main));
+              Navigator.pop(context);
+              Navigator.pushNamed(context, Routes.groups,
+                  arguments: GroupScreenArguments(groups));
             },
           ),
         ],

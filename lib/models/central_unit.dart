@@ -9,6 +9,7 @@ class CentralUnit {
   String? description;
   String? imagePath;
   bool isBlocked = false;
+  bool chosen = false;
   List<LeakProbe> leakProbes = [];
 
   CentralUnit(

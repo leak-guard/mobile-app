@@ -5,6 +5,7 @@ import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/floating_data_generator.dart';
 import 'package:leak_guard/utils/strings.dart';
+import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/block_time_clock.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
 import 'package:leak_guard/widgets/drawer_menu.dart';
@@ -132,64 +133,24 @@ class _MainScreenState extends State<MainScreen> {
           onHorizontalDragEnd: _handleSwipe,
           child: Scaffold(
             key: _scaffoldKey,
-            drawer: DrawerMenu(),
-            appBar: PreferredSize(
-              preferredSize: Size.fromHeight(120),
-              child: NeumorphicAppBar(
-                padding: 0,
-                automaticallyImplyLeading: false,
-                titleSpacing: 0,
-                actionSpacing: 0,
-                centerTitle: true,
-                title: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          NeumorphicButton(
-                            padding: EdgeInsets.all(8),
-                            minDistance: -3,
-                            style: NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.roundRect(
-                                  BorderRadius.circular(10)),
-                              depth: 5,
-                            ),
-                            onPressed: _openDrawer,
-                            child: Icon(Icons.menu),
-                          ),
-                          Text(
-                            MyStrings.appName,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          NeumorphicButton(
-                            padding: EdgeInsets.all(8),
-                            minDistance: -3,
-                            style: NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.roundRect(
-                                  BorderRadius.circular(10)),
-                              depth: 5,
-                            ),
-                            onPressed: _refreshData,
-                            child: Icon(Icons.refresh),
-                          ),
-                        ],
-                      ),
-                    ),
-                    HorizontalGroupList(
-                      groups: groups,
-                      selectedIndex: groupIndex,
-                      onIndexChanged: _handleGroupChange,
-                    )
-                  ],
+            drawer: DrawerMenu(groups: groups),
+            appBar: CustomNeumorphicAppBar(
+              leadingIcon: const Icon(Icons.menu),
+              onLeadingTap: _openDrawer,
+              title: MyStrings.appName,
+              trailingIcon: const Icon(Icons.refresh),
+              onTrailingTap: _refreshData,
+              bottomWidgets: [
+                HorizontalGroupList(
+                  groups: groups,
+                  selectedIndex: groupIndex,
+                  onIndexChanged: _handleGroupChange,
                 ),
-              ),
+              ],
+              height: 120,
             ),
             backgroundColor: MyColors.background,
             body: FutureBuilder<Map<String, dynamic>>(
-              // Pobierz wszystkie potrzebne dane na raz
               future: Future.wait([
                 currentGroup.todaysWaterUsage(),
                 currentGroup.yesterdayWaterUsage(),
@@ -231,8 +192,14 @@ class _MainScreenState extends State<MainScreen> {
                             padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
                             child: WaterBlockButton(
                               group: currentGroup,
-                              handleButtonPress: () =>
-                                  _handleBlockButtonTap(currentGroup),
+                              handleButtonPress: () {
+                                _handleBlockButtonTap(currentGroup);
+                                setState(() {
+                                  for (Group group in groups) {
+                                    group.updateBlockStatus();
+                                  }
+                                });
+                              },
                             ),
                           ),
                         ],
