@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 
+// TODO: Baza danych - kolumna pozycji grupy. Kolumna pozycji powinna być o jeden większa od poprzedniej. To wystarczy.
+// TODO: Trzeba ogarnąć powrót do manage groups po dodaniu grupy.
 void main() {
   runApp(const MyApp());
 }

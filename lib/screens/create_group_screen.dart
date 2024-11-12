@@ -3,6 +3,7 @@ import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
@@ -17,6 +18,7 @@ class CreateGroupScreen extends StatefulWidget {
 
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final _formKey = GlobalKey<FormState>();
+  bool _isValid = true;
   final _nameController = TextEditingController();
   final _db = DatabaseService.instance;
   List<CentralUnit> centrals = [];
@@ -44,22 +46,41 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   }
 
   Future<void> _createGroup() async {
-    if (!_formKey.currentState!.validate()) return;
+    bool? isFormValid = _formKey.currentState?.validate();
+
+    await Future.microtask(() => null);
+
+    if (isFormValid != true || !_isValid) {
+      return;
+    }
+
+    if (chosenCentrals.isEmpty) {
+      _showValidationError(
+        context,
+        'No central units',
+        'Please select at least one central unit for the group',
+      );
+      return;
+    }
 
     try {
       final newGroup = Group(name: _nameController.text.trim());
       final groupId = await _db.addGroup(newGroup);
       newGroup.groupdID = groupId;
 
-      // Dodaj wszystkie wybrane jednostki do grupy
       for (var central in chosenCentrals) {
         await _db.addCentralUnitToGroup(groupId, central.centralUnitID!);
+        central.leakProbes =
+            await _db.getCentralUnitLeakProbes(central.centralUnitID!);
+        newGroup.centralUnits.add(central);
       }
 
-      // Dodaj do listy grup i wróć
       widget.groups.add(newGroup);
       if (mounted) {
         Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.pushNamed(context, Routes.groups,
+            arguments: GroupScreenArguments(widget.groups));
       }
     } catch (e) {
       if (mounted) {
@@ -68,6 +89,43 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         );
       }
     }
+  }
+
+  void _showValidationError(
+      BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: MyColors.background,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        content: Text(
+          message,
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
+        actions: [
+          NeumorphicButton(
+            style: NeumorphicStyle(
+              depth: 2,
+              intensity: 0.8,
+              boxShape: NeumorphicBoxShape.roundRect(
+                BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Close',
+              style: Theme.of(context).textTheme.displaySmall,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -122,14 +180,23 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                             color: MyColors.lightThemeFont.withOpacity(0.5)),
                       ),
                       validator: (value) {
+                        String? errorMessage;
                         if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a group name';
-                        }
-                        // Sprawdź czy nazwa nie jest już zajęta
-                        if (widget.groups.any((g) =>
+                          errorMessage = 'Please enter a group name';
+                        } else if (widget.groups.any((g) =>
                             g.name.toLowerCase() ==
                             value.trim().toLowerCase())) {
-                          return 'Group name already exists';
+                          errorMessage = 'Group name already exists';
+                        }
+
+                        if (errorMessage != null) {
+                          Future.microtask(() {
+                            setState(() => _isValid = false);
+                            _showValidationError(
+                                context, 'Wrong group name', errorMessage!);
+                          });
+                        } else {
+                          setState(() => _isValid = true);
                         }
                         return null;
                       },

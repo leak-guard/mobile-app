@@ -19,7 +19,8 @@ import 'package:leak_guard/widgets/water_usage_arc.dart';
 import 'package:leak_guard/widgets/water_usage_graph.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  const MainScreen({super.key, required this.groups});
+  final List<Group> groups;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -35,7 +36,17 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDataFuture = _loadData();
+    _loadDataFuture = _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    if (widget.groups.isNotEmpty) {
+      setState(() {
+        groups = widget.groups;
+      });
+    } else {
+      await _loadData();
+    }
   }
 
   Future<void> _loadData() async {

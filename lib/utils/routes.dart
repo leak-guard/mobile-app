@@ -12,8 +12,14 @@ class Routes {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case main:
+        if (settings.arguments is MainScreenArguments) {
+          final args = settings.arguments as MainScreenArguments;
+          return MaterialPageRoute(
+            builder: (_) => MainScreen(groups: args.groups),
+          );
+        }
         return MaterialPageRoute(
-          builder: (_) => const MainScreen(),
+          builder: (_) => const MainScreen(groups: []),
         );
 
       case groups:
@@ -52,6 +58,12 @@ class Routes {
         );
     }
   }
+}
+
+class MainScreenArguments {
+  final List<Group> groups;
+
+  MainScreenArguments(this.groups);
 }
 
 class GroupScreenArguments {

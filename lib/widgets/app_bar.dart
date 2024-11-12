@@ -64,7 +64,11 @@ class CustomNeumorphicAppBar extends StatelessWidget
                     depth: 5,
                   ),
                   onPressed: onTrailingTap,
-                  child: trailingIcon ?? const SizedBox.shrink(),
+                  child: trailingIcon ??
+                      const SizedBox(
+                        height: 30,
+                        width: 30,
+                      ),
                 ),
               ],
             ),
