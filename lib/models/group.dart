@@ -24,6 +24,7 @@ class WaterUsageData {
 class Group {
   int? groupdID;
   String name;
+  int position = 0;
   BlockStatus status = BlockStatus.noBlocked;
   bool isTimeBlockSetted = false;
   List<int> blockedHours = [];

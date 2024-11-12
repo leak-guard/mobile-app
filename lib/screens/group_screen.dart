@@ -32,12 +32,10 @@ class _GroupScreenState extends State<GroupScreen> {
   @override
   void initState() {
     super.initState();
-    // Inicjalizacja kontrolerów i ich stanów
     for (var group in widget.groups) {
       _nameControllers[group.groupdID!] =
           TextEditingController(text: group.name)
             ..addListener(() {
-              // Aktualizuj stan przycisku przy każdej zmianie tekstu
               setState(() {
                 _nameButtonStates[group.groupdID!] = _confirmNameState(
                   group.name,
@@ -51,7 +49,6 @@ class _GroupScreenState extends State<GroupScreen> {
 
   @override
   void dispose() {
-    // Czyszczenie kontrolerów
     for (var controller in _nameControllers.values) {
       controller.dispose();
     }
@@ -268,11 +265,10 @@ class _GroupScreenState extends State<GroupScreen> {
                         setState(() {
                           group.name = _nameControllers[group.groupdID]!.text;
                           _db.updateGroup(group);
-                          // Aktualizuj stan przycisku po zmianie nazwy
                           _nameButtonStates[group.groupdID!] = false;
                         });
                       }
-                    : null, // Użyj null zamiast pustej funkcji aby wyłączyć przycisk
+                    : null,
                 padding: const EdgeInsets.all(8),
                 child: Icon(
                   Icons.check,
@@ -381,6 +377,8 @@ class _GroupScreenState extends State<GroupScreen> {
   }
 
   Widget _buildPositionTile(Group group) {
+    final currentIndex = widget.groups.indexOf(group);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Neumorphic(
@@ -404,36 +402,40 @@ class _GroupScreenState extends State<GroupScreen> {
               const SizedBox(width: 8),
               NeumorphicButton(
                 style: NeumorphicStyle(
-                  depth: 5,
+                  depth: currentIndex > 0 ? 5 : 2,
                   intensity: 0.8,
                   boxShape:
                       NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
                 ),
-                onPressed: () {
-                  // TODO: Implementacja przesunięcia w górę
-                },
+                onPressed: currentIndex > 0
+                    ? () => _moveGroupUp(group, currentIndex)
+                    : null,
                 padding: const EdgeInsets.all(8),
                 child: Icon(
                   Icons.arrow_upward,
-                  color: MyColors.lightThemeFont,
+                  color: currentIndex > 0
+                      ? MyColors.lightThemeFont
+                      : MyColors.lightThemeFont.withOpacity(0.5),
                   size: 20,
                 ),
               ),
               const SizedBox(width: 8),
               NeumorphicButton(
                 style: NeumorphicStyle(
-                  depth: 5,
+                  depth: currentIndex < widget.groups.length - 1 ? 5 : 2,
                   intensity: 0.8,
                   boxShape:
                       NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
                 ),
-                onPressed: () {
-                  // TODO: Implementacja przesunięcia w dół
-                },
+                onPressed: currentIndex < widget.groups.length - 1
+                    ? () => _moveGroupDown(group, currentIndex)
+                    : null,
                 padding: const EdgeInsets.all(8),
                 child: Icon(
                   Icons.arrow_downward,
-                  color: MyColors.lightThemeFont,
+                  color: currentIndex < widget.groups.length - 1
+                      ? MyColors.lightThemeFont
+                      : MyColors.lightThemeFont.withOpacity(0.5),
                   size: 20,
                 ),
               ),
@@ -442,6 +444,62 @@ class _GroupScreenState extends State<GroupScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _moveGroupUp(Group group, int currentIndex) async {
+    if (currentIndex <= 0) return;
+
+    try {
+      final previousGroup = widget.groups[currentIndex - 1];
+
+      await _db.swapGroupsPositions(
+        group.groupdID!,
+        previousGroup.groupdID!,
+      );
+
+      final tempPosition = group.position;
+      group.position = previousGroup.position;
+      previousGroup.position = tempPosition;
+
+      setState(() {
+        widget.groups[currentIndex] = previousGroup;
+        widget.groups[currentIndex - 1] = group;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error moving group: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _moveGroupDown(Group group, int currentIndex) async {
+    if (currentIndex >= widget.groups.length - 1) return;
+
+    try {
+      final nextGroup = widget.groups[currentIndex + 1];
+
+      await _db.swapGroupsPositions(
+        group.groupdID!,
+        nextGroup.groupdID!,
+      );
+
+      final tempPosition = group.position;
+      group.position = nextGroup.position;
+      nextGroup.position = tempPosition;
+
+      setState(() {
+        widget.groups[currentIndex] = nextGroup;
+        widget.groups[currentIndex + 1] = group;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error moving group: $e')),
+        );
+      }
+    }
   }
 
   @override
