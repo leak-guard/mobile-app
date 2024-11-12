@@ -23,6 +23,10 @@ class _WaterUsageArcState extends State<WaterUsageArc>
   final double _thickness = 16;
 
   Color _arcColor() {
+    if (widget.maxUsage == 0) {
+      return MyColors.blue;
+    }
+
     if (widget.currentUsage / widget.maxUsage <= 0.9) {
       return MyColors.blue;
     } else if (widget.currentUsage / widget.maxUsage <= 1) {
@@ -30,6 +34,16 @@ class _WaterUsageArcState extends State<WaterUsageArc>
     } else {
       return MyColors.red;
     }
+  }
+
+  double _sweepAngle() {
+    if (widget.maxUsage == 0) {
+      return 280;
+    }
+
+    return widget.currentUsage / widget.maxUsage < 1
+        ? 280 * widget.currentUsage / widget.maxUsage
+        : 280;
   }
 
   @override
@@ -59,9 +73,7 @@ class _WaterUsageArcState extends State<WaterUsageArc>
                   shape: NeumorphicShape.convex,
                   boxShape: NeumorphicBoxShape.path(
                     ArcPathProvider(
-                      sweepAngle: widget.currentUsage / widget.maxUsage < 1
-                          ? 280 * widget.currentUsage / widget.maxUsage
-                          : 280,
+                      sweepAngle: _sweepAngle(),
                       thickness: _thickness,
                     ),
                   ),

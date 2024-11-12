@@ -1,3 +1,4 @@
+import 'package:leak_guard/models/group_central_relation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:leak_guard/models/central_unit.dart';
@@ -51,6 +52,7 @@ class DatabaseService {
   final String _groupsTableName = "groups";
   final String _groupsGroupIDColumnName = "groupID";
   final String _groupsNameColumnName = "name";
+  final String _groupsPositionColumnName = "position";
 
   // CentralUnits table
   final String _centralUnitsTableName = "central_units";
@@ -99,7 +101,8 @@ class DatabaseService {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS $_groupsTableName (
         $_groupsGroupIDColumnName INTEGER PRIMARY KEY,
-        $_groupsNameColumnName TEXT NOT NULL
+        $_groupsNameColumnName TEXT NOT NULL,
+        $_groupsPositionColumnName INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -173,20 +176,30 @@ class DatabaseService {
   // Group CRUD operations
   Future<int> addGroup(Group group) async {
     final db = await database;
+
+    final maxPosition = Sqflite.firstIntValue(await db.rawQuery(
+            'SELECT MAX($_groupsPositionColumnName) FROM $_groupsTableName')) ??
+        -1;
+
     return await db.insert(
       _groupsTableName,
       {
         _groupsNameColumnName: group.name,
+        _groupsPositionColumnName: maxPosition + 1,
       },
     );
   }
 
   Future<List<Group>> getGroups() async {
     final db = await database;
-    final data = await db.query(_groupsTableName);
+    final data = await db.query(
+      _groupsTableName,
+      orderBy: '$_groupsPositionColumnName ASC', // Sortowanie po position
+    );
     return data
         .map((e) => Group(name: e[_groupsNameColumnName] as String)
-          ..groupdID = e[_groupsGroupIDColumnName] as int)
+          ..groupdID = e[_groupsGroupIDColumnName] as int
+          ..position = e[_groupsPositionColumnName] as int)
         .toList();
   }
 
@@ -221,6 +234,65 @@ class DatabaseService {
     );
   }
 
+  Future swapGroupsPositions(int groupId1, int groupId2) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      final group1Data = await txn.query(
+        _groupsTableName,
+        columns: [_groupsPositionColumnName],
+        where: '$_groupsGroupIDColumnName = ?',
+        whereArgs: [groupId1],
+      );
+
+      final group2Data = await txn.query(
+        _groupsTableName,
+        columns: [_groupsPositionColumnName],
+        where: '$_groupsGroupIDColumnName = ?',
+        whereArgs: [groupId2],
+      );
+
+      if (group1Data.isEmpty || group2Data.isEmpty) return;
+
+      final position1 = group1Data.first[_groupsPositionColumnName] as int;
+      final position2 = group2Data.first[_groupsPositionColumnName] as int;
+
+      await txn.update(
+        _groupsTableName,
+        {_groupsPositionColumnName: position2},
+        where: '$_groupsGroupIDColumnName = ?',
+        whereArgs: [groupId1],
+      );
+
+      await txn.update(
+        _groupsTableName,
+        {_groupsPositionColumnName: position1},
+        where: '$_groupsGroupIDColumnName = ?',
+        whereArgs: [groupId2],
+      );
+    });
+  }
+
+  Future resetGroupPositions() async {
+    final db = await database;
+
+    final groups = await db.query(
+      _groupsTableName,
+      orderBy: '$_groupsPositionColumnName ASC',
+    );
+
+    await db.transaction((txn) async {
+      for (int i = 0; i < groups.length; i++) {
+        await txn.update(
+          _groupsTableName,
+          {_groupsPositionColumnName: i},
+          where: '$_groupsGroupIDColumnName = ?',
+          whereArgs: [groups[i][_groupsGroupIDColumnName]],
+        );
+      }
+    });
+  }
+
   // CentralUnit CRUD operations
   Future<int> addCentralUnit(CentralUnit unit) async {
     final db = await database;
@@ -253,6 +325,26 @@ class DatabaseService {
         .toList();
   }
 
+  Future<Map<int, CentralUnit>> getCentralUnitsAndIDs() async {
+    final db = await database;
+    final data = await db.query(_centralUnitsTableName);
+
+    return data.fold<Map<int, CentralUnit>>({}, (map, e) {
+      final unit = CentralUnit(
+        name: e[_centralUnitsNameColumnName] as String,
+        addressIP: e[_centralUnitsAddressIPColumnName] as String,
+        addressMAC: e[_centralUnitsAddressMACColumnName] as String,
+        description: e[_centralUnitsDescriptionColumnName] as String?,
+        imagePath: e[_centralUnitsImagePathColumnName] as String?,
+      )
+        ..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int
+        ..password = e[_centralUnitsPasswordColumnName] as String;
+
+      map[unit.centralUnitID!] = unit;
+      return map;
+    });
+  }
+
   Future<List<CentralUnit>> getGroupCentralUnits(int groupID) async {
     final db = await database;
     final data = await db.rawQuery('''
@@ -273,6 +365,21 @@ class DatabaseService {
             )
               ..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int
               ..password = e[_centralUnitsPasswordColumnName] as String)
+        .toList();
+  }
+
+  Future<List<int>> getGroupCentralUnitsIDs(int groupID) async {
+    final db = await database;
+    final data = await db.rawQuery('''
+      SELECT cu.* 
+      FROM $_centralUnitsTableName cu
+      INNER JOIN $_groupCentralTableName gc 
+        ON cu.$_centralUnitsCentralUnitIDColumnName = gc.$_groupCentralCentralUnitIDColumnName
+      WHERE gc.$_groupCentralGroupIDColumnName = ?
+    ''', [groupID]);
+
+    return data
+        .map((e) => e[_centralUnitsCentralUnitIDColumnName] as int)
         .toList();
   }
 
@@ -343,6 +450,17 @@ class DatabaseService {
     );
   }
 
+  Future<List<GroupCentralRelation>> getAllGroupCentralRelations() async {
+    final db = await database;
+    final data = await db.query(_groupCentralTableName);
+    return data
+        .map((e) => GroupCentralRelation(
+              groupId: e[_groupCentralGroupIDColumnName] as int,
+              centralUnitId: e[_groupCentralCentralUnitIDColumnName] as int,
+            ))
+        .toList();
+  }
+
   // LeakProbe CRUD operations
   Future<int> addLeakProbe(LeakProbe probe) async {
     final db = await database;
@@ -364,6 +482,24 @@ class DatabaseService {
       where: '$_leakProbesCentralUnitIDColumnName = ?',
       whereArgs: [centralUnitID],
     );
+    return data
+        .map((e) => LeakProbe(
+              name: e[_leakProbesNameColumnName] as String,
+              centralUnitID: e[_leakProbesCentralUnitIDColumnName] as int,
+              description: e[_leakProbesDescriptionColumnName] as String?,
+              imagePath: e[_leakProbesImagePathColumnName] as String?,
+            )..leakProbeID = e[_leakProbesLeakProbeIDColumnName] as int)
+        .toList();
+  }
+
+  Future<List<LeakProbe>> getAllLeakProbes() async {
+    final db = await database;
+    final data = await db.query(
+      _leakProbesTableName,
+      orderBy:
+          '$_leakProbesCentralUnitIDColumnName ASC, $_leakProbesNameColumnName ASC',
+    );
+
     return data
         .map((e) => LeakProbe(
               name: e[_leakProbesNameColumnName] as String,

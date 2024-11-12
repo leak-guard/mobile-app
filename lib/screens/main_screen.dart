@@ -1,12 +1,17 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
+import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/models/group_central_relation.dart';
+import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/floating_data_generator.dart';
 import 'package:leak_guard/utils/strings.dart';
+import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/block_time_clock.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
+import 'package:leak_guard/widgets/drawer_menu.dart';
 import 'package:leak_guard/widgets/horizontal_group_list.dart';
 import 'package:leak_guard/widgets/panel.dart';
 import 'package:leak_guard/widgets/water_block_button.dart';
@@ -14,13 +19,15 @@ import 'package:leak_guard/widgets/water_usage_arc.dart';
 import 'package:leak_guard/widgets/water_usage_graph.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  const MainScreen({super.key, required this.groups});
+  final List<Group> groups;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int groupIndex = 0;
   List<Group> groups = [];
   final _db = DatabaseService.instance;
@@ -29,16 +36,44 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDataFuture = _loadData();
+    _loadDataFuture = _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    if (widget.groups.isNotEmpty) {
+      setState(() {
+        groups = widget.groups;
+      });
+    } else {
+      await _loadData();
+    }
   }
 
   Future<void> _loadData() async {
-    // Pobierz grupy
-    groups = await _db.getGroups();
+    final futures = await Future.wait([
+      _db.getGroups(),
+      _db.getCentralUnitsAndIDs(),
+      _db.getAllGroupCentralRelations(),
+      _db.getAllLeakProbes(),
+    ]);
 
-    // Załaduj dane dla każdej grupy
+    groups = futures[0] as List<Group>;
+    final centrals = futures[1] as Map<int, CentralUnit>;
+    final relations = futures[2] as List<GroupCentralRelation>;
+    final leakProbes = futures[3] as List<LeakProbe>;
+
+    for (var probe in leakProbes) {
+      if (centrals.containsKey(probe.centralUnitID)) {
+        centrals[probe.centralUnitID]!.leakProbes.add(probe);
+      }
+    }
+
     for (var group in groups) {
-      await group.loadCentralUnits();
+      group.centralUnits = relations
+          .where((relation) => relation.groupId == group.groupdID)
+          .map((relation) => centrals[relation.centralUnitId])
+          .whereType<CentralUnit>()
+          .toList();
     }
   }
 
@@ -78,6 +113,10 @@ class _MainScreenState extends State<MainScreen> {
         group.unBlock();
       }
     });
+  }
+
+  void _openDrawer() {
+    _scaffoldKey.currentState?.openDrawer();
   }
 
   @override
@@ -127,62 +166,25 @@ class _MainScreenState extends State<MainScreen> {
         return GestureDetector(
           onHorizontalDragEnd: _handleSwipe,
           child: Scaffold(
-            appBar: PreferredSize(
-              preferredSize: Size.fromHeight(120),
-              child: NeumorphicAppBar(
-                padding: 0,
-                titleSpacing: 0,
-                actionSpacing: 0,
-                centerTitle: true,
-                title: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          NeumorphicButton(
-                            padding: EdgeInsets.all(8),
-                            minDistance: -3,
-                            style: NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.roundRect(
-                                  BorderRadius.circular(10)),
-                              depth: 5,
-                            ),
-                            onPressed: () {},
-                            child: Icon(Icons.menu),
-                          ),
-                          Text(
-                            MyStrings.appName,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          NeumorphicButton(
-                            padding: EdgeInsets.all(8),
-                            minDistance: -3,
-                            style: NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.roundRect(
-                                  BorderRadius.circular(10)),
-                              depth: 5,
-                            ),
-                            onPressed: _refreshData,
-                            child: Icon(Icons.refresh),
-                          ),
-                        ],
-                      ),
-                    ),
-                    HorizontalGroupList(
-                      groups: groups,
-                      selectedIndex: groupIndex,
-                      onIndexChanged: _handleGroupChange,
-                    )
-                  ],
+            key: _scaffoldKey,
+            drawer: DrawerMenu(groups: groups),
+            appBar: CustomNeumorphicAppBar(
+              leadingIcon: const Icon(Icons.menu),
+              onLeadingTap: _openDrawer,
+              title: MyStrings.appName,
+              trailingIcon: const Icon(Icons.refresh),
+              onTrailingTap: _refreshData,
+              bottomWidgets: [
+                HorizontalGroupList(
+                  groups: groups,
+                  selectedIndex: groupIndex,
+                  onIndexChanged: _handleGroupChange,
                 ),
-              ),
+              ],
+              height: 120,
             ),
             backgroundColor: MyColors.background,
             body: FutureBuilder<Map<String, dynamic>>(
-              // Pobierz wszystkie potrzebne dane na raz
               future: Future.wait([
                 currentGroup.todaysWaterUsage(),
                 currentGroup.yesterdayWaterUsage(),
@@ -224,8 +226,14 @@ class _MainScreenState extends State<MainScreen> {
                             padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
                             child: WaterBlockButton(
                               group: currentGroup,
-                              handleButtonPress: () =>
-                                  _handleBlockButtonTap(currentGroup),
+                              handleButtonPress: () {
+                                _handleBlockButtonTap(currentGroup);
+                                setState(() {
+                                  for (Group group in groups) {
+                                    group.updateBlockStatus();
+                                  }
+                                });
+                              },
                             ),
                           ),
                         ],

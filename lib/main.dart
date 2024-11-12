@@ -1,9 +1,10 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:leak_guard/screens/main_screen.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 
+// TODO: Baza danych - kolumna pozycji grupy. Kolumna pozycji powinna być o jeden większa od poprzedniej. To wystarczy.
+// TODO: Trzeba ogarnąć powrót do manage groups po dodaniu grupy.
 void main() {
   runApp(const MyApp());
 }
@@ -33,6 +34,10 @@ class MyApp extends StatelessWidget {
             displaySmall: TextStyle(
                 color: MyColors.lightThemeFont,
                 fontSize: 17,
+                fontWeight: FontWeight.w600),
+            displayMedium: TextStyle(
+                color: MyColors.lightThemeFont,
+                fontSize: 20,
                 fontWeight: FontWeight.w600)),
         depth: 10,
       ),
@@ -42,9 +47,7 @@ class MyApp extends StatelessWidget {
         depth: 10,
       ),
       initialRoute: Routes.main,
-      routes: {
-        Routes.main: (context) => const MainScreen(),
-      },
+      onGenerateRoute: Routes.onGenerateRoute,
     );
   }
 }

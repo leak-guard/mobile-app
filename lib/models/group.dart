@@ -24,6 +24,7 @@ class WaterUsageData {
 class Group {
   int? groupdID;
   String name;
+  int position = 0;
   BlockStatus status = BlockStatus.noBlocked;
   bool isTimeBlockSetted = false;
   List<int> blockedHours = [];
@@ -33,7 +34,7 @@ class Group {
   Group({required this.name});
 
   // Update block status based on central units
-  void _updateBlockStatus() {
+  void updateBlockStatus() {
     if (centralUnits.isEmpty) {
       status = BlockStatus.noBlocked;
       return;
@@ -146,7 +147,7 @@ class Group {
         unit.leakProbes =
             await _db.getCentralUnitLeakProbes(unit.centralUnitID!);
       }
-      _updateBlockStatus();
+      updateBlockStatus();
     }
   }
 
