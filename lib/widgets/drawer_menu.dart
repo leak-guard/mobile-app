@@ -23,10 +23,7 @@ class DrawerMenu extends StatelessWidget {
                 const SizedBox(height: 16),
                 Text(
                   MyStrings.appName,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: MyColors.lightThemeFont,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
             ),
