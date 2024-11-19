@@ -237,15 +237,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       ),
                       onPressed: () {},
                       child: Center(
-                        child: Text(
-                          'Add new central unit',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge!
-                              .copyWith(
-                                color: MyColors.lightThemeFont.withOpacity(0.4),
-                              ),
-                        ),
+                        child: Text('Add new central unit',
+                            style: Theme.of(context).textTheme.titleLarge),
                       ),
                     ),
                   ),

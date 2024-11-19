@@ -364,12 +364,8 @@ class _GroupScreenState extends State<GroupScreen> {
             });
           },
           child: Center(
-            child: Text(
-              'Add new group',
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                    color: MyColors.lightThemeFont.withOpacity(0.4),
-                  ),
-            ),
+            child: Text('Add new group',
+                style: Theme.of(context).textTheme.titleLarge),
           ),
         ),
       ),
