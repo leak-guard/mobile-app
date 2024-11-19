@@ -31,7 +31,7 @@ class DrawerMenu extends StatelessWidget {
           NeumorphicListTile(
             leading: Icon(Icons.room_preferences_rounded,
                 color: MyColors.lightThemeFont),
-            title: Text('Manage gorups',
+            title: Text('Manage groups',
                 style: Theme.of(context).textTheme.displaySmall),
             onTap: () {
               Navigator.pop(context);

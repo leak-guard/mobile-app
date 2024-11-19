@@ -235,7 +235,15 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                           BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.findCentral,
+                          arguments: FindCentralScreenArguments(centrals),
+                        ).then((_) {
+                          setState(() {});
+                        });
+                      },
                       child: Center(
                         child: Text('Add new central unit',
                             style: Theme.of(context).textTheme.titleLarge),

@@ -41,6 +41,9 @@ dependencies:
   path: ^1.9.0
   flutter_svg: ^2.0.14
   nsd: ^4.0.2
+  network_tools: ^5.0.2
+  path_provider: ^2.1.5
+  network_info_plus: ^6.1.1
 
 
 
