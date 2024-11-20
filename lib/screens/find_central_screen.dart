@@ -1,5 +1,6 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
+import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
 import 'package:nsd/nsd.dart';
@@ -103,7 +104,14 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                       BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      Routes.createCentral,
+                      arguments:
+                          CreateCentralScreenArguments(widget.centralUnits),
+                    );
+                  },
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Text(
@@ -161,7 +169,17 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
             final service = _services[index - 2];
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Neumorphic(
+              child: NeumorphicButton(
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    Routes.createCentral,
+                    arguments: CreateCentralScreenArguments(
+                      widget.centralUnits,
+                      service,
+                    ),
+                  );
+                },
                 style: NeumorphicStyle(
                   depth: 5,
                   intensity: 0.8,
@@ -180,7 +198,11 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'IP: ${service.host}',
+                        'Hostname: ${service.host}',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      Text(
+                        'IPv4: ${service.addresses!.first.address}',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ],

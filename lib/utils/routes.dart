@@ -1,16 +1,19 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/screens/create_central_screen.dart';
 import 'package:leak_guard/screens/find_central_screen.dart';
 import 'package:leak_guard/screens/create_group_screen.dart';
 import 'package:leak_guard/screens/group_screen.dart';
 import 'package:leak_guard/screens/main_screen.dart';
+import 'package:nsd/nsd.dart';
 
 class Routes {
   static const String main = '/';
   static const String groups = '/groups';
   static const String createGroup = '/createGroup';
   static const String findCentral = '/findCentral';
+  static const String createCentral = '/createCentral';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -67,6 +70,22 @@ class Routes {
           ),
         );
 
+      case createCentral:
+        if (settings.arguments is CreateCentralScreenArguments) {
+          final args = settings.arguments as CreateCentralScreenArguments;
+          return MaterialPageRoute(
+            builder: (_) => CreateCentralScreen(
+              centralUnits: args.centralUnits,
+              chosenCentral: args.chosenCentral,
+            ),
+          );
+        }
+        return MaterialPageRoute(
+          builder: (_) => const Scaffold(
+            body: Center(child: Text('Invalid arguments')),
+          ),
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
@@ -99,4 +118,11 @@ class FindCentralScreenArguments {
   final List<CentralUnit> centralUnits;
 
   FindCentralScreenArguments(this.centralUnits);
+}
+
+class CreateCentralScreenArguments {
+  final List<CentralUnit> centralUnits;
+  final Service? chosenCentral;
+
+  CreateCentralScreenArguments(this.centralUnits, [this.chosenCentral]);
 }
