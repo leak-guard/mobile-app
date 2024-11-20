@@ -505,8 +505,10 @@ class _GroupScreenState extends State<GroupScreen> {
         height: 80,
         onLeadingTap: () {
           Navigator.pop(context);
-          Navigator.pushNamed(context, Routes.main,
-              arguments: MainScreenArguments([]));
+          Navigator.pushNamed(
+            context,
+            Routes.main,
+          );
         },
         title: MyStrings.manageGroups,
       ),

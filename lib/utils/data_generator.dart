@@ -197,7 +197,7 @@ class DataGenerator {
     final probeCount = _random.nextInt(4); // 0 to 3 probes
     for (int i = 0; i < probeCount; i++) {
       final probe = LeakProbe(
-        name: 'Probe ${i + 1}',
+        name: 'Probe ${i + 1} for unit $centralUnitId',
         centralUnitID: centralUnitId,
         description: 'Test probe ${i + 1} description',
         imagePath: null,
@@ -215,7 +215,7 @@ class DataGenerator {
     final unitCount = _random.nextInt(3) + 1;
 
     for (int i = 0; i < unitCount; i++) {
-      final unitName = 'Unit ${i + 1}';
+      final unitName = 'Unit ${i + 1} for group $groupId';
       onProgress('Creating $unitName for $groupName...', 0);
 
       final unit = CentralUnit(
