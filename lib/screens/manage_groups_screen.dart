@@ -505,10 +505,6 @@ class _ManageGroupsScreenState extends State<ManageGroupsScreen> {
         height: 80,
         onLeadingTap: () {
           Navigator.pop(context);
-          Navigator.pushNamed(
-            context,
-            Routes.main,
-          );
         },
         title: MyStrings.manageGroups,
       ),

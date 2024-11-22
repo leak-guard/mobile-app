@@ -68,8 +68,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       _appData.groups.add(newGroup);
       if (mounted) {
         Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.pushNamed(context, Routes.manageGroups);
       }
     } catch (e) {
       if (mounted) {

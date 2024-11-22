@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/floating_data_generator.dart';
+import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/block_time_clock.dart';
@@ -67,18 +69,95 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  void _onBack() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_appData.groups.isEmpty) {
       return Scaffold(
         backgroundColor: MyColors.background,
         body: Center(
-          child: Text('No groups found'),
-        ),
-        floatingActionButton: GenerateTestDataButton(
-          onComplete: _refreshData,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 78),
+              Image.asset('assets/icons/logo.png', width: 150),
+              const SizedBox(height: 20),
+              Text(MyStrings.appName,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge!
+                      .copyWith(fontSize: 50)),
+              const SizedBox(height: 20),
+              NeumorphicButton(
+                style: NeumorphicStyle(
+                  depth: 5,
+                  intensity: 0.8,
+                  boxShape: NeumorphicBoxShape.roundRect(
+                    BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    Routes.createGroup,
+                  ).then((_) => _refreshData());
+                },
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Create your first group',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (kDebugMode) // Pokazuj tylko w trybie debug
+                NeumorphicButton(
+                  style: NeumorphicStyle(
+                    depth: 5,
+                    intensity: 0.8,
+                    boxShape: NeumorphicBoxShape.roundRect(
+                      BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () async {
+                    GenerateTestDataButton(
+                      onComplete: _refreshData,
+                    ).generateData(context);
+                  },
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.science_outlined),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Generate test data',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       );
+    }
+
+    if (_appData.groups.length - 1 < groupIndex) {
+      groupIndex = _appData.groups.length - 1;
     }
 
     Group currentGroup = _appData.groups[groupIndex];
@@ -87,7 +166,9 @@ class _MainScreenState extends State<MainScreen> {
       onHorizontalDragEnd: _handleSwipe,
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: DrawerMenu(groups: _appData.groups),
+        drawer: DrawerMenu(
+          onBack: _onBack,
+        ),
         appBar: CustomNeumorphicAppBar(
           leadingIcon: const Icon(Icons.menu),
           onLeadingTap: _openDrawer,
