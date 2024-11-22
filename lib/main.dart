@@ -43,6 +43,10 @@ class MyApp extends StatelessWidget {
             displayMedium: TextStyle(
                 color: MyColors.lightThemeFont,
                 fontSize: 20,
+                fontWeight: FontWeight.w600),
+            displayLarge: TextStyle(
+                color: MyColors.lightThemeFont,
+                fontSize: 30,
                 fontWeight: FontWeight.w600)),
         depth: 10,
       ),

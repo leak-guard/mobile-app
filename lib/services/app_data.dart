@@ -19,7 +19,7 @@ class AppData {
   AppData._internal();
 
   Future<void> loadData() async {
-    await Future.delayed(const Duration(seconds: 2));
+    // await Future.delayed(const Duration(seconds: 2));
     final futures = await Future.wait([
       _db.getGroups(),
       _db.getCentralUnitsAndIDs(),

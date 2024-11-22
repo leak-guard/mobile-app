@@ -271,7 +271,7 @@ class _MainScreenState extends State<MainScreen> {
                                     CustomIcons.leak_probe,
                                     size: 80,
                                     style: NeumorphicStyle(
-                                      color: MyColors.blue,
+                                      color: MyColors.lightThemeFont,
                                     ),
                                   ),
                                 ),
@@ -283,7 +283,7 @@ class _MainScreenState extends State<MainScreen> {
                                     .textTheme
                                     .titleLarge!
                                     .copyWith(
-                                      color: MyColors.blue,
+                                      color: MyColors.lightThemeFont,
                                       fontSize: 50,
                                     ),
                               ),
@@ -301,7 +301,7 @@ class _MainScreenState extends State<MainScreen> {
                                     CustomIcons.battery_low,
                                     size: 50,
                                     style: NeumorphicStyle(
-                                      color: MyColors.blue,
+                                      color: MyColors.lightThemeFont,
                                     ),
                                   ),
                                 ),
@@ -315,7 +315,7 @@ class _MainScreenState extends State<MainScreen> {
                                   .textTheme
                                   .titleLarge!
                                   .copyWith(
-                                    color: MyColors.blue,
+                                    color: MyColors.lightThemeFont,
                                     fontSize: 50,
                                   ),
                             ),
@@ -339,7 +339,7 @@ class _MainScreenState extends State<MainScreen> {
                                   CustomIcons.central_unit,
                                   size: 70,
                                   style: NeumorphicStyle(
-                                    color: MyColors.blue,
+                                    color: MyColors.lightThemeFont,
                                   ),
                                 ),
                               ),
@@ -351,7 +351,7 @@ class _MainScreenState extends State<MainScreen> {
                                   .textTheme
                                   .titleLarge!
                                   .copyWith(
-                                    color: MyColors.blue,
+                                    color: MyColors.lightThemeFont,
                                     fontSize: 50,
                                   ),
                             ),
@@ -366,7 +366,7 @@ class _MainScreenState extends State<MainScreen> {
                                   CustomIcons.broken_pipe,
                                   size: 50,
                                   style: NeumorphicStyle(
-                                    color: MyColors.blue,
+                                    color: MyColors.lightThemeFont,
                                   ),
                                 ),
                               ),
@@ -377,7 +377,7 @@ class _MainScreenState extends State<MainScreen> {
                                   .textTheme
                                   .titleLarge!
                                   .copyWith(
-                                    color: MyColors.blue,
+                                    color: MyColors.lightThemeFont,
                                     fontSize: 50,
                                   ),
                             ),

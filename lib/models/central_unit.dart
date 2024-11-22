@@ -16,6 +16,14 @@ class CentralUnit {
   List<LeakProbe> leakProbes = [];
   final _db = DatabaseService.instance;
 
+  int leakProbeLowBatteryNumber() {
+    return leakProbes.where((probe) => probe.lowBattery).length;
+  }
+
+  int leakProbeNumber() {
+    return leakProbes.length;
+  }
+
   CentralUnit(
       {required this.name,
       required this.addressIP,
@@ -238,8 +246,7 @@ class CentralUnit {
 
         final usage = hourFlows.isEmpty
             ? 0.0
-            : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble()) /
-                hourFlows.length;
+            : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
 
         _cachedWaterUsageData!.add(WaterUsageData(
           time.year,
@@ -262,8 +269,7 @@ class CentralUnit {
     final usage = currentHourFlows.isEmpty
         ? 0.0
         : currentHourFlows.fold(
-                0.0, (sum, flow) => sum + flow.volume.toDouble()) /
-            currentHourFlows.length;
+            0.0, (sum, flow) => sum + flow.volume.toDouble());
 
     _cachedWaterUsageData!.last = WaterUsageData(
       currentHour.year,

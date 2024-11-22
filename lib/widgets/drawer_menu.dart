@@ -1,4 +1,5 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/custom_icons.dart';
 import '../utils/colors.dart';
 import '../utils/routes.dart';
 import '../utils/strings.dart';
@@ -37,6 +38,19 @@ class DrawerMenu extends StatelessWidget {
               Navigator.pushNamed(
                 context,
                 Routes.manageGroups,
+              ).then((_) => onBack());
+            },
+          ),
+          NeumorphicListTile(
+            leading:
+                Icon(CustomIcons.central_unit, color: MyColors.lightThemeFont),
+            title: Text('Manage central units',
+                style: Theme.of(context).textTheme.displaySmall),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(
+                context,
+                Routes.manageCentrals,
               ).then((_) => onBack());
             },
           ),

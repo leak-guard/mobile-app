@@ -6,6 +6,7 @@ import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
+import 'package:leak_guard/widgets/add_new_group_button.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
 
@@ -337,37 +338,8 @@ class _ManageGroupsScreenState extends State<ManageGroupsScreen> {
   Widget _buildAddGroupButton() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: Neumorphic(
-        padding: const EdgeInsets.all(15),
-        style: NeumorphicStyle(
-          shape: NeumorphicShape.flat,
-          boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
-          depth: -10,
-          intensity: 0.8,
-          lightSource: LightSource.topLeft,
-          color: MyColors.background,
-        ),
-        child: NeumorphicButton(
-          style: NeumorphicStyle(
-            depth: 5,
-            intensity: 0.8,
-            boxShape: NeumorphicBoxShape.roundRect(
-              BorderRadius.circular(12),
-            ),
-          ),
-          onPressed: () {
-            Navigator.pushNamed(
-              context,
-              Routes.createGroup,
-            ).then((_) {
-              setState(() {});
-            });
-          },
-          child: Center(
-            child: Text('Add new group',
-                style: Theme.of(context).textTheme.titleLarge),
-          ),
-        ),
+      child: AddNewGroupButton(
+        onBack: () => setState(() {}),
       ),
     );
   }
