@@ -1,5 +1,5 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/utils/colors.dart';
 
 class WaterUsageChart extends StatelessWidget {

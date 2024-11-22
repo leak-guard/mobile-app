@@ -1,6 +1,7 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
@@ -15,24 +16,24 @@ enum GroupManageMode {
   delete,
 }
 
-class GroupScreen extends StatefulWidget {
-  const GroupScreen({super.key, required this.groups});
-  final List<Group> groups;
+class ManageGroupsScreen extends StatefulWidget {
+  const ManageGroupsScreen({super.key});
 
   @override
-  State<GroupScreen> createState() => _GroupScreenState();
+  State<ManageGroupsScreen> createState() => _ManageGroupsScreenState();
 }
 
-class _GroupScreenState extends State<GroupScreen> {
+class _ManageGroupsScreenState extends State<ManageGroupsScreen> {
   GroupManageMode _currentMode = GroupManageMode.view;
   final Map<int, TextEditingController> _nameControllers = {};
   final Map<int, bool> _nameButtonStates = {};
+  final _appData = AppData();
   final _db = DatabaseService.instance;
 
   @override
   void initState() {
     super.initState();
-    for (var group in widget.groups) {
+    for (var group in _appData.groups) {
       _nameControllers[group.groupdID!] =
           TextEditingController(text: group.name)
             ..addListener(() {
@@ -316,7 +317,7 @@ class _GroupScreenState extends State<GroupScreen> {
                 onPressed: () {
                   setState(() {
                     _db.deleteGroup(group.groupdID!);
-                    widget.groups.remove(group);
+                    _appData.groups.remove(group);
                   });
                 },
                 padding: const EdgeInsets.all(8),
@@ -358,18 +359,13 @@ class _GroupScreenState extends State<GroupScreen> {
             Navigator.pushNamed(
               context,
               Routes.createGroup,
-              arguments: CreateGroupScreenArguments(widget.groups),
             ).then((_) {
               setState(() {});
             });
           },
           child: Center(
-            child: Text(
-              'Add new group',
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                    color: MyColors.lightThemeFont.withOpacity(0.4),
-                  ),
-            ),
+            child: Text('Add new group',
+                style: Theme.of(context).textTheme.titleLarge),
           ),
         ),
       ),
@@ -377,7 +373,7 @@ class _GroupScreenState extends State<GroupScreen> {
   }
 
   Widget _buildPositionTile(Group group) {
-    final currentIndex = widget.groups.indexOf(group);
+    final currentIndex = _appData.groups.indexOf(group);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -422,18 +418,18 @@ class _GroupScreenState extends State<GroupScreen> {
               const SizedBox(width: 8),
               NeumorphicButton(
                 style: NeumorphicStyle(
-                  depth: currentIndex < widget.groups.length - 1 ? 5 : 2,
+                  depth: currentIndex < _appData.groups.length - 1 ? 5 : 2,
                   intensity: 0.8,
                   boxShape:
                       NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
                 ),
-                onPressed: currentIndex < widget.groups.length - 1
+                onPressed: currentIndex < _appData.groups.length - 1
                     ? () => _moveGroupDown(group, currentIndex)
                     : null,
                 padding: const EdgeInsets.all(8),
                 child: Icon(
                   Icons.arrow_downward,
-                  color: currentIndex < widget.groups.length - 1
+                  color: currentIndex < _appData.groups.length - 1
                       ? MyColors.lightThemeFont
                       : MyColors.lightThemeFont.withOpacity(0.5),
                   size: 20,
@@ -450,7 +446,7 @@ class _GroupScreenState extends State<GroupScreen> {
     if (currentIndex <= 0) return;
 
     try {
-      final previousGroup = widget.groups[currentIndex - 1];
+      final previousGroup = _appData.groups[currentIndex - 1];
 
       await _db.swapGroupsPositions(
         group.groupdID!,
@@ -462,8 +458,8 @@ class _GroupScreenState extends State<GroupScreen> {
       previousGroup.position = tempPosition;
 
       setState(() {
-        widget.groups[currentIndex] = previousGroup;
-        widget.groups[currentIndex - 1] = group;
+        _appData.groups[currentIndex] = previousGroup;
+        _appData.groups[currentIndex - 1] = group;
       });
     } catch (e) {
       if (mounted) {
@@ -475,10 +471,10 @@ class _GroupScreenState extends State<GroupScreen> {
   }
 
   Future<void> _moveGroupDown(Group group, int currentIndex) async {
-    if (currentIndex >= widget.groups.length - 1) return;
+    if (currentIndex >= _appData.groups.length - 1) return;
 
     try {
-      final nextGroup = widget.groups[currentIndex + 1];
+      final nextGroup = _appData.groups[currentIndex + 1];
 
       await _db.swapGroupsPositions(
         group.groupdID!,
@@ -490,8 +486,8 @@ class _GroupScreenState extends State<GroupScreen> {
       nextGroup.position = tempPosition;
 
       setState(() {
-        widget.groups[currentIndex] = nextGroup;
-        widget.groups[currentIndex + 1] = group;
+        _appData.groups[currentIndex] = nextGroup;
+        _appData.groups[currentIndex + 1] = group;
       });
     } catch (e) {
       if (mounted) {
@@ -509,15 +505,13 @@ class _GroupScreenState extends State<GroupScreen> {
         height: 80,
         onLeadingTap: () {
           Navigator.pop(context);
-          Navigator.pushNamed(context, Routes.main,
-              arguments: MainScreenArguments([]));
         },
         title: MyStrings.manageGroups,
       ),
       body: BlurredTopEdge(
         height: 20,
         child: ListView.builder(
-          itemCount: widget.groups.length + 2,
+          itemCount: _appData.groups.length + 2,
           itemBuilder: (context, index) {
             if (index == 0) {
               return Column(
@@ -530,7 +524,7 @@ class _GroupScreenState extends State<GroupScreen> {
             if (index == 1) {
               return _buildManageButtons();
             }
-            return _buildGroupTile(widget.groups[index - 2]);
+            return _buildGroupTile(_appData.groups[index - 2]);
           },
         ),
       ),
