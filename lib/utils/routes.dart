@@ -45,9 +45,7 @@ class Routes {
           );
         }
         return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(child: Text('Invalid arguments')),
-          ),
+          builder: (_) => const CreateCentralScreen(),
         );
 
       default:

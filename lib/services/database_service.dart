@@ -623,6 +623,27 @@ class DatabaseService {
     );
   }
 
+  Future<Flow?> getLatestFlow(int centralUnitID, int timestamp) async {
+    final db = await database;
+    final data = await db.query(
+      _flowsTableName,
+      where:
+          '$_flowsCentralUnitIDColumnName = ? AND $_flowsDateColumnName <= ?',
+      whereArgs: [centralUnitID, timestamp],
+      orderBy: '$_flowsDateColumnName DESC',
+      limit: 1,
+    );
+
+    if (data.isEmpty) return null;
+
+    return Flow(
+      centralUnitID: data[0][_flowsCentralUnitIDColumnName] as int,
+      volume: data[0][_flowsVolumeColumnName] as num,
+      date: DateTime.fromMillisecondsSinceEpoch(
+          (data[0][_flowsDateColumnName] as int) * 1000),
+    )..flowID = data[0][_flowsFlowIDColumnName] as int;
+  }
+
   // Additional utility methods
   Future clearDatabase() async {
     final db = await database;

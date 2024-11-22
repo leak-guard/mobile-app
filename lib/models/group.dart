@@ -1,5 +1,6 @@
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/flow.dart';
+import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 
 class BlockStatus {
@@ -9,16 +10,6 @@ class BlockStatus {
 
   final int value;
   const BlockStatus._(this.value);
-}
-
-class WaterUsageData {
-  final int year;
-  final int month;
-  final int day;
-  final int hour;
-  final double usage;
-
-  WaterUsageData(this.year, this.month, this.day, this.hour, this.usage);
 }
 
 class Group {
@@ -133,22 +124,12 @@ class Group {
         time.month,
         time.day,
         time.hour,
+        time.minute,
         usage,
       ));
     }
 
     return result.reversed.toList();
-  }
-
-  Future<void> loadCentralUnits() async {
-    if (groupdID != null) {
-      centralUnits = await _db.getGroupCentralUnits(groupdID!);
-      for (var unit in centralUnits) {
-        unit.leakProbes =
-            await _db.getCentralUnitLeakProbes(unit.centralUnitID!);
-      }
-      updateBlockStatus();
-    }
   }
 
   int centralUnitsNumber() => centralUnits.length;
