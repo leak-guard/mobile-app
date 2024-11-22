@@ -4,7 +4,7 @@ class WaterUsageData {
   final int day;
   final int hour;
   final int minute;
-  final double usage;
+  double usage;
 
   WaterUsageData(
       this.year, this.month, this.day, this.hour, this.minute, this.usage);

@@ -30,7 +30,6 @@ class CentralUnit {
   double? _cachedYesterdayUsage;
   DateTime? _lastYesterdayUsageDate;
   List<WaterUsageData>? _cachedWaterUsageData;
-  DateTime? _lastWaterUsageUpdate;
 
   void invalidateCache() {
     _cachedCurrentFlowRate = null;
@@ -40,7 +39,6 @@ class CentralUnit {
     _cachedYesterdayUsage = null;
     _lastYesterdayUsageDate = null;
     _cachedWaterUsageData = null;
-    _lastWaterUsageUpdate = null;
   }
 
   static const _flowRateCacheDuration = Duration(minutes: 1);
@@ -162,15 +160,13 @@ class CentralUnit {
     final now = DateTime.now();
     final currentHour = DateTime(now.year, now.month, now.day, now.hour);
 
-    // No cache case
     if (_cachedWaterUsageData == null) {
       final startTime = currentHour.subtract(Duration(hours: hoursToFetch - 1));
       final flows = await _getFlowData(startTime, now);
 
       List<WaterUsageData> result = [];
-      for (int i = 0; i < hoursToFetch; i++) {
-        final time =
-            currentHour.subtract(Duration(hours: hoursToFetch - 1 - i));
+      for (int i = hoursToFetch - 1; i >= 0; i--) {
+        final time = currentHour.subtract(Duration(hours: i));
         final hourFlows = flows
             .where((flow) =>
                 flow.date.year == time.year &&
@@ -181,8 +177,7 @@ class CentralUnit {
 
         final usage = hourFlows.isEmpty
             ? 0.0
-            : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble()) /
-                hourFlows.length;
+            : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
 
         result.add(WaterUsageData(
           time.year,
@@ -195,11 +190,9 @@ class CentralUnit {
       }
 
       _cachedWaterUsageData = result;
-      _lastWaterUsageUpdate = now;
       return result;
     }
 
-    // Cache exists but last hour is not current
     if (_cachedWaterUsageData!.last.hour != currentHour.hour) {
       final lastCachedHour = DateTime(
         _cachedWaterUsageData!.last.year,
@@ -208,12 +201,33 @@ class CentralUnit {
         _cachedWaterUsageData!.last.hour,
       );
 
-      final hoursToAdd = currentHour.difference(lastCachedHour).inHours;
-      final startTime = lastCachedHour.add(const Duration(hours: 1));
+      final startTime = lastCachedHour;
       final flows = await _getFlowData(startTime, now);
 
-      for (int i = 1; i <= hoursToAdd; i++) {
-        final time = startTime.add(Duration(hours: i - 1));
+      final lastHourFlows = flows
+          .where((flow) =>
+              flow.date.year == lastCachedHour.year &&
+              flow.date.month == lastCachedHour.month &&
+              flow.date.day == lastCachedHour.day &&
+              flow.date.hour == lastCachedHour.hour)
+          .toList();
+
+      if (lastHourFlows.isNotEmpty) {
+        final lastHourUsage = lastHourFlows.fold(
+            0.0, (sum, flow) => sum + flow.volume.toDouble());
+        _cachedWaterUsageData!.last = WaterUsageData(
+          lastCachedHour.year,
+          lastCachedHour.month,
+          lastCachedHour.day,
+          lastCachedHour.hour,
+          now.minute,
+          lastHourUsage,
+        );
+      }
+
+      final hoursToAdd = currentHour.difference(lastCachedHour).inHours;
+      for (int i = hoursToAdd; i > 0; i--) {
+        final time = currentHour.subtract(Duration(hours: i - 1));
         final hourFlows = flows
             .where((flow) =>
                 flow.date.year == time.year &&
@@ -237,16 +251,13 @@ class CentralUnit {
         ));
       }
 
-      // Remove old entries
       while (_cachedWaterUsageData!.length > hoursToFetch) {
         _cachedWaterUsageData!.removeAt(0);
       }
 
-      _lastWaterUsageUpdate = now;
       return _cachedWaterUsageData!;
     }
 
-    // Update current hour
     final currentHourFlows = await _getFlowData(currentHour, now);
     final usage = currentHourFlows.isEmpty
         ? 0.0
@@ -263,7 +274,6 @@ class CentralUnit {
       usage,
     );
 
-    _lastWaterUsageUpdate = now;
     return _cachedWaterUsageData!;
   }
 

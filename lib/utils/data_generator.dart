@@ -155,8 +155,8 @@ class DataGenerator {
   static Future<void> _generateFlowData(int centralUnitId, String groupName,
       String unitName, void Function(String, double) onProgress) async {
     final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month - 6, now.day);
-    final endDate = DateTime(now.year, now.month + 2, now.day);
+    final startDate = DateTime(now.year, now.month, now.day - 1);
+    final endDate = DateTime(now.year, now.month + 1, now.day);
 
     final totalDays = endDate.difference(startDate).inDays;
     int currentRecord = 0;

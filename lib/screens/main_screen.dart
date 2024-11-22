@@ -120,7 +120,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (kDebugMode) // Pokazuj tylko w trybie debug
+              if (kDebugMode)
                 NeumorphicButton(
                   style: NeumorphicStyle(
                     depth: 5,
