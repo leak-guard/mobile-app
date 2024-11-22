@@ -76,39 +76,6 @@ class MyApp extends StatelessWidget {
             );
           }
 
-          if (snapshot.hasError) {
-            return Scaffold(
-              backgroundColor: MyColors.background,
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Error loading data',
-                      style: GoogleFonts.lato(
-                        color: MyColors.lightThemeFont,
-                        fontSize: 20,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    NeumorphicButton(
-                      onPressed: () {
-                        // Retry loading data
-                        AppData().loadData();
-                      },
-                      child: Text(
-                        'Retry',
-                        style: GoogleFonts.lato(
-                          color: MyColors.lightThemeFont,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
           return Navigator(
             initialRoute: Routes.main,
             onGenerateRoute: Routes.onGenerateRoute,

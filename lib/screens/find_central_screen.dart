@@ -1,19 +1,19 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:leak_guard/models/central_unit.dart';
+import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
 import 'package:nsd/nsd.dart';
 
 class FindCentralScreen extends StatefulWidget {
-  const FindCentralScreen({super.key, required this.centralUnits});
-  final List<CentralUnit> centralUnits;
+  const FindCentralScreen({super.key});
 
   @override
   State<FindCentralScreen> createState() => _FindCentralScreenState();
 }
 
 class _FindCentralScreenState extends State<FindCentralScreen> {
+  final _appData = AppData();
   Discovery? _discovery;
   final List<Service> _services = [];
   bool _isSearching = false;
@@ -108,8 +108,6 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                     Navigator.pushNamed(
                       context,
                       Routes.createCentral,
-                      arguments:
-                          CreateCentralScreenArguments(widget.centralUnits),
                     );
                   },
                   child: Padding(
@@ -175,7 +173,6 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                     context,
                     Routes.createCentral,
                     arguments: CreateCentralScreenArguments(
-                      widget.centralUnits,
                       service,
                     ),
                   );

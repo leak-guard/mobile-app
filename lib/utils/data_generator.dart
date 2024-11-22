@@ -3,6 +3,7 @@ import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/models/flow.dart';
+import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 
 /// Service responsible for generating realistic test data for the LeakGuard application.
@@ -49,6 +50,7 @@ import 'package:leak_guard/services/database_service.dart';
 
 class DataGenerator {
   static final _random = Random();
+  static final _appData = AppData();
   static final _db = DatabaseService.instance;
 
   // Seasonal multipliers (relative to average)
@@ -244,6 +246,7 @@ class DataGenerator {
       void Function(String, double) onProgress) async {
     try {
       await _db.clearDatabase();
+      _appData.clearData();
       onProgress('Clearing database...', 0);
       await Future.delayed(const Duration(milliseconds: 100));
 
@@ -251,8 +254,8 @@ class DataGenerator {
         'KotłowniaKotłowniaKotłowniaKotłowniaKotłowniaKotłownia',
         'Kotłownia',
         'Toaleta',
-        'Duży salon',
-        'Mały salon',
+        // 'Duży salon',
+        // 'Mały salon',
         // 'Kuchnia',
         // 'Sypialnia',
         // 'Łazienka',
@@ -280,6 +283,7 @@ class DataGenerator {
 
       onProgress('Data generation completed!', 1.0);
       await Future.delayed(const Duration(milliseconds: 100));
+      await _appData.loadData();
     } catch (e, stackTrace) {
       print('Error generating data: $e');
       print(stackTrace);

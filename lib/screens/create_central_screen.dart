@@ -1,18 +1,16 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/services/api_service.dart';
+import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:nsd/nsd.dart';
 
 class CreateCentralScreen extends StatefulWidget {
-  final List<CentralUnit> centralUnits;
   final Service? chosenCentral;
 
   const CreateCentralScreen({
     super.key,
-    required this.centralUnits,
     this.chosenCentral,
   });
 
@@ -22,6 +20,7 @@ class CreateCentralScreen extends StatefulWidget {
 
 class _CreateCentralScreenState extends State<CreateCentralScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _appData = AppData();
   bool _isValid = true;
   final _nameController = TextEditingController();
   final _ipController = TextEditingController();
@@ -208,7 +207,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
                     String? errorMessage;
                     if (value == null || value.trim().isEmpty) {
                       errorMessage = 'Please enter a name';
-                    } else if (widget.centralUnits.any((c) =>
+                    } else if (_appData.centralUnits.any((c) =>
                         c.name.toLowerCase() == value.trim().toLowerCase())) {
                       errorMessage = 'Central unit name already exists';
                     }

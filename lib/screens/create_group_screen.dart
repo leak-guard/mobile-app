@@ -1,6 +1,7 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
@@ -9,8 +10,7 @@ import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
 
 class CreateGroupScreen extends StatefulWidget {
-  const CreateGroupScreen({super.key, required this.groups});
-  final List<Group> groups;
+  const CreateGroupScreen({super.key});
 
   @override
   State<CreateGroupScreen> createState() => _CreateGroupScreenState();
@@ -21,24 +21,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   bool _isValid = true;
   final _nameController = TextEditingController();
   final _db = DatabaseService.instance;
-  List<CentralUnit> centrals = [];
+  final _appData = AppData();
 
   List<CentralUnit> get chosenCentrals =>
-      centrals.where((central) => central.chosen).toList();
-
-  @override
-  void initState() {
-    super.initState();
-    _db.getCentralUnits().then((value) {
-      setState(() {
-        centrals = value;
-      });
-    });
-  }
+      _appData.centralUnits.where((central) => central.chosen).toList();
 
   @override
   void dispose() {
-    for (var central in centrals) {
+    for (var central in _appData.centralUnits) {
       central.chosen = false;
     }
     _nameController.dispose();
@@ -75,12 +65,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         newGroup.centralUnits.add(central);
       }
 
-      widget.groups.add(newGroup);
+      _appData.groups.add(newGroup);
       if (mounted) {
         Navigator.pop(context);
         Navigator.pop(context);
-        Navigator.pushNamed(context, Routes.groups,
-            arguments: GroupScreenArguments(widget.groups));
+        Navigator.pushNamed(context, Routes.manageGroups);
       }
     } catch (e) {
       if (mounted) {
@@ -143,7 +132,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         child: Form(
           key: _formKey,
           child: ListView.builder(
-            itemCount: centrals.length + 4,
+            itemCount: _appData.centralUnits.length + 4,
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Padding(
@@ -183,7 +172,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                         String? errorMessage;
                         if (value == null || value.trim().isEmpty) {
                           errorMessage = 'Please enter a group name';
-                        } else if (widget.groups.any((g) =>
+                        } else if (_appData.groups.any((g) =>
                             g.name.toLowerCase() ==
                             value.trim().toLowerCase())) {
                           errorMessage = 'Group name already exists';
@@ -239,7 +228,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                         Navigator.pushNamed(
                           context,
                           Routes.findCentral,
-                          arguments: FindCentralScreenArguments(centrals),
                         ).then((_) {
                           setState(() {});
                         });
@@ -253,7 +241,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 );
               }
 
-              final central = centrals[index - 4];
+              final central = _appData.centralUnits[index - 4];
 
               return Padding(
                 padding:

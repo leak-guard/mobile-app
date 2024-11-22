@@ -50,4 +50,10 @@ class AppData {
 
     isLoaded = true;
   }
+
+  void clearData() {
+    groups.clear();
+    centralUnits.clear();
+    isLoaded = false;
+  }
 }

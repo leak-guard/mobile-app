@@ -36,8 +36,10 @@ class DrawerMenu extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.pop(context);
-              Navigator.pushNamed(context, Routes.groups,
-                  arguments: GroupScreenArguments(groups));
+              Navigator.pushNamed(
+                context,
+                Routes.manageGroups,
+              );
             },
           ),
         ],

@@ -1,16 +1,14 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:leak_guard/models/central_unit.dart';
-import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/screens/create_central_screen.dart';
 import 'package:leak_guard/screens/find_central_screen.dart';
 import 'package:leak_guard/screens/create_group_screen.dart';
-import 'package:leak_guard/screens/group_screen.dart';
+import 'package:leak_guard/screens/manage_groups_screen.dart';
 import 'package:leak_guard/screens/main_screen.dart';
 import 'package:nsd/nsd.dart';
 
 class Routes {
   static const String main = '/';
-  static const String groups = '/groups';
+  static const String manageGroups = '/manageGroups';
   static const String createGroup = '/createGroup';
   static const String findCentral = '/findCentral';
   static const String createCentral = '/createCentral';
@@ -22,46 +20,19 @@ class Routes {
           builder: (_) => const MainScreen(),
         );
 
-      case groups:
-        if (settings.arguments is GroupScreenArguments) {
-          final args = settings.arguments as GroupScreenArguments;
-          return MaterialPageRoute(
-            builder: (_) => GroupScreen(groups: args.groups),
-          );
-        }
-
+      case manageGroups:
         return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(child: Text('Invalid arguments')),
-          ),
+          builder: (_) => const ManageGroupsScreen(),
         );
 
       case createGroup:
-        if (settings.arguments is CreateGroupScreenArguments) {
-          final args = settings.arguments as CreateGroupScreenArguments;
-          return MaterialPageRoute(
-            builder: (_) => CreateGroupScreen(groups: args.groups),
-          );
-        }
-
         return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(child: Text('Invalid arguments')),
-          ),
+          builder: (_) => const CreateGroupScreen(),
         );
 
       case findCentral:
-        if (settings.arguments is FindCentralScreenArguments) {
-          final args = settings.arguments as FindCentralScreenArguments;
-          return MaterialPageRoute(
-            builder: (_) => FindCentralScreen(centralUnits: args.centralUnits),
-          );
-        }
-
         return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(child: Text('Invalid arguments')),
-          ),
+          builder: (_) => const FindCentralScreen(),
         );
 
       case createCentral:
@@ -69,7 +40,6 @@ class Routes {
           final args = settings.arguments as CreateCentralScreenArguments;
           return MaterialPageRoute(
             builder: (_) => CreateCentralScreen(
-              centralUnits: args.centralUnits,
               chosenCentral: args.chosenCentral,
             ),
           );
@@ -90,27 +60,8 @@ class Routes {
   }
 }
 
-class GroupScreenArguments {
-  final List<Group> groups;
-
-  GroupScreenArguments(this.groups);
-}
-
-class CreateGroupScreenArguments {
-  final List<Group> groups;
-
-  CreateGroupScreenArguments(this.groups);
-}
-
-class FindCentralScreenArguments {
-  final List<CentralUnit> centralUnits;
-
-  FindCentralScreenArguments(this.centralUnits);
-}
-
 class CreateCentralScreenArguments {
-  final List<CentralUnit> centralUnits;
   final Service? chosenCentral;
 
-  CreateCentralScreenArguments(this.centralUnits, [this.chosenCentral]);
+  CreateCentralScreenArguments([this.chosenCentral]);
 }

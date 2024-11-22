@@ -176,16 +176,23 @@ class DatabaseService {
   // Group CRUD operations
   Future<int> addGroup(Group group) async {
     final db = await database;
+    final tableInfo = await db.rawQuery('PRAGMA table_info($_groupsTableName)');
+    final hasPosition =
+        tableInfo.any((col) => col['name'] == _groupsPositionColumnName);
 
-    final maxPosition = Sqflite.firstIntValue(await db.rawQuery(
-            'SELECT MAX($_groupsPositionColumnName) FROM $_groupsTableName')) ??
-        -1;
+    int nextPosition = 0;
+    if (hasPosition) {
+      nextPosition = (Sqflite.firstIntValue(await db.rawQuery(
+                  'SELECT MAX($_groupsPositionColumnName) FROM $_groupsTableName')) ??
+              -1) +
+          1;
+    }
 
     return await db.insert(
       _groupsTableName,
       {
         _groupsNameColumnName: group.name,
-        _groupsPositionColumnName: maxPosition + 1,
+        _groupsPositionColumnName: nextPosition + 1,
       },
     );
   }
