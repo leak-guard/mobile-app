@@ -95,6 +95,8 @@ class _HorizontalGroupListState extends State<HorizontalGroupList> {
 
   @override
   Widget build(BuildContext context) {
+    _initializeKeys();
+
     return SizedBox(
       height: 50,
       child: LayoutBuilder(

@@ -3,6 +3,7 @@ import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/models/flow.dart';
+import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 
 /// Service responsible for generating realistic test data for the LeakGuard application.
@@ -49,6 +50,7 @@ import 'package:leak_guard/services/database_service.dart';
 
 class DataGenerator {
   static final _random = Random();
+  static final _appData = AppData();
   static final _db = DatabaseService.instance;
 
   // Seasonal multipliers (relative to average)
@@ -153,8 +155,8 @@ class DataGenerator {
   static Future<void> _generateFlowData(int centralUnitId, String groupName,
       String unitName, void Function(String, double) onProgress) async {
     final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month - 6, now.day);
-    final endDate = DateTime(now.year, now.month + 2, now.day);
+    final startDate = DateTime(now.year, now.month, now.day - 1);
+    final endDate = DateTime(now.year, now.month + 1, now.day);
 
     final totalDays = endDate.difference(startDate).inDays;
     int currentRecord = 0;
@@ -197,7 +199,7 @@ class DataGenerator {
     final probeCount = _random.nextInt(4); // 0 to 3 probes
     for (int i = 0; i < probeCount; i++) {
       final probe = LeakProbe(
-        name: 'Probe ${i + 1}',
+        name: 'Probe ${i + 1} for unit $centralUnitId',
         centralUnitID: centralUnitId,
         description: 'Test probe ${i + 1} description',
         imagePath: null,
@@ -215,7 +217,7 @@ class DataGenerator {
     final unitCount = _random.nextInt(3) + 1;
 
     for (int i = 0; i < unitCount; i++) {
-      final unitName = 'Unit ${i + 1}';
+      final unitName = 'Unit ${i + 1} for group $groupId';
       onProgress('Creating $unitName for $groupName...', 0);
 
       final unit = CentralUnit(
@@ -244,6 +246,7 @@ class DataGenerator {
       void Function(String, double) onProgress) async {
     try {
       await _db.clearDatabase();
+      _appData.clearData();
       onProgress('Clearing database...', 0);
       await Future.delayed(const Duration(milliseconds: 100));
 
@@ -251,8 +254,8 @@ class DataGenerator {
         'KotłowniaKotłowniaKotłowniaKotłowniaKotłowniaKotłownia',
         'Kotłownia',
         'Toaleta',
-        'Duży salon',
-        'Mały salon',
+        // 'Duży salon',
+        // 'Mały salon',
         // 'Kuchnia',
         // 'Sypialnia',
         // 'Łazienka',
@@ -280,6 +283,7 @@ class DataGenerator {
 
       onProgress('Data generation completed!', 1.0);
       await Future.delayed(const Duration(milliseconds: 100));
+      await _appData.loadData();
     } catch (e, stackTrace) {
       print('Error generating data: $e');
       print(stackTrace);

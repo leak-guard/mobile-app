@@ -1,16 +1,17 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
-import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
+import 'package:leak_guard/widgets/add_new_unit_button.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
+import 'package:leak_guard/widgets/central_unit_button.dart';
 
 class CreateGroupScreen extends StatefulWidget {
-  const CreateGroupScreen({super.key, required this.groups});
-  final List<Group> groups;
+  const CreateGroupScreen({super.key});
 
   @override
   State<CreateGroupScreen> createState() => _CreateGroupScreenState();
@@ -21,24 +22,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   bool _isValid = true;
   final _nameController = TextEditingController();
   final _db = DatabaseService.instance;
-  List<CentralUnit> centrals = [];
+  final _appData = AppData();
 
   List<CentralUnit> get chosenCentrals =>
-      centrals.where((central) => central.chosen).toList();
-
-  @override
-  void initState() {
-    super.initState();
-    _db.getCentralUnits().then((value) {
-      setState(() {
-        centrals = value;
-      });
-    });
-  }
+      _appData.centralUnits.where((central) => central.chosen).toList();
 
   @override
   void dispose() {
-    for (var central in centrals) {
+    for (var central in _appData.centralUnits) {
       central.chosen = false;
     }
     _nameController.dispose();
@@ -75,12 +66,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         newGroup.centralUnits.add(central);
       }
 
-      widget.groups.add(newGroup);
+      _appData.groups.add(newGroup);
       if (mounted) {
         Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.pushNamed(context, Routes.groups,
-            arguments: GroupScreenArguments(widget.groups));
       }
     } catch (e) {
       if (mounted) {
@@ -143,7 +131,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         child: Form(
           key: _formKey,
           child: ListView.builder(
-            itemCount: centrals.length + 4,
+            itemCount: _appData.centralUnits.length + 4,
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Padding(
@@ -183,7 +171,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                         String? errorMessage;
                         if (value == null || value.trim().isEmpty) {
                           errorMessage = 'Please enter a group name';
-                        } else if (widget.groups.any((g) =>
+                        } else if (_appData.groups.any((g) =>
                             g.name.toLowerCase() ==
                             value.trim().toLowerCase())) {
                           errorMessage = 'Group name already exists';
@@ -216,81 +204,24 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               if (index == 3) {
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Neumorphic(
-                    padding: const EdgeInsets.all(15),
-                    style: NeumorphicStyle(
-                      shape: NeumorphicShape.flat,
-                      boxShape: NeumorphicBoxShape.roundRect(
-                          BorderRadius.circular(12)),
-                      depth: -10,
-                      intensity: 0.8,
-                      lightSource: LightSource.topLeft,
-                      color: MyColors.background,
-                    ),
-                    child: NeumorphicButton(
-                      style: NeumorphicStyle(
-                        depth: 5,
-                        intensity: 0.8,
-                        boxShape: NeumorphicBoxShape.roundRect(
-                          BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () {},
-                      child: Center(
-                        child: Text(
-                          'Add new central unit',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge!
-                              .copyWith(
-                                color: MyColors.lightThemeFont.withOpacity(0.4),
-                              ),
-                        ),
-                      ),
-                    ),
+                  child: AddNewUnitButton(
+                    onBack: () => setState(() {}),
                   ),
                 );
               }
 
-              final central = centrals[index - 4];
+              final central = _appData.centralUnits[index - 4];
 
               return Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                child: NeumorphicButton(
-                  style: NeumorphicStyle(
-                    depth: central.chosen ? -5 : 5,
-                    intensity: 0.8,
-                    boxShape: NeumorphicBoxShape.roundRect(
-                      BorderRadius.circular(12),
-                    ),
-                  ),
+                child: CentralUnitButton(
+                  central: central,
                   onPressed: () {
                     setState(() {
                       central.chosen = !central.chosen;
                     });
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                    child: SizedBox(
-                      height: 60,
-                      child: Center(
-                        child: Text(
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          central.name,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge!
-                              .copyWith(
-                                color: !central.chosen
-                                    ? MyColors.lightThemeFont
-                                    : MyColors.lightThemeFont.withOpacity(0.7),
-                              ),
-                        ),
-                      ),
-                    ),
-                  ),
                 ),
               );
             },

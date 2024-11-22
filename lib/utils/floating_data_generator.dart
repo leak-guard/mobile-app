@@ -51,7 +51,7 @@ class GenerateTestDataButton extends StatelessWidget {
     this.onComplete,
   });
 
-  Future<void> _generateData(BuildContext context) async {
+  Future<void> generateData(BuildContext context) async {
     final progressDialogKey = GlobalKey<_ProgressDialogState>();
 
     showDialog(
@@ -87,7 +87,7 @@ class GenerateTestDataButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NeumorphicFloatingActionButton(
-      onPressed: () => _generateData(context),
+      onPressed: () => generateData(context),
       child: const Icon(Icons.add),
     );
   }

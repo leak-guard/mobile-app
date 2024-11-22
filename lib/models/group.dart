@@ -1,5 +1,6 @@
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/flow.dart';
+import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 
 class BlockStatus {
@@ -11,16 +12,6 @@ class BlockStatus {
   const BlockStatus._(this.value);
 }
 
-class WaterUsageData {
-  final int year;
-  final int month;
-  final int day;
-  final int hour;
-  final double usage;
-
-  WaterUsageData(this.year, this.month, this.day, this.hour, this.usage);
-}
-
 class Group {
   int? groupdID;
   String name;
@@ -29,9 +20,21 @@ class Group {
   bool isTimeBlockSetted = false;
   List<int> blockedHours = [];
   List<CentralUnit> centralUnits = [];
-  final _db = DatabaseService.instance;
 
   Group({required this.name});
+
+  int centralUnitsNumber() => centralUnits.length;
+
+  int centralUnitsLeaksNumber() => centralUnits.fold(
+      0,
+      (sum, unit) =>
+          sum + unit.leakProbes.where((probe) => probe.leakDetected).length);
+
+  int leakProbeNumber() =>
+      centralUnits.fold(0, (sum, unit) => sum + unit.leakProbeNumber());
+
+  int leakProbeLowBatteryNumber() => centralUnits.fold(
+      0, (sum, unit) => sum + unit.leakProbeLowBatteryNumber());
 
   // Update block status based on central units
   void updateBlockStatus() {
@@ -66,120 +69,64 @@ class Group {
     status = BlockStatus.noBlocked;
   }
 
-  // Get flow data for specified time range
-  Future<List<Flow>> _getFlowData(DateTime start, DateTime end) async {
-    List<Flow> allFlows = [];
-    for (var unit in centralUnits) {
-      if (unit.centralUnitID != null) {
-        final flows = await _db.getCentralUnitFlowsBetweenDates(
-          unit.centralUnitID!,
-          start,
-          end,
-        );
-        allFlows.addAll(flows);
-      }
-    }
-    return allFlows;
+  void blockHours(List<int> hours) {
+    blockedHours = hours;
+    isTimeBlockSetted = hours.isNotEmpty;
   }
 
-// Calculate water usage for a specific time period
-  Future<double> _calculateWaterUsage(DateTime start, DateTime end) async {
-    final flows = await _getFlowData(start, end);
+  Future<double> flowRate() async {
     double total = 0.0;
-    for (var flow in flows) {
-      total += flow.volume.toDouble();
+    for (var unit in centralUnits) {
+      final usage = await unit.getCurrentFlowRate();
+      total += usage;
     }
     return total;
   }
 
   Future<double> todaysWaterUsage() async {
-    final now = DateTime.now();
-    final startOfDay = DateTime(now.year, now.month, now.day);
-    return await _calculateWaterUsage(startOfDay, now);
+    double total = 0.0;
+    for (var unit in centralUnits) {
+      final usage = await unit.getTodaysWaterUsage();
+      total += usage;
+    }
+    return total;
   }
 
   Future<double> yesterdayWaterUsage() async {
-    final now = DateTime.now();
-    final startOfYesterday = DateTime(now.year, now.month, now.day - 1);
-    final endOfYesterday = DateTime(now.year, now.month, now.day);
-    return await _calculateWaterUsage(startOfYesterday, endOfYesterday);
+    double total = 0.0;
+    for (var unit in centralUnits) {
+      final usage = await unit.getYesterdayWaterUsage();
+      total += usage;
+    }
+    return total;
   }
 
-  Future<List<WaterUsageData>> getWaterUsageData(int lastHours) async {
+  Future<List<WaterUsageData>> getWaterUsageData(int hoursToFetch) async {
     final now = DateTime.now();
-    final startTime = now.subtract(Duration(hours: lastHours));
-    final flows = await _getFlowData(startTime, now);
+    final currentHour = DateTime(now.year, now.month, now.day, now.hour);
 
-    // Group flows by hour and calculate average usage
-    Map<String, List<Flow>> flowsByHour = {};
-    for (var flow in flows) {
-      final hourKey =
-          '${flow.date.year}-${flow.date.month}-${flow.date.day}-${flow.date.hour}';
-      flowsByHour.putIfAbsent(hourKey, () => []).add(flow);
-    }
-
+    // Create initial list with zero usage
     List<WaterUsageData> result = [];
-    for (int i = 0; i < lastHours; i++) {
-      final time = now.subtract(Duration(hours: i));
-      final hourKey = '${time.year}-${time.month}-${time.day}-${time.hour}';
-      final hourFlows = flowsByHour[hourKey] ?? [];
-      final usage = hourFlows.isEmpty
-          ? 0.0
-          : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble()) /
-              hourFlows.length;
-
+    for (int i = hoursToFetch - 1; i >= 0; i--) {
+      final time = currentHour.subtract(Duration(hours: i));
       result.add(WaterUsageData(
         time.year,
         time.month,
         time.day,
         time.hour,
-        usage,
+        time.minute,
+        0.0,
       ));
     }
 
-    return result.reversed.toList();
-  }
-
-  Future<void> loadCentralUnits() async {
-    if (groupdID != null) {
-      centralUnits = await _db.getGroupCentralUnits(groupdID!);
-      for (var unit in centralUnits) {
-        unit.leakProbes =
-            await _db.getCentralUnitLeakProbes(unit.centralUnitID!);
+    // Sum up usage from all central units
+    for (var unit in centralUnits) {
+      final unitData = await unit.getWaterUsageData(hoursToFetch);
+      for (int i = 0; i < hoursToFetch; i++) {
+        result[i].usage += unitData[i].usage;
       }
-      updateBlockStatus();
     }
-  }
 
-  int centralUnitsNumber() => centralUnits.length;
-
-  int centralUnitsLeaksNumber() => centralUnits.fold(
-      0,
-      (sum, unit) =>
-          sum + unit.leakProbes.where((probe) => probe.leakDetected).length);
-
-  int leakProbeNumber() =>
-      centralUnits.fold(0, (sum, unit) => sum + unit.leakProbes.length);
-
-  int leakProbeLowBatteryNumber() => centralUnits.fold(
-      0,
-      (sum, unit) =>
-          sum + unit.leakProbes.where((probe) => probe.lowBattery).length);
-
-  Future<double> flowRate() async {
-    if (status == BlockStatus.allBlocked) return 0;
-
-    final now = DateTime.now();
-    final lastHour = now.subtract(const Duration(minutes: 60));
-    final recentFlows = await _getFlowData(lastHour, now);
-
-    if (recentFlows.isEmpty) return 0;
-    return recentFlows.map((f) => f.volume.toDouble()).reduce((a, b) => a + b) /
-        recentFlows.length;
-  }
-
-  void blockHours(List<int> hours) {
-    blockedHours = hours;
-    isTimeBlockSetted = hours.isNotEmpty;
+    return result;
   }
 }

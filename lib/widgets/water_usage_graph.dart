@@ -1,5 +1,5 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/utils/colors.dart';
 
 class WaterUsageChart extends StatelessWidget {
@@ -40,50 +40,51 @@ class WaterUsageChart extends StatelessWidget {
             SizedBox(
               height: maxHeight + 40,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: data.map((item) {
                   final height = (item.usage / maxUsage) * maxHeight;
 
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        '${(item.usage * 10).roundToDouble() / 10}',
-                        style: TextStyle(
-                          color: MyColors.blue,
-                          fontSize: getFontSize(item.usage),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Neumorphic(
-                        style: NeumorphicStyle(
-                          depth: 1,
-                          intensity: 0.7,
-                          surfaceIntensity: 0.5,
-                          shadowLightColorEmboss: Colors.white,
-                          color: MyColors.blue,
-                          shape: NeumorphicShape.convex,
-                          boxShape: NeumorphicBoxShape.roundRect(
-                            BorderRadius.circular(16),
+                  return Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${(item.usage * 10).roundToDouble() / 10}',
+                          style: TextStyle(
+                            color: MyColors.blue,
+                            fontSize: getFontSize(item.usage),
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        child: SizedBox(
-                          width: barWidth,
-                          height: height,
+                        const SizedBox(height: 4),
+                        Neumorphic(
+                          style: NeumorphicStyle(
+                            depth: 1,
+                            intensity: 0.7,
+                            surfaceIntensity: 0.5,
+                            shadowLightColorEmboss: Colors.white,
+                            color: MyColors.blue,
+                            shape: NeumorphicShape.convex,
+                            boxShape: NeumorphicBoxShape.roundRect(
+                              BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: SizedBox(
+                            width: barWidth,
+                            height: height,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.hour.toString(),
-                        style: TextStyle(
-                          color: MyColors.darkShadow,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 12,
+                        const SizedBox(height: 4),
+                        Text(
+                          item.hour.toString(),
+                          style: TextStyle(
+                            color: MyColors.darkShadow,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   );
                 }).toList(),
               ),
