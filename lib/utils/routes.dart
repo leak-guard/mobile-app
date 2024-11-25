@@ -1,6 +1,8 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/screens/create_central_screen.dart';
+import 'package:leak_guard/screens/details_central_screen.dart';
 import 'package:leak_guard/screens/details_group_screen.dart';
 import 'package:leak_guard/screens/error_screen.dart';
 import 'package:leak_guard/screens/find_central_screen.dart';
@@ -13,11 +15,12 @@ import 'package:nsd/nsd.dart';
 class Routes {
   static const String main = '/';
   static const String manageGroups = '/manageGroups';
-  static const String manageCentrals = '/manageCentrals';
   static const String createGroup = '/createGroup';
-  static const String findCentral = '/findCentral';
-  static const String createCentral = '/createCentral';
   static const String detailsGroup = '/detailsGroup';
+  static const String manageCentrals = '/manageCentrals';
+  static const String createCentral = '/createCentral';
+  static const String detailsCentral = '/detailsCentral';
+  static const String findCentral = '/findCentral';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -73,11 +76,23 @@ class Routes {
           builder: (_) => const ErrorScreen(),
         );
 
+      case detailsCentral:
+        if (settings.arguments is DetailsCentralcreenArguments) {
+          final args = settings.arguments as DetailsCentralcreenArguments;
+          return MaterialPageRoute(
+            builder: (_) => DetailsCentralScreen(
+              central: args.central,
+            ),
+          );
+        }
+
+        return MaterialPageRoute(
+          builder: (_) => const ErrorScreen(),
+        );
+
       default:
         return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(child: Text('Route not found')),
-          ),
+          builder: (_) => const ErrorScreen(),
         );
     }
   }
@@ -93,4 +108,10 @@ class DetailsGroupScreenArguments {
   final Group chosenGroup;
 
   DetailsGroupScreenArguments(this.chosenGroup);
+}
+
+class DetailsCentralcreenArguments {
+  final CentralUnit central;
+
+  DetailsCentralcreenArguments(this.central);
 }
