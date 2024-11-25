@@ -5,6 +5,8 @@ import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
 import 'package:nsd/nsd.dart';
 
+//TODO: Check if founded centrals are already in the list by MAC address
+
 class FindCentralScreen extends StatefulWidget {
   const FindCentralScreen({super.key});
 
