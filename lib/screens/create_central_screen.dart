@@ -224,10 +224,10 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
                   },
                 ),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               NeumorphicButton(
                 onPressed: () => _checkCentralUnit(_ipController.text),
-                child: Text("Central Unit info"),
+                child: const Text("Central Unit info"),
               ),
             ],
           ),

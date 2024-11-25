@@ -9,8 +9,21 @@ class CentralUnit {
   String addressIP;
   String addressMAC;
   String password = "admin";
+  bool isValveNO = true;
+  int impulsesPerLiter = 1000;
   String? description;
   String? imagePath;
+
+  CentralUnit(
+      {required this.name,
+      required this.addressIP,
+      required this.addressMAC,
+      required this.password,
+      required this.isValveNO,
+      required this.impulsesPerLiter,
+      this.description,
+      this.imagePath});
+
   bool isBlocked = false;
   bool chosen = false;
   List<LeakProbe> leakProbes = [];
@@ -23,13 +36,6 @@ class CentralUnit {
   int leakProbeNumber() {
     return leakProbes.length;
   }
-
-  CentralUnit(
-      {required this.name,
-      required this.addressIP,
-      required this.addressMAC,
-      this.description,
-      this.imagePath});
 
   double? _cachedCurrentFlowRate;
   DateTime? _lastFlowRateUpdate;
@@ -54,7 +60,7 @@ class CentralUnit {
   //TODO: Implement API call to update central unit data
   Future<void> updateFlowInfo() async {
     // Mocked update
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
   }
 
   Future<List<Flow>> _getFlowData(DateTime start, DateTime end) async {

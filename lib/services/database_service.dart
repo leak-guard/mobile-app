@@ -6,7 +6,7 @@ import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/models/flow.dart';
 
-// TODO: To Central add valveType, pulsesPerLiter.
+// TODO: To Central add valveType, impulsesPerLiter.
 
 /// A singleton service class that manages SQLite database operations for the LeakGuard application.
 ///
@@ -64,6 +64,8 @@ class DatabaseService {
   final String _centralUnitsNameColumnName = "name";
   final String _centralUnitsAddressIPColumnName = "addressIP";
   final String _centralUnitsAddressMACColumnName = "addressMAC";
+  final String _centralUnitsIsValveNOColumnName = "isValveNO";
+  final String _centralUnitsImpulsesPerLiterColumnName = "impulsesPerLiter";
   final String _centralUnitsPasswordColumnName = "password";
   final String _centralUnitsDescriptionColumnName = "description";
   final String _centralUnitsImagePathColumnName = "imagePath";
@@ -121,7 +123,9 @@ class DatabaseService {
         $_centralUnitsAddressMACColumnName TEXT NOT NULL,
         $_centralUnitsPasswordColumnName TEXT NOT NULL,
         $_centralUnitsDescriptionColumnName TEXT,
-        $_centralUnitsImagePathColumnName TEXT
+        $_centralUnitsImagePathColumnName TEXT,
+        $_centralUnitsIsValveNOColumnName INTEGER NOT NULL DEFAULT 0,
+        $_centralUnitsImpulsesPerLiterColumnName INTEGER NOT NULL DEFAULT 1
       )
     ''');
 
@@ -172,7 +176,7 @@ class DatabaseService {
     final databasePath = join(databaseDirPath, "leak_guard.db");
     final database = await openDatabase(
       databasePath,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,
@@ -190,6 +194,18 @@ class DatabaseService {
       await db.execute('''
         ALTER TABLE $_groupsTableName 
         ADD COLUMN $_groupsImagePathColumnName TEXT
+      ''');
+    }
+
+    if (oldVersion < 3) {
+      await db.execute('''
+        ALTER TABLE $_centralUnitsTableName 
+        ADD COLUMN $_centralUnitsIsValveNOColumnName INTEGER NOT NULL DEFAULT 0
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_centralUnitsTableName 
+        ADD COLUMN $_centralUnitsImpulsesPerLiterColumnName INTEGER NOT NULL DEFAULT 1
       ''');
     }
   }
@@ -343,6 +359,8 @@ class DatabaseService {
         _centralUnitsPasswordColumnName: unit.password,
         _centralUnitsDescriptionColumnName: unit.description,
         _centralUnitsImagePathColumnName: unit.imagePath,
+        _centralUnitsIsValveNOColumnName: unit.isValveNO ? 1 : 0,
+        _centralUnitsImpulsesPerLiterColumnName: unit.impulsesPerLiter,
       },
     );
   }
@@ -355,11 +373,13 @@ class DatabaseService {
               name: e[_centralUnitsNameColumnName] as String,
               addressIP: e[_centralUnitsAddressIPColumnName] as String,
               addressMAC: e[_centralUnitsAddressMACColumnName] as String,
+              password: e[_centralUnitsPasswordColumnName] as String,
+              isValveNO: (e[_centralUnitsIsValveNOColumnName] as int) == 1,
+              impulsesPerLiter:
+                  e[_centralUnitsImpulsesPerLiterColumnName] as int,
               description: e[_centralUnitsDescriptionColumnName] as String?,
               imagePath: e[_centralUnitsImagePathColumnName] as String?,
-            )
-              ..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int
-              ..password = e[_centralUnitsPasswordColumnName] as String)
+            )..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int)
         .toList();
   }
 
@@ -372,11 +392,12 @@ class DatabaseService {
         name: e[_centralUnitsNameColumnName] as String,
         addressIP: e[_centralUnitsAddressIPColumnName] as String,
         addressMAC: e[_centralUnitsAddressMACColumnName] as String,
+        password: e[_centralUnitsPasswordColumnName] as String,
+        isValveNO: (e[_centralUnitsIsValveNOColumnName] as int) == 1,
+        impulsesPerLiter: e[_centralUnitsImpulsesPerLiterColumnName] as int,
         description: e[_centralUnitsDescriptionColumnName] as String?,
         imagePath: e[_centralUnitsImagePathColumnName] as String?,
-      )
-        ..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int
-        ..password = e[_centralUnitsPasswordColumnName] as String;
+      )..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int;
 
       map[unit.centralUnitID!] = unit;
       return map;
@@ -398,11 +419,13 @@ class DatabaseService {
               name: e[_centralUnitsNameColumnName] as String,
               addressIP: e[_centralUnitsAddressIPColumnName] as String,
               addressMAC: e[_centralUnitsAddressMACColumnName] as String,
+              isValveNO: (e[_centralUnitsIsValveNOColumnName] as int) == 1,
+              impulsesPerLiter:
+                  e[_centralUnitsImpulsesPerLiterColumnName] as int,
+              password: e[_centralUnitsPasswordColumnName] as String,
               description: e[_centralUnitsDescriptionColumnName] as String?,
               imagePath: e[_centralUnitsImagePathColumnName] as String?,
-            )
-              ..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int
-              ..password = e[_centralUnitsPasswordColumnName] as String)
+            )..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int)
         .toList();
   }
 
@@ -433,11 +456,13 @@ class DatabaseService {
       name: data.first[_centralUnitsNameColumnName] as String,
       addressIP: data.first[_centralUnitsAddressIPColumnName] as String,
       addressMAC: data.first[_centralUnitsAddressMACColumnName] as String,
+      password: data.first[_centralUnitsPasswordColumnName] as String,
+      isValveNO: (data.first[_centralUnitsIsValveNOColumnName] as int) == 1,
+      impulsesPerLiter:
+          data.first[_centralUnitsImpulsesPerLiterColumnName] as int,
       description: data.first[_centralUnitsDescriptionColumnName] as String?,
       imagePath: data.first[_centralUnitsImagePathColumnName] as String?,
-    )
-      ..centralUnitID = data.first[_centralUnitsCentralUnitIDColumnName] as int
-      ..password = data.first[_centralUnitsPasswordColumnName] as String;
+    )..centralUnitID = data.first[_centralUnitsCentralUnitIDColumnName] as int;
   }
 
   Future updateCentralUnit(CentralUnit unit) async {
@@ -449,6 +474,8 @@ class DatabaseService {
         _centralUnitsAddressIPColumnName: unit.addressIP,
         _centralUnitsAddressMACColumnName: unit.addressMAC,
         _centralUnitsPasswordColumnName: unit.password,
+        _centralUnitsIsValveNOColumnName: unit.isValveNO ? 1 : 0,
+        _centralUnitsImpulsesPerLiterColumnName: unit.impulsesPerLiter,
         _centralUnitsDescriptionColumnName: unit.description,
         _centralUnitsImagePathColumnName: unit.imagePath,
       },

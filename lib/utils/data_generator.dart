@@ -224,6 +224,9 @@ class DataGenerator {
         name: unitName,
         addressIP: '192.168.1.${100 + i}',
         addressMAC: _generateMacAddress(),
+        password: "admin",
+        isValveNO: false,
+        impulsesPerLiter: 1000,
         description: 'Test unit ${i + 1} description',
         imagePath: null,
       );
