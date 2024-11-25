@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:leak_guard/services/app_data.dart';
+import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/add_new_unit_button.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
@@ -46,7 +47,15 @@ class _ManageCentralsScreenState extends State<ManageCentralsScreen> {
               child: CentralUnitButton(
                 central: central,
                 onPressed: () {
-                  print(central);
+                  Navigator.pushNamed(
+                    context,
+                    Routes.detailsCentral,
+                    arguments: DetailsCentralcreenArguments(
+                      central,
+                    ),
+                  ).then((_) {
+                    setState(() {});
+                  });
                 },
               ),
             );

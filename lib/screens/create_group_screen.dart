@@ -4,6 +4,7 @@ import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/add_new_unit_button.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
@@ -220,6 +221,17 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   onPressed: () {
                     setState(() {
                       central.chosen = !central.chosen;
+                    });
+                  },
+                  onLongPress: () {
+                    Navigator.pushNamed(
+                      context,
+                      Routes.detailsCentral,
+                      arguments: DetailsCentralcreenArguments(
+                        central,
+                      ),
+                    ).then((_) {
+                      setState(() {});
                     });
                   },
                 ),
