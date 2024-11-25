@@ -10,6 +10,7 @@ class CustomNeumorphicAppBar extends StatelessWidget
   final VoidCallback? onTrailingTap;
   final List<Widget>? bottomWidgets;
   final double height;
+  final double trailingDepth;
 
   const CustomNeumorphicAppBar({
     super.key,
@@ -18,6 +19,7 @@ class CustomNeumorphicAppBar extends StatelessWidget
     this.onLeadingTap,
     this.trailingIcon,
     this.onTrailingTap,
+    this.trailingDepth = 5,
     this.bottomWidgets,
     this.height = 120,
   });
@@ -68,7 +70,7 @@ class CustomNeumorphicAppBar extends StatelessWidget
                   style: NeumorphicStyle(
                     boxShape:
                         NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
-                    depth: 5,
+                    depth: trailingDepth,
                   ),
                   onPressed: onTrailingTap,
                   child: trailingIcon ??
