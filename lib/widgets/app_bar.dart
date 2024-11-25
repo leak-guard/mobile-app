@@ -51,9 +51,16 @@ class CustomNeumorphicAppBar extends StatelessWidget
                   onPressed: onLeadingTap,
                   child: leadingIcon ?? const Icon(Icons.arrow_back),
                 ),
-                Text(
-                  title ?? MyStrings.appName,
-                  style: Theme.of(context).textTheme.titleLarge,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      title ?? MyStrings.appName,
+                      style: Theme.of(context).textTheme.titleLarge,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
                 NeumorphicButton(
                   padding: const EdgeInsets.all(8),

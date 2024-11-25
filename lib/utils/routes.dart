@@ -1,5 +1,8 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/screens/create_central_screen.dart';
+import 'package:leak_guard/screens/details_group_screen.dart';
+import 'package:leak_guard/screens/error_screen.dart';
 import 'package:leak_guard/screens/find_central_screen.dart';
 import 'package:leak_guard/screens/create_group_screen.dart';
 import 'package:leak_guard/screens/manage_centrals_screen.dart';
@@ -14,6 +17,7 @@ class Routes {
   static const String createGroup = '/createGroup';
   static const String findCentral = '/findCentral';
   static const String createCentral = '/createCentral';
+  static const String detailsGroup = '/detailsGroup';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -55,6 +59,20 @@ class Routes {
           builder: (_) => const CreateCentralScreen(),
         );
 
+      case detailsGroup:
+        if (settings.arguments is DetailsGroupScreenArguments) {
+          final args = settings.arguments as DetailsGroupScreenArguments;
+          return MaterialPageRoute(
+            builder: (_) => DetailsGroupScreen(
+              group: args.chosenGroup,
+            ),
+          );
+        }
+
+        return MaterialPageRoute(
+          builder: (_) => const ErrorScreen(),
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
@@ -69,4 +87,10 @@ class CreateCentralScreenArguments {
   final Service? chosenCentral;
 
   CreateCentralScreenArguments([this.chosenCentral]);
+}
+
+class DetailsGroupScreenArguments {
+  final Group chosenGroup;
+
+  DetailsGroupScreenArguments(this.chosenGroup);
 }

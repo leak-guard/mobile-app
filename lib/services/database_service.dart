@@ -6,6 +6,8 @@ import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/models/flow.dart';
 
+// TODO: To Central add valveType, pulsesPerLiter.
+
 /// A singleton service class that manages SQLite database operations for the LeakGuard application.
 ///
 /// Database Structure:
@@ -53,6 +55,8 @@ class DatabaseService {
   final String _groupsGroupIDColumnName = "groupID";
   final String _groupsNameColumnName = "name";
   final String _groupsPositionColumnName = "position";
+  final String _groupsDescriptionColumnName = "description";
+  final String _groupsImagePathColumnName = "imagePath";
 
   // CentralUnits table
   final String _centralUnitsTableName = "central_units";
@@ -102,7 +106,9 @@ class DatabaseService {
       CREATE TABLE IF NOT EXISTS $_groupsTableName (
         $_groupsGroupIDColumnName INTEGER PRIMARY KEY,
         $_groupsNameColumnName TEXT NOT NULL,
-        $_groupsPositionColumnName INTEGER NOT NULL DEFAULT 0
+        $_groupsPositionColumnName INTEGER NOT NULL DEFAULT 0,
+        $_groupsDescriptionColumnName TEXT,
+        $_groupsImagePathColumnName TEXT
       )
     ''');
 
@@ -166,11 +172,26 @@ class DatabaseService {
     final databasePath = join(databaseDirPath, "leak_guard.db");
     final database = await openDatabase(
       databasePath,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,
     );
     return database;
+  }
+
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        ALTER TABLE $_groupsTableName 
+        ADD COLUMN $_groupsDescriptionColumnName TEXT
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_groupsTableName 
+        ADD COLUMN $_groupsImagePathColumnName TEXT
+      ''');
+    }
   }
 
   // Group CRUD operations
@@ -193,6 +214,8 @@ class DatabaseService {
       {
         _groupsNameColumnName: group.name,
         _groupsPositionColumnName: nextPosition + 1,
+        _groupsDescriptionColumnName: group.description,
+        _groupsImagePathColumnName: group.imagePath,
       },
     );
   }
@@ -201,12 +224,14 @@ class DatabaseService {
     final db = await database;
     final data = await db.query(
       _groupsTableName,
-      orderBy: '$_groupsPositionColumnName ASC', // Sortowanie po position
+      orderBy: '$_groupsPositionColumnName ASC',
     );
     return data
         .map((e) => Group(name: e[_groupsNameColumnName] as String)
           ..groupdID = e[_groupsGroupIDColumnName] as int
-          ..position = e[_groupsPositionColumnName] as int)
+          ..position = e[_groupsPositionColumnName] as int
+          ..description = e[_groupsDescriptionColumnName] as String?
+          ..imagePath = e[_groupsImagePathColumnName] as String?)
         .toList();
   }
 
@@ -219,14 +244,20 @@ class DatabaseService {
     );
     if (data.isEmpty) return null;
     return Group(name: data.first[_groupsNameColumnName] as String)
-      ..groupdID = data.first[_groupsGroupIDColumnName] as int;
+      ..groupdID = data.first[_groupsGroupIDColumnName] as int
+      ..description = data.first[_groupsDescriptionColumnName] as String?
+      ..imagePath = data.first[_groupsImagePathColumnName] as String?;
   }
 
   Future updateGroup(Group group) async {
     final db = await database;
     await db.update(
       _groupsTableName,
-      {_groupsNameColumnName: group.name},
+      {
+        _groupsNameColumnName: group.name,
+        _groupsDescriptionColumnName: group.description,
+        _groupsImagePathColumnName: group.imagePath,
+      },
       where: '$_groupsGroupIDColumnName = ?',
       whereArgs: [group.groupdID],
     );

@@ -1,5 +1,4 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
@@ -15,7 +14,6 @@ class FindCentralScreen extends StatefulWidget {
 }
 
 class _FindCentralScreenState extends State<FindCentralScreen> {
-  final _appData = AppData();
   Discovery? _discovery;
   final List<Service> _services = [];
   bool _isSearching = false;
