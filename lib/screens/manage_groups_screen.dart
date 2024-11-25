@@ -1,13 +1,14 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/add_new_group_button.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
+import 'package:leak_guard/widgets/group_button.dart';
 
 enum GroupManageMode {
   view,
@@ -150,44 +151,19 @@ class _ManageGroupsScreenState extends State<ManageGroupsScreen> {
   Widget _buildViewTile(Group group) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Neumorphic(
-        style: NeumorphicStyle(
-          depth: 5,
-          intensity: 0.8,
-          boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Text(
-                group.name,
-                style: Theme.of(context).textTheme.displayMedium,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildInfoColumn(
-                    CustomIcons.leak_probe,
-                    group.leakProbeNumber().toString(),
-                    24,
-                  ),
-                  _buildInfoColumn(CustomIcons.battery_low,
-                      group.leakProbeLowBatteryNumber().toString(), 18,
-                      iconVerticalMargin: 3),
-                  _buildInfoColumn(CustomIcons.central_unit,
-                      group.centralUnitsNumber().toString(), 24),
-                  _buildInfoColumn(CustomIcons.broken_pipe,
-                      group.centralUnitsLeaksNumber().toString(), 20,
-                      iconVerticalMargin: 2),
-                ],
-              ),
-            ],
-          ),
-        ),
+      child: GroupButton(
+        group: group,
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            Routes.detailsGroup,
+            arguments: DetailsGroupScreenArguments(
+              group,
+            ),
+          ).then((_) {
+            setState(() {});
+          });
+        },
       ),
     );
   }

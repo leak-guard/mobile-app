@@ -15,7 +15,7 @@ import 'package:leak_guard/widgets/horizontal_group_list.dart';
 import 'package:leak_guard/widgets/panel.dart';
 import 'package:leak_guard/widgets/water_block_button.dart';
 import 'package:leak_guard/widgets/water_usage_arc.dart';
-import 'package:leak_guard/widgets/water_usage_graph.dart';
+import 'package:leak_guard/widgets/graph_water_usage.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -242,7 +242,7 @@ class _MainScreenState extends State<MainScreen> {
                   SizedBox(height: 10),
                   Panel(
                     name: "Water usage",
-                    child: WaterUsageChart(
+                    child: GraphWaterUsage(
                       data: data['waterUsageData'],
                       maxHeight: 150,
                     ),

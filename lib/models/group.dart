@@ -14,6 +14,8 @@ class Group {
   int? groupdID;
   String name;
   int position = 0;
+  String? imagePath;
+  String? description;
   BlockStatus status = BlockStatus.noBlocked;
   bool isTimeBlockSetted = false;
   List<int> blockedHours = [];
@@ -103,7 +105,6 @@ class Group {
     final now = DateTime.now();
     final currentHour = DateTime(now.year, now.month, now.day, now.hour);
 
-    // Create initial list with zero usage
     List<WaterUsageData> result = [];
     for (int i = hoursToFetch - 1; i >= 0; i--) {
       final time = currentHour.subtract(Duration(hours: i));
@@ -117,7 +118,6 @@ class Group {
       ));
     }
 
-    // Sum up usage from all central units
     for (var unit in centralUnits) {
       final unitData = await unit.getWaterUsageData(hoursToFetch);
       for (int i = 0; i < hoursToFetch; i++) {
@@ -126,5 +126,10 @@ class Group {
     }
 
     return result;
+  }
+
+  @override
+  String toString() {
+    return 'Group{id: $groupdID, name: $name, position: $position, imagePath: $imagePath, description: $description';
   }
 }
