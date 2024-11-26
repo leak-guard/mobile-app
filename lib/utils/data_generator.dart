@@ -5,6 +5,7 @@ import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/models/flow.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
+import 'package:leak_guard/utils/strings.dart';
 
 /// Service responsible for generating realistic test data for the LeakGuard application.
 ///
@@ -201,8 +202,10 @@ class DataGenerator {
       final probe = LeakProbe(
         name: 'Probe ${i + 1} for unit $centralUnitId',
         centralUnitID: centralUnitId,
+        stmId: [centralUnitId, i, i + centralUnitId],
         description: 'Test probe ${i + 1} description',
         imagePath: null,
+        address: i,
       );
       await _db.addLeakProbe(probe);
     }
@@ -222,10 +225,10 @@ class DataGenerator {
 
       final unit = CentralUnit(
         name: unitName,
-        addressIP: '192.168.1.${100 + i}',
+        addressIP: MyStrings.mockIp,
         addressMAC: _generateMacAddress(),
         password: "admin",
-        isValveNO: false,
+        isValveNO: true,
         impulsesPerLiter: 1000,
         description: 'Test unit ${i + 1} description',
         imagePath: null,

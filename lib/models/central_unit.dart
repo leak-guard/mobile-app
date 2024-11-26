@@ -30,7 +30,7 @@ class CentralUnit {
   final _db = DatabaseService.instance;
 
   int leakProbeLowBatteryNumber() {
-    return leakProbes.where((probe) => probe.lowBattery).length;
+    return leakProbes.where((probe) => probe.batteryLevel <= 20).length;
   }
 
   int leakProbeNumber() {
@@ -291,6 +291,14 @@ class CentralUnit {
 
   @override
   String toString() {
-    return "CentralUnit: $name, $addressIP, $addressMAC";
+    String result = "CentralUnit: $name, $addressIP, $addressMAC\n";
+    String probes = "Probes:\n";
+    for (var probe in leakProbes) {
+      probes += "\t" + probe.toString() + "\n";
+    }
+
+    result += probes;
+
+    return result;
   }
 }

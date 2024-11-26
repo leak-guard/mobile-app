@@ -204,7 +204,7 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
           'Hardware Configuration',
           style: Theme.of(context).textTheme.displayLarge,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Text(
           'IP Address',
           style: Theme.of(context).textTheme.displayMedium,
@@ -238,17 +238,17 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 32),
         Text('MAC Address', style: Theme.of(context).textTheme.displayMedium),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         Center(
           child: Text(widget.central.addressMAC,
               style: Theme.of(context).textTheme.displaySmall),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 32),
         Text('Electrovalve Type',
             style: Theme.of(context).textTheme.displayMedium),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -257,6 +257,8 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
             NeumorphicSwitch(
               value: _isValveNO,
               style: NeumorphicSwitchStyle(
+                trackDepth: 2,
+                thumbDepth: 4,
                 activeTrackColor: MyColors.lightThemeFont,
                 disableDepth: _isValveNO,
               ),
@@ -271,7 +273,7 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
                 style: Theme.of(context).textTheme.displaySmall),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 32),
         Text('Impulses Per Liter',
             style: Theme.of(context).textTheme.displayMedium),
         const SizedBox(height: 8),

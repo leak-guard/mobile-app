@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:leak_guard/utils/strings.dart';
 
 class CustomApi {
   static final CustomApi _instance = CustomApi._internal();
@@ -13,9 +14,163 @@ class CustomApi {
     _client.connectionTimeout = const Duration(seconds: 5);
   }
 
-  Future<(String?, bool)> getCentralMacAddress(String ip) async {
+  // Pomocnicza metoda do wykonywania requestów
+  Future<Map<String, dynamic>?> _makeRequest(
+    String ip,
+    String path, {
+    String method = 'GET',
+    Map<String, dynamic>? body,
+  }) async {
+    int port = ip == MyStrings.mockIp ? 8000 : 80;
+
     try {
-      final request = await _client.get(ip, 80, '/me');
+      late HttpClientRequest request;
+
+      switch (method) {
+        case 'GET':
+          request = await _client.get(ip, port, path);
+          break;
+        case 'POST':
+          request = await _client.post(ip, port, path);
+          break;
+        case 'PUT':
+          request = await _client.put(ip, port, path);
+          break;
+        case 'DELETE':
+          request = await _client.delete(ip, port, path);
+          break;
+        default:
+          throw Exception('Unsupported HTTP method');
+      }
+
+      if (body != null) {
+        request.headers.contentType = ContentType.json;
+        request.write(jsonEncode(body));
+      }
+
+      final response = await request.close();
+      final content = await response.transform(utf8.decoder).join();
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (content.isNotEmpty) {
+          return jsonDecode(content);
+        }
+        return null;
+      }
+      throw HttpException('Request failed with status: ${response.statusCode}');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Config endpoints
+  Future<Map<String, dynamic>?> getConfig(String ip) async {
+    return await _makeRequest(ip, '/config');
+  }
+
+  Future<bool> putConfig(String ip, Map<String, dynamic> config) async {
+    final response =
+        await _makeRequest(ip, '/config', method: 'PUT', body: config);
+    return response != null;
+  }
+
+  // Water usage endpoints
+  Future<Map<String, dynamic>?> getWaterUsage(String ip) async {
+    return await _makeRequest(ip, '/water-usage');
+  }
+
+  Future<Map<String, dynamic>?> getWaterUsageRange(
+    String ip,
+    DateTime fromTimestamp,
+    DateTime toTimestamp,
+  ) async {
+    final path =
+        '/water-usage/${fromTimestamp.millisecondsSinceEpoch}/${toTimestamp.millisecondsSinceEpoch}';
+    return await _makeRequest(ip, path);
+  }
+
+  Future<Map<String, dynamic>?> getWaterUsageToday(String ip) async {
+    return await _makeRequest(ip, '/water-usage/today');
+  }
+
+  // TODO: Probe endpoints
+
+  // Probe pairing endpoints
+  Future<bool> enterPairingMode(String ip) async {
+    final response = await _makeRequest(
+      ip,
+      '/probe/pair/enter',
+      method: 'POST',
+    );
+    return response != null;
+  }
+
+  Future<bool> exitPairingMode(String ip) async {
+    final response = await _makeRequest(
+      ip,
+      '/probe/pair/exit',
+      method: 'POST',
+    );
+    return response != null;
+  }
+
+  // Water block endpoints
+  Future<Map<String, dynamic>?> getWaterBlock(String ip) async {
+    return await _makeRequest(ip, '/water-block');
+  }
+
+  Future<bool> postWaterBlock(String ip, Map<String, dynamic> blockData) async {
+    final response = await _makeRequest(
+      ip,
+      '/water-block',
+      method: 'POST',
+      body: blockData,
+    );
+    return response != null;
+  }
+
+  Future<Map<String, dynamic>?> getWaterBlockSchedule(String ip) async {
+    return await _makeRequest(ip, '/water-block/schedule');
+  }
+
+  Future<bool> postWaterBlockSchedule(
+    String ip,
+    Map<String, dynamic> scheduleData,
+  ) async {
+    final response = await _makeRequest(
+      ip,
+      '/water-block/schedule',
+      method: 'POST',
+      body: scheduleData,
+    );
+    return response != null;
+  }
+
+  // Criteria endpoints
+  Future<Map<String, dynamic>?> getCriteria(String ip) async {
+    return await _makeRequest(ip, '/criteria');
+  }
+
+  Future<bool> postCriteria(String ip, Map<String, dynamic> criteria) async {
+    final response = await _makeRequest(
+      ip,
+      '/criteria',
+      method: 'POST',
+      body: criteria,
+    );
+    return response != null;
+  }
+
+  Future<Map<String, dynamic>?> getCriterion(String ip, String id) async {
+    return await _makeRequest(ip, '/criteria/$id');
+  }
+
+  // MAC Address endpoint (already implemented)
+  Future<(String?, bool)> getCentralMacAddress(String ip) async {
+    int port = ip == MyStrings.mockIp ? 8000 : 80;
+
+    try {
+      final request = await _client.get(ip, port, '/me');
       final response = await request.close();
       final content = await response.transform(utf8.decoder).join();
 
@@ -28,7 +183,4 @@ class CustomApi {
       return (null, false);
     }
   }
-
-  // Add other API methods following same pattern:
-  // Future<(ReturnType?, bool)> methodName(params)...
 }

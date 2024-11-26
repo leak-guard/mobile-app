@@ -28,7 +28,7 @@ class Group {
   int centralUnitsLeaksNumber() => centralUnits.fold(
       0,
       (sum, unit) =>
-          sum + unit.leakProbes.where((probe) => probe.leakDetected).length);
+          sum + unit.leakProbes.where((probe) => probe.blocked).length);
 
   int leakProbeNumber() =>
       centralUnits.fold(0, (sum, unit) => sum + unit.leakProbeNumber());

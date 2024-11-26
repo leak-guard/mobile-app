@@ -80,6 +80,12 @@ class DatabaseService {
   final String _leakProbesLeakProbeIDColumnName = "leakProbeID";
   final String _leakProbesCentralUnitIDColumnName = "centralUnitID";
   final String _leakProbesNameColumnName = "name";
+  final String _leakProbesSTMID1ColumnName = "stmId1";
+  final String _leakProbesSTMID2ColumnName = "stmId2";
+  final String _leakProbesSTMID3ColumnName = "stmId3";
+  final String _leakProbesAddressColumnName = "address";
+  final String _leakProbesBatteryLevelColumnName = "batteryLevel";
+  final String _leakProbesBlockedColumnName = "blocked";
   final String _leakProbesDescriptionColumnName = "description";
   final String _leakProbesImagePathColumnName = "imagePath";
 
@@ -149,8 +155,15 @@ class DatabaseService {
         $_leakProbesLeakProbeIDColumnName INTEGER PRIMARY KEY,
         $_leakProbesCentralUnitIDColumnName INTEGER NOT NULL,
         $_leakProbesNameColumnName TEXT NOT NULL,
+        $_leakProbesSTMID1ColumnName INTEGER NOT NULL,
+        $_leakProbesSTMID2ColumnName INTEGER NOT NULL,
+        $_leakProbesSTMID3ColumnName INTEGER NOT NULL,
+        $_leakProbesAddressColumnName INTEGER NOT NULL,
+        $_leakProbesBatteryLevelColumnName INTEGER NOT NULL DEFAULT 100,
+        $_leakProbesBlockedColumnName INTEGER NOT NULL DEFAULT 0,
         $_leakProbesDescriptionColumnName TEXT,
         $_leakProbesImagePathColumnName TEXT,
+        UNIQUE($_leakProbesSTMID1ColumnName, $_leakProbesSTMID2ColumnName, $_leakProbesSTMID3ColumnName),
         FOREIGN KEY ($_leakProbesCentralUnitIDColumnName) 
           REFERENCES $_centralUnitsTableName ($_centralUnitsCentralUnitIDColumnName) 
           ON DELETE CASCADE
@@ -207,6 +220,55 @@ class DatabaseService {
         ALTER TABLE $_centralUnitsTableName 
         ADD COLUMN $_centralUnitsImpulsesPerLiterColumnName INTEGER NOT NULL DEFAULT 1
       ''');
+    }
+
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE ${_leakProbesTableName}_temp (
+          $_leakProbesLeakProbeIDColumnName INTEGER PRIMARY KEY,
+          $_leakProbesCentralUnitIDColumnName INTEGER NOT NULL,
+          $_leakProbesNameColumnName TEXT NOT NULL,
+          $_leakProbesSTMID1ColumnName INTEGER NOT NULL,
+          $_leakProbesSTMID2ColumnName INTEGER NOT NULL,
+          $_leakProbesSTMID3ColumnName INTEGER NOT NULL,
+          $_leakProbesAddressColumnName INTEGER NOT NULL,
+          $_leakProbesBatteryLevelColumnName INTEGER NOT NULL DEFAULT 100,
+          $_leakProbesBlockedColumnName INTEGER NOT NULL DEFAULT 0,
+          $_leakProbesDescriptionColumnName TEXT,
+          $_leakProbesImagePathColumnName TEXT,
+          UNIQUE($_leakProbesSTMID1ColumnName, $_leakProbesSTMID2ColumnName, $_leakProbesSTMID3ColumnName),
+          FOREIGN KEY ($_leakProbesCentralUnitIDColumnName) 
+            REFERENCES $_centralUnitsTableName ($_centralUnitsCentralUnitIDColumnName) 
+            ON DELETE CASCADE
+        )
+      ''');
+
+      await db.execute('''
+        INSERT INTO ${_leakProbesTableName}_temp (
+          $_leakProbesLeakProbeIDColumnName,
+          $_leakProbesCentralUnitIDColumnName,
+          $_leakProbesNameColumnName,
+          $_leakProbesDescriptionColumnName,
+          $_leakProbesImagePathColumnName,
+          $_leakProbesSTMID1ColumnName,
+          $_leakProbesSTMID2ColumnName,
+          $_leakProbesSTMID3ColumnName,
+          $_leakProbesAddressColumnName,
+        ) 
+        SELECT 
+          $_leakProbesLeakProbeIDColumnName,
+          $_leakProbesCentralUnitIDColumnName,
+          $_leakProbesNameColumnName,
+          $_leakProbesDescriptionColumnName,
+          $_leakProbesImagePathColumnName,
+          0, 0, 0, 0
+        FROM $_leakProbesTableName
+      ''');
+
+      await db.execute('DROP TABLE $_leakProbesTableName');
+
+      await db.execute(
+          'ALTER TABLE ${_leakProbesTableName}_temp RENAME TO $_leakProbesTableName');
     }
   }
 
@@ -534,10 +596,34 @@ class DatabaseService {
       {
         _leakProbesCentralUnitIDColumnName: probe.centralUnitID,
         _leakProbesNameColumnName: probe.name,
+        _leakProbesSTMID1ColumnName: probe.stmId[0],
+        _leakProbesSTMID2ColumnName: probe.stmId[1],
+        _leakProbesSTMID3ColumnName: probe.stmId[2],
+        _leakProbesAddressColumnName: probe.address,
+        _leakProbesBatteryLevelColumnName: probe.batteryLevel,
+        _leakProbesBlockedColumnName: probe.blocked ? 1 : 0,
         _leakProbesDescriptionColumnName: probe.description,
         _leakProbesImagePathColumnName: probe.imagePath,
       },
     );
+  }
+
+  LeakProbe _mapToLeakProbe(Map<String, dynamic> data) {
+    return LeakProbe(
+      name: data[_leakProbesNameColumnName] as String,
+      centralUnitID: data[_leakProbesCentralUnitIDColumnName] as int,
+      stmId: [
+        data[_leakProbesSTMID1ColumnName] as int,
+        data[_leakProbesSTMID2ColumnName] as int,
+        data[_leakProbesSTMID3ColumnName] as int,
+      ],
+      address: data[_leakProbesAddressColumnName] as int,
+      description: data[_leakProbesDescriptionColumnName] as String?,
+      imagePath: data[_leakProbesImagePathColumnName] as String?,
+    )
+      ..leakProbeID = data[_leakProbesLeakProbeIDColumnName] as int
+      ..batteryLevel = data[_leakProbesBatteryLevelColumnName] as int
+      ..blocked = (data[_leakProbesBlockedColumnName] as int) == 1;
   }
 
   Future<List<LeakProbe>> getCentralUnitLeakProbes(int centralUnitID) async {
@@ -547,14 +633,7 @@ class DatabaseService {
       where: '$_leakProbesCentralUnitIDColumnName = ?',
       whereArgs: [centralUnitID],
     );
-    return data
-        .map((e) => LeakProbe(
-              name: e[_leakProbesNameColumnName] as String,
-              centralUnitID: e[_leakProbesCentralUnitIDColumnName] as int,
-              description: e[_leakProbesDescriptionColumnName] as String?,
-              imagePath: e[_leakProbesImagePathColumnName] as String?,
-            )..leakProbeID = e[_leakProbesLeakProbeIDColumnName] as int)
-        .toList();
+    return data.map(_mapToLeakProbe).toList();
   }
 
   Future<List<LeakProbe>> getAllLeakProbes() async {
@@ -564,15 +643,7 @@ class DatabaseService {
       orderBy:
           '$_leakProbesCentralUnitIDColumnName ASC, $_leakProbesNameColumnName ASC',
     );
-
-    return data
-        .map((e) => LeakProbe(
-              name: e[_leakProbesNameColumnName] as String,
-              centralUnitID: e[_leakProbesCentralUnitIDColumnName] as int,
-              description: e[_leakProbesDescriptionColumnName] as String?,
-              imagePath: e[_leakProbesImagePathColumnName] as String?,
-            )..leakProbeID = e[_leakProbesLeakProbeIDColumnName] as int)
-        .toList();
+    return data.map(_mapToLeakProbe).toList();
   }
 
   Future<LeakProbe?> getLeakProbe(int leakProbeID) async {
@@ -583,12 +654,7 @@ class DatabaseService {
       whereArgs: [leakProbeID],
     );
     if (data.isEmpty) return null;
-    return LeakProbe(
-      name: data.first[_leakProbesNameColumnName] as String,
-      centralUnitID: data.first[_leakProbesCentralUnitIDColumnName] as int,
-      description: data.first[_leakProbesDescriptionColumnName] as String?,
-      imagePath: data.first[_leakProbesImagePathColumnName] as String?,
-    )..leakProbeID = data.first[_leakProbesLeakProbeIDColumnName] as int;
+    return _mapToLeakProbe(data.first);
   }
 
   Future updateLeakProbe(LeakProbe probe) async {
@@ -597,6 +663,9 @@ class DatabaseService {
       _leakProbesTableName,
       {
         _leakProbesNameColumnName: probe.name,
+        _leakProbesAddressColumnName: probe.address,
+        _leakProbesBatteryLevelColumnName: probe.batteryLevel,
+        _leakProbesBlockedColumnName: probe.blocked ? 1 : 0,
         _leakProbesDescriptionColumnName: probe.description,
         _leakProbesImagePathColumnName: probe.imagePath,
       },
@@ -609,6 +678,20 @@ class DatabaseService {
     final db = await database;
     await db.delete(
       _leakProbesTableName,
+      where: '$_leakProbesLeakProbeIDColumnName = ?',
+      whereArgs: [leakProbeID],
+    );
+  }
+
+  Future updateLeakProbeStatus(
+      int leakProbeID, int batteryLevel, bool blocked) async {
+    final db = await database;
+    await db.update(
+      _leakProbesTableName,
+      {
+        _leakProbesBatteryLevelColumnName: batteryLevel,
+        _leakProbesBlockedColumnName: blocked ? 1 : 0,
+      },
       where: '$_leakProbesLeakProbeIDColumnName = ?',
       whereArgs: [leakProbeID],
     );
