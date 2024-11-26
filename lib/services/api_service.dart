@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:leak_guard/utils/strings.dart';
 
+// TODO: Make all endpoints return type, message if the request was successful or not
+
 class CustomApi {
   static final CustomApi _instance = CustomApi._internal();
   final HttpClient _client;
@@ -14,7 +16,6 @@ class CustomApi {
     _client.connectionTimeout = const Duration(seconds: 5);
   }
 
-  // Pomocnicza metoda do wykonywania requestów
   Future<Map<String, dynamic>?> _makeRequest(
     String ip,
     String path, {
@@ -64,6 +65,7 @@ class CustomApi {
   }
 
   // Config endpoints
+  //TODO: Implement all the config endpoints
   Future<Map<String, dynamic>?> getConfig(String ip) async {
     return await _makeRequest(ip, '/config');
   }
@@ -75,10 +77,12 @@ class CustomApi {
   }
 
   // Water usage endpoints
+  //TODO: Make it return double
   Future<Map<String, dynamic>?> getWaterUsage(String ip) async {
     return await _makeRequest(ip, '/water-usage');
   }
 
+  //TODO: Make it return List<Flow>
   Future<Map<String, dynamic>?> getWaterUsageRange(
     String ip,
     DateTime fromTimestamp,
@@ -89,11 +93,12 @@ class CustomApi {
     return await _makeRequest(ip, path);
   }
 
+  //TODO: Make it return double
   Future<Map<String, dynamic>?> getWaterUsageToday(String ip) async {
     return await _makeRequest(ip, '/water-usage/today');
   }
 
-  // TODO: Probe endpoints
+  // TODO: Probe endpoints, GET, PUT and DELETE
 
   // Probe pairing endpoints
   Future<bool> enterPairingMode(String ip) async {
@@ -114,7 +119,7 @@ class CustomApi {
     return response != null;
   }
 
-  // Water block endpoints
+  // TODO: Make it return bool
   Future<Map<String, dynamic>?> getWaterBlock(String ip) async {
     return await _makeRequest(ip, '/water-block');
   }
@@ -129,6 +134,7 @@ class CustomApi {
     return response != null;
   }
 
+  // TODO: Make it return List<List<int>>
   Future<Map<String, dynamic>?> getWaterBlockSchedule(String ip) async {
     return await _makeRequest(ip, '/water-block/schedule');
   }
@@ -146,7 +152,7 @@ class CustomApi {
     return response != null;
   }
 
-  // Criteria endpoints
+  // TODO: wait for documentation
   Future<Map<String, dynamic>?> getCriteria(String ip) async {
     return await _makeRequest(ip, '/criteria');
   }
@@ -161,6 +167,7 @@ class CustomApi {
     return response != null;
   }
 
+  //TODO: Wait for documentation
   Future<Map<String, dynamic>?> getCriterion(String ip, String id) async {
     return await _makeRequest(ip, '/criteria/$id');
   }
