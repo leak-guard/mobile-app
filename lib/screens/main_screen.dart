@@ -209,6 +209,7 @@ class _MainScreenState extends State<MainScreen> {
             return BlurredTopEdge(
               height: 20,
               child: ListView(
+                cacheExtent: 1000,
                 children: [
                   const SizedBox(height: 20),
                   Row(

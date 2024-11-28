@@ -1,4 +1,4 @@
-package com.example.leak_guard
+package com.leakguard.app
 
 import io.flutter.embedding.android.FlutterActivity
 
