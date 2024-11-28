@@ -189,7 +189,7 @@ class DatabaseService {
     final databasePath = join(databaseDirPath, "leak_guard.db");
     final database = await openDatabase(
       databasePath,
-      version: 3,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,

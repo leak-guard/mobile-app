@@ -257,9 +257,9 @@ class DataGenerator {
       await Future.delayed(const Duration(milliseconds: 100));
 
       final groupNames = [
-        'KotłowniaKotłowniaKotłowniaKotłowniaKotłowniaKotłownia',
-        'Kotłownia',
-        'Toaleta',
+        'Group 1',
+        'Group 2',
+        'Group 3',
         // 'Duży salon',
         // 'Mały salon',
         // 'Kuchnia',
@@ -287,7 +287,7 @@ class DataGenerator {
         );
       }
 
-      onProgress('Data generation completed!', 1.0);
+      onProgress(MyStrings.dataGenerationCompleted, 1.0);
       await Future.delayed(const Duration(milliseconds: 100));
       await _appData.loadData();
     } catch (e, stackTrace) {

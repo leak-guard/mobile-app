@@ -5,4 +5,5 @@ class MyStrings {
   static const String manageUnits = "Manage units";
   static const String mockIp = "localhost";
   static const String myIp = '192.168.187.225';
+  static const String dataGenerationCompleted = 'Data generation completed!';
 }

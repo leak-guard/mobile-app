@@ -1,5 +1,6 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/utils/data_generator.dart';
+import 'package:leak_guard/utils/strings.dart';
 
 /// Provides UI components for data generation in the LeakGuard application.
 ///
@@ -78,7 +79,7 @@ class GenerateTestDataButton extends StatelessWidget {
       }
     } finally {
       if (context.mounted) {
-        Navigator.pop(context);
+        // Navigator.of(context).pop();
         onComplete?.call();
       }
     }
@@ -113,31 +114,47 @@ class _ProgressDialogState extends State<_ProgressDialog> {
     }
   }
 
+  Widget _closeButton() {
+    if (_status == MyStrings.dataGenerationCompleted) {
+      return NeumorphicButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        child: const Text('Close'),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false, // Prevent closing with back button
-      child: AlertDialog(
-        title: const Text('Generating test data'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            LinearProgressIndicator(value: _progress),
-            const SizedBox(height: 16),
-            Text(
-              _status,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${(_progress * 100).toStringAsFixed(1)}%',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ],
-        ),
+    return AlertDialog(
+      title: const Text('Generating test data'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          LinearProgressIndicator(value: _progress),
+          const SizedBox(height: 16),
+          Text(
+            _status,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${(_progress * 100).toStringAsFixed(1)}%',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              _closeButton(),
+            ],
+          ),
+        ],
       ),
     );
   }
