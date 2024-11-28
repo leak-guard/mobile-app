@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'dart:math' as math;
 
@@ -7,8 +9,8 @@ class ArcPathProvider extends NeumorphicPathProvider {
   final double thickness;
 
   ArcPathProvider({
-    this.startAngle = 130,
-    this.sweepAngle = 280,
+    this.startAngle = 3 * pi / 4,
+    this.sweepAngle = 3 * pi / 2,
     this.thickness = 30,
   });
 
@@ -20,46 +22,41 @@ class ArcPathProvider extends NeumorphicPathProvider {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = math.min(size.width / 2, size.height / 2) - thickness;
 
-    final startAngleRad = startAngle * math.pi / 180;
-    final sweepAngleRad = sweepAngle * math.pi / 180;
-
     final path = Path();
 
     path.addArc(
       Rect.fromCircle(center: center, radius: radius + thickness),
-      startAngleRad,
-      sweepAngleRad,
+      startAngle,
+      sweepAngle,
     );
 
     Offset centerEnd = Offset(
         center.dx +
-            (radius + thickness / 2.0) *
-                math.cos(startAngleRad + sweepAngleRad),
+            (radius + thickness / 2.0) * math.cos(startAngle + sweepAngle),
         center.dy +
-            (radius + thickness / 2.0) *
-                math.sin(startAngleRad + sweepAngleRad));
+            (radius + thickness / 2.0) * math.sin(startAngle + sweepAngle));
 
     path.arcTo(
       Rect.fromCircle(center: centerEnd, radius: thickness / 2.0),
-      startAngleRad + sweepAngleRad,
+      startAngle + sweepAngle,
       math.pi,
       false,
     );
 
     path.arcTo(
       Rect.fromCircle(center: center, radius: radius),
-      startAngleRad + sweepAngleRad,
-      -sweepAngleRad,
+      startAngle + sweepAngle,
+      -sweepAngle,
       false,
     );
 
     Offset centerStart = Offset(
-        center.dx + (radius + thickness / 2.0) * math.cos(startAngleRad),
-        center.dy + (radius + thickness / 2.0) * math.sin(startAngleRad));
+        center.dx + (radius + thickness / 2.0) * math.cos(startAngle),
+        center.dy + (radius + thickness / 2.0) * math.sin(startAngle));
 
     path.arcTo(
       Rect.fromCircle(center: centerStart, radius: thickness / 2.0),
-      startAngleRad,
+      startAngle,
       -math.pi,
       false,
     );

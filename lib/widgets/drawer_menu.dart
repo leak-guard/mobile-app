@@ -54,19 +54,6 @@ class DrawerMenu extends StatelessWidget {
               ).then((_) => onBack());
             },
           ),
-          NeumorphicListTile(
-            leading:
-                Icon(Icons.architecture_sharp, color: MyColors.lightThemeFont),
-            title: Text('Arc test',
-                style: Theme.of(context).textTheme.displaySmall),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(
-                context,
-                Routes.arcTest,
-              ).then((_) => onBack());
-            },
-          ),
         ],
       ),
     );

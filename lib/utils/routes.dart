@@ -1,7 +1,6 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
-import 'package:leak_guard/screens/arc_test_screen.dart';
 import 'package:leak_guard/screens/create_central_screen.dart';
 import 'package:leak_guard/screens/details_central_screen.dart';
 import 'package:leak_guard/screens/details_group_screen.dart';
@@ -23,17 +22,8 @@ class Routes {
   static const String detailsCentral = '/detailsCentral';
   static const String findCentral = '/findCentral';
 
-  //TODO: to delete
-  static const String arcTest = '/arcTest';
-
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-      //TODO: to delete
-      case arcTest:
-        return MaterialPageRoute(
-          builder: (_) => const ArcTestScreen(),
-        );
-
       case main:
         return MaterialPageRoute(
           builder: (_) => const MainScreen(),

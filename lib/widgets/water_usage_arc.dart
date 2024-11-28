@@ -1,6 +1,7 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/utils/arc_path_provider.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/widgets/arc_progress_widget.dart';
 
 class WaterUsageArc extends StatefulWidget {
   final double currentUsage;
@@ -38,12 +39,12 @@ class _WaterUsageArcState extends State<WaterUsageArc>
 
   double _sweepAngle() {
     if (widget.maxUsage == 0) {
-      return 280;
+      return 1;
     }
 
     return widget.currentUsage / widget.maxUsage < 1
-        ? 280 * widget.currentUsage / widget.maxUsage
-        : 280;
+        ? widget.currentUsage / widget.maxUsage
+        : 1;
   }
 
   @override
@@ -64,20 +65,10 @@ class _WaterUsageArcState extends State<WaterUsageArc>
               ),
             ),
             Positioned.fill(
-              child: Neumorphic(
-                style: NeumorphicStyle(
-                  depth: 0,
-                  intensity: 0.8,
-                  surfaceIntensity: 0.5,
-                  color: _arcColor(),
-                  shape: NeumorphicShape.convex,
-                  boxShape: NeumorphicBoxShape.path(
-                    ArcPathProvider(
-                      sweepAngle: _sweepAngle(),
-                      thickness: _thickness,
-                    ),
-                  ),
-                ),
+              child: ArcProgressWidget(
+                size: 154,
+                progress: _sweepAngle(),
+                color: _arcColor(),
               ),
             ),
             Center(
