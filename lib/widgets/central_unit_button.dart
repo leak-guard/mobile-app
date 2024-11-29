@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/central_unit.dart';
@@ -53,11 +55,30 @@ class _CentralUnitButtonState extends State<CentralUnitButton> {
                 children: [
                   Expanded(
                     child: Container(
-                      height: 123.2,
+                      height: 130,
                       decoration: BoxDecoration(
-                        color: _color,
+                        color: MyColors.lightThemeFont,
                         borderRadius: BorderRadius.circular(8),
                       ),
+                      child: widget.central.imagePath != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                File(widget.central.getPhoto()!),
+                                fit: BoxFit.cover,
+                                color: widget.central.chosen
+                                    ? Colors.white.withOpacity(0.5)
+                                    : null,
+                                colorBlendMode: BlendMode.overlay,
+                              ),
+                            )
+                          : Center(
+                              child: Icon(
+                                CustomIcons.central_unit,
+                                color: Colors.white,
+                                size: 50,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(width: 8),
