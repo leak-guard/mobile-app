@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:leak_guard/services/app_data.dart';
@@ -14,6 +15,14 @@ Future<void> main() async {
   await configureNetworkTools(appDocDirectory.path, enableDebugging: true);
 
   await Firebase.initializeApp();
+  final notificationSettings =
+      await FirebaseMessaging.instance.requestPermission(provisional: true);
+  final fncToken = await FirebaseMessaging.instance.getToken();
+  if (fncToken != null) {
+    print("FNC token: ${fncToken}");
+  } else {
+    print('There is no FNC token');
+  }
 
   runApp(const MyApp());
 }
