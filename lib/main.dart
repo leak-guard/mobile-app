@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:leak_guard/services/app_data.dart';
@@ -11,6 +12,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDocDirectory = await getApplicationDocumentsDirectory();
   await configureNetworkTools(appDocDirectory.path, enableDebugging: true);
+
+  await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
@@ -50,7 +54,7 @@ class MyApp extends StatelessWidget {
                 fontWeight: FontWeight.w600)),
         depth: 10,
       ),
-      darkTheme: NeumorphicThemeData(
+      darkTheme: const NeumorphicThemeData(
         baseColor: Color(0xFF3E3E3E),
         lightSource: LightSource.topLeft,
         depth: 10,
@@ -80,7 +84,7 @@ class MyApp extends StatelessWidget {
             );
           }
 
-          return Navigator(
+          return const Navigator(
             initialRoute: Routes.main,
             onGenerateRoute: Routes.onGenerateRoute,
           );
