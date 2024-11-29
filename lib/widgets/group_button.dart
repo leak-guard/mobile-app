@@ -54,7 +54,7 @@ class _GroupButtonState extends State<GroupButton> {
                 children: [
                   Expanded(
                     child: Container(
-                      height: 150,
+                      height: 123.2,
                       decoration: BoxDecoration(
                         color: color,
                         borderRadius: BorderRadius.circular(8),

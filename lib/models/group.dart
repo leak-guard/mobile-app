@@ -1,4 +1,5 @@
 import 'package:leak_guard/models/central_unit.dart';
+import 'package:leak_guard/models/photographable.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
 
 class BlockStatus {
@@ -10,7 +11,7 @@ class BlockStatus {
   const BlockStatus._(this.value);
 }
 
-class Group {
+class Group implements Photographable {
   int? groupdID;
   String name;
   int position = 0;
@@ -131,5 +132,13 @@ class Group {
   @override
   String toString() {
     return 'Group{id: $groupdID, name: $name, position: $position, imagePath: $imagePath, description: $description';
+  }
+
+  @override
+  String? getPhoto() => imagePath;
+
+  @override
+  void setPhoto(String? path) {
+    imagePath = path;
   }
 }

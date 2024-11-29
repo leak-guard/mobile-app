@@ -1,9 +1,10 @@
 import 'package:leak_guard/models/flow.dart';
 import 'package:leak_guard/models/leak_probe.dart';
+import 'package:leak_guard/models/photographable.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 
-class CentralUnit {
+class CentralUnit implements Photographable {
   int? centralUnitID;
   String name;
   String addressIP;
@@ -300,5 +301,13 @@ class CentralUnit {
     result += probes;
 
     return result;
+  }
+
+  @override
+  String? getPhoto() => imagePath;
+
+  @override
+  void setPhoto(String? path) {
+    imagePath = path;
   }
 }

@@ -53,7 +53,7 @@ class _CentralUnitButtonState extends State<CentralUnitButton> {
                 children: [
                   Expanded(
                     child: Container(
-                      height: 150,
+                      height: 123.2,
                       decoration: BoxDecoration(
                         color: _color,
                         borderRadius: BorderRadius.circular(8),

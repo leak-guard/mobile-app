@@ -161,6 +161,7 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     Group currentGroup = _appData.groups[groupIndex];
+    print('Current group: ${currentGroup.imagePath}');
 
     return GestureDetector(
       onHorizontalDragEnd: _handleSwipe,
@@ -251,26 +252,103 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   Panel(
                     name: "Block time",
-                    child: BlockTimeClock(
-                      group: currentGroup,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                      child: BlockTimeClock(
+                        group: currentGroup,
+                      ),
                     ),
                     onTap: () {},
                   ),
                   Panel(
                     name: "Leak probes",
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          child: Column(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 70,
+                                  child: Center(
+                                    child: NeumorphicIcon(
+                                      CustomIcons.leak_probe,
+                                      size: 80,
+                                      style: NeumorphicStyle(
+                                        color: MyColors.lightThemeFont,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  currentGroup.leakProbeNumber().toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(
+                                        color: MyColors.lightThemeFont,
+                                        fontSize: 50,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            children: [
+                              SizedBox(
+                                height: 80,
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(13, 0, 0, 0),
+                                  child: Center(
+                                    child: NeumorphicIcon(
+                                      CustomIcons.battery_low,
+                                      size: 50,
+                                      style: NeumorphicStyle(
+                                        color: MyColors.lightThemeFont,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                currentGroup
+                                    .leakProbeLowBatteryNumber()
+                                    .toString(),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge!
+                                    .copyWith(
+                                      color: MyColors.lightThemeFont,
+                                      fontSize: 50,
+                                    ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    onTap: () {},
+                  ),
+                  Panel(
+                    name: "Central units",
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Column(
                             children: [
                               SizedBox(
                                 height: 70,
                                 child: Center(
                                   child: NeumorphicIcon(
-                                    CustomIcons.leak_probe,
-                                    size: 80,
+                                    CustomIcons.central_unit,
+                                    size: 70,
                                     style: NeumorphicStyle(
                                       color: MyColors.lightThemeFont,
                                     ),
@@ -279,7 +357,7 @@ class _MainScreenState extends State<MainScreen> {
                               ),
                               SizedBox(height: 10),
                               Text(
-                                currentGroup.leakProbeNumber().toString(),
+                                currentGroup.centralUnitsNumber().toString(),
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge!
@@ -290,16 +368,13 @@ class _MainScreenState extends State<MainScreen> {
                               ),
                             ],
                           ),
-                        ),
-                        Column(
-                          children: [
-                            SizedBox(
-                              height: 80,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(13, 0, 0, 0),
+                          Column(
+                            children: [
+                              SizedBox(
+                                height: 80,
                                 child: Center(
                                   child: NeumorphicIcon(
-                                    CustomIcons.battery_low,
+                                    CustomIcons.broken_pipe,
                                     size: 50,
                                     style: NeumorphicStyle(
                                       color: MyColors.lightThemeFont,
@@ -307,84 +382,22 @@ class _MainScreenState extends State<MainScreen> {
                                   ),
                                 ),
                               ),
-                            ),
-                            Text(
-                              currentGroup
-                                  .leakProbeLowBatteryNumber()
-                                  .toString(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge!
-                                  .copyWith(
-                                    color: MyColors.lightThemeFont,
-                                    fontSize: 50,
-                                  ),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    onTap: () {},
-                  ),
-                  Panel(
-                    name: "Central units",
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            SizedBox(
-                              height: 70,
-                              child: Center(
-                                child: NeumorphicIcon(
-                                  CustomIcons.central_unit,
-                                  size: 70,
-                                  style: NeumorphicStyle(
-                                    color: MyColors.lightThemeFont,
-                                  ),
-                                ),
+                              Text(
+                                currentGroup
+                                    .centralUnitsLeaksNumber()
+                                    .toString(),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge!
+                                    .copyWith(
+                                      color: MyColors.lightThemeFont,
+                                      fontSize: 50,
+                                    ),
                               ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              currentGroup.centralUnitsNumber().toString(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge!
-                                  .copyWith(
-                                    color: MyColors.lightThemeFont,
-                                    fontSize: 50,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            SizedBox(
-                              height: 80,
-                              child: Center(
-                                child: NeumorphicIcon(
-                                  CustomIcons.broken_pipe,
-                                  size: 50,
-                                  style: NeumorphicStyle(
-                                    color: MyColors.lightThemeFont,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Text(
-                              currentGroup.centralUnitsLeaksNumber().toString(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge!
-                                  .copyWith(
-                                    color: MyColors.lightThemeFont,
-                                    fontSize: 50,
-                                  ),
-                            ),
-                          ],
-                        )
-                      ],
+                            ],
+                          )
+                        ],
+                      ),
                     ),
                     onTap: () {},
                   ),

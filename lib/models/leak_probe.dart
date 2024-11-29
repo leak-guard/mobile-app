@@ -1,4 +1,6 @@
-class LeakProbe {
+import 'package:leak_guard/models/photographable.dart';
+
+class LeakProbe implements Photographable {
   int? leakProbeID;
   int? centralUnitID;
   String name;
@@ -25,5 +27,13 @@ class LeakProbe {
   @override
   String toString() {
     return 'LeakProbe($name, $centralUnitID, $stmId, $address, $batteryLevel, $blocked)';
+  }
+
+  @override
+  String? getPhoto() => imagePath;
+
+  @override
+  void setPhoto(String? path) {
+    imagePath = path;
   }
 }

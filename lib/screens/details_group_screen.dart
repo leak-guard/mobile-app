@@ -8,6 +8,7 @@ import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/widgets/app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_edge.dart';
 import 'package:leak_guard/widgets/central_unit_button.dart';
+import 'package:leak_guard/widgets/photo_widget.dart';
 
 class DetailsGroupScreen extends StatefulWidget {
   const DetailsGroupScreen({super.key, required this.group});
@@ -314,6 +315,17 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                 controller: _descriptionController,
                 hintText: 'Enter description...',
                 maxLines: 3,
+              ),
+              const SizedBox(height: 24),
+              Text('Photography',
+                  style: Theme.of(context).textTheme.displayMedium),
+              const SizedBox(height: 12),
+              PhotoWidget(
+                item: widget.group,
+                size: MediaQuery.of(context).size.width - 32,
+                onPhotoChanged: () {
+                  setState(() {});
+                },
               ),
               const SizedBox(height: 24),
               Text('Central units',

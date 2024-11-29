@@ -56,7 +56,18 @@ class _GraphWaterUsageState extends State<GraphWaterUsage> {
         final barWidth = (constraints.maxWidth - 32) / widget.data.length - 8;
 
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              "Max usage: ${(maxUsage * 100).roundToDouble() / 100}l",
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                color: MyColors.lightThemeFont,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 8),
             SizedBox(
               height: widget.maxHeight + 40,
               child: Row(
