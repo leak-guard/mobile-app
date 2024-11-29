@@ -161,7 +161,6 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     Group currentGroup = _appData.groups[groupIndex];
-    print('Current group: ${currentGroup.imagePath}');
 
     return GestureDetector(
       onHorizontalDragEnd: _handleSwipe,

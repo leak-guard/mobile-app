@@ -112,16 +112,16 @@ class _GroupButtonState extends State<GroupButton> {
                                   .displayMedium!
                                   .copyWith(color: color),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 15),
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 2, 0),
+                              padding: const EdgeInsets.fromLTRB(0, 1, 0, 0),
                               child: Icon(
                                 CustomIcons.battery_low,
                                 color: color,
-                                size: 18,
+                                size: 20,
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 24),
                             Text(
                               widget.group
                                   .leakProbeLowBatteryNumber()
@@ -151,18 +151,18 @@ class _GroupButtonState extends State<GroupButton> {
                                   .displayMedium!
                                   .copyWith(color: color),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 16),
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(4, 3, 2, 0),
+                              padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
                               child: Icon(
-                                Icons.lock_outline,
+                                CustomIcons.broken_pipe,
                                 color: color,
-                                size: 35,
+                                size: 20,
                               ),
                             ),
-                            const SizedBox(width: 3),
+                            const SizedBox(width: 18),
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                              padding: const EdgeInsets.fromLTRB(6, 0, 0, 0),
                               child: Text(
                                 widget.group
                                     .centralUnitsLeaksNumber()
