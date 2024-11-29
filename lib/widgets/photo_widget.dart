@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:leak_guard/models/photographable.dart';
 import 'package:leak_guard/utils/colors.dart';
@@ -17,6 +18,31 @@ class PhotoWidget extends StatelessWidget {
     this.size = 120,
     required this.onPhotoChanged,
   }) : super(key: key);
+
+  Future<String?> _cropImage(String imagePath) async {
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: imagePath,
+      aspectRatio: CropAspectRatio(ratioX: 5, ratioY: 4),
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Image',
+          toolbarColor: Colors.black,
+          toolbarWidgetColor: Colors.white,
+          backgroundColor: Colors.black,
+          activeControlsWidgetColor: Colors.blue,
+          initAspectRatio: CropAspectRatioPreset.ratio5x4,
+          lockAspectRatio: true,
+        ),
+        IOSUiSettings(
+          title: 'Crop Image',
+          aspectRatioLockEnabled: true,
+          resetAspectRatioEnabled: false,
+        ),
+      ],
+    );
+
+    return croppedFile?.path;
+  }
 
   Future<void> _checkAndRequestPermissions(ImageSource source) async {
     if (source == ImageSource.camera) {
@@ -46,7 +72,7 @@ class PhotoWidget extends StatelessWidget {
     }
   }
 
-  Future<void> _pickImage(BuildContext context) async {
+  Future<void> _pickAndCropImage(BuildContext context) async {
     final ImagePicker picker = ImagePicker();
 
     final XFile? image = await showDialog<XFile?>(
@@ -124,8 +150,12 @@ class PhotoWidget extends StatelessWidget {
     );
 
     if (image != null) {
-      item.setPhoto(image.path);
-      onPhotoChanged();
+      // Przytnij zdjęcie
+      final croppedPath = await _cropImage(image.path);
+      if (croppedPath != null) {
+        item.setPhoto(croppedPath);
+        onPhotoChanged();
+      }
     }
   }
 
@@ -190,7 +220,7 @@ class PhotoWidget extends StatelessWidget {
         children: [
           NeumorphicButton(
             padding: const EdgeInsets.all(8),
-            onPressed: () => _pickImage(context),
+            onPressed: () => _pickAndCropImage(context),
             style: NeumorphicStyle(
               depth: 3,
               boxShape: NeumorphicBoxShape.roundRect(
@@ -203,7 +233,7 @@ class PhotoWidget extends StatelessWidget {
           ),
           SizedBox(width: 8),
           Text(
-            'Take a photo!',
+            'Add a photo!',
             style: Theme.of(context).textTheme.displaySmall,
           ),
         ],
@@ -251,7 +281,7 @@ class PhotoWidget extends StatelessWidget {
                   SizedBox(width: 8),
                   NeumorphicButton(
                     padding: const EdgeInsets.all(8),
-                    onPressed: () => _pickImage(context),
+                    onPressed: () => _pickAndCropImage(context),
                     style: NeumorphicStyle(
                       depth: 3,
                       boxShape: NeumorphicBoxShape.roundRect(
