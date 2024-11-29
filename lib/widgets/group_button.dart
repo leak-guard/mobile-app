@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/group.dart';
@@ -59,6 +61,36 @@ class _GroupButtonState extends State<GroupButton> {
                         color: color,
                         borderRadius: BorderRadius.circular(8),
                       ),
+                      child: widget.group.imagePath != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                File(widget.group.getPhoto()!),
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    CustomIcons.central_unit,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  Icon(
+                                    CustomIcons.central_unit,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ),
+                                  Icon(
+                                    CustomIcons.central_unit,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -119,18 +151,18 @@ class _GroupButtonState extends State<GroupButton> {
                                   .displayMedium!
                                   .copyWith(color: color),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 8),
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(1, 6, 0, 0),
+                              padding: const EdgeInsets.fromLTRB(4, 3, 2, 0),
                               child: Icon(
-                                CustomIcons.broken_pipe,
+                                Icons.lock_outline,
                                 color: color,
-                                size: 18,
+                                size: 35,
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 3),
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(6, 0, 0, 0),
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: Text(
                                 widget.group
                                     .centralUnitsLeaksNumber()

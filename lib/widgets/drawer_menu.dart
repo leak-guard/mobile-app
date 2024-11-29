@@ -29,8 +29,22 @@ class DrawerMenu extends StatelessWidget {
             ),
           ),
           NeumorphicListTile(
-            leading: Icon(Icons.room_preferences_rounded,
-                color: MyColors.lightThemeFont),
+            leading: Row(
+              children: [
+                Icon(
+                  CustomIcons.central_unit,
+                  color: MyColors.lightThemeFont,
+                  size: 8,
+                ),
+                Icon(
+                  CustomIcons.central_unit,
+                  color: MyColors.lightThemeFont,
+                  size: 14,
+                ),
+                Icon(CustomIcons.central_unit,
+                    color: MyColors.lightThemeFont, size: 8),
+              ],
+            ),
             title: Text('Manage groups',
                 style: Theme.of(context).textTheme.displaySmall),
             onTap: () {

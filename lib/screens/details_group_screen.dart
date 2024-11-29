@@ -26,6 +26,9 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
   final _appData = AppData();
   bool _isValid = true;
 
+  late String? _initialImagePath;
+  late String _initialDescription;
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +38,85 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
     for (var central in _appData.centralUnits) {
       central.chosen = widget.group.centralUnits.contains(central);
     }
+
+    _initialImagePath = widget.group.imagePath;
+    _initialDescription = widget.group.description ?? '';
+  }
+
+  bool _hasUnsavedChanges() {
+    bool imagePathDif = widget.group.imagePath != _initialImagePath;
+    bool nameDif = widget.group.name != _nameController.text.trim();
+    bool descriptionDif =
+        _initialDescription != _descriptionController.text.trim();
+    bool centralUnitsDif =
+        widget.group.centralUnits.length != chosenCentrals.length;
+    bool centralUnitsContentDif =
+        widget.group.centralUnits.any((c) => !chosenCentrals.contains(c));
+
+    return imagePathDif ||
+        nameDif ||
+        descriptionDif ||
+        centralUnitsDif ||
+        centralUnitsContentDif;
+  }
+
+  Future<bool> _onWillPop() async {
+    if (!_hasUnsavedChanges()) {
+      return true;
+    }
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: MyColors.background,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        title: Text(
+          'Unsaved Changes',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        content: Text(
+          'You have unsaved changes. Do you want to save them before leaving?',
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
+        actions: [
+          NeumorphicButton(
+            style: NeumorphicStyle(
+              depth: 2,
+              intensity: 0.8,
+              boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              widget.group.imagePath = _initialImagePath;
+              Navigator.of(context).pop(false);
+            },
+            child: Text(
+              'Discard',
+              style: Theme.of(context).textTheme.displaySmall,
+            ),
+          ),
+          NeumorphicButton(
+            style: NeumorphicStyle(
+              depth: 2,
+              intensity: 0.8,
+              boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'Save',
+              style: Theme.of(context).textTheme.displaySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await _saveChanges();
+    }
+
+    return true;
   }
 
   @override
@@ -87,8 +169,6 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
       }
 
       widget.group.centralUnits = chosenCentrals;
-
-      if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -268,10 +348,17 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
     return Scaffold(
       appBar: CustomNeumorphicAppBar(
         height: 80,
-        onLeadingTap: () => Navigator.pop(context),
+        onLeadingTap: () async {
+          if (await _onWillPop()) {
+            Navigator.pop(context);
+          }
+        },
         title: 'Edit ${widget.group.name}',
         trailingIcon: const Icon(Icons.check),
-        onTrailingTap: _saveChanges,
+        onTrailingTap: () async {
+          await _saveChanges();
+          Navigator.pop(context);
+        },
       ),
       body: BlurredTopEdge(
         height: 20,
