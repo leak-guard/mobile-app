@@ -31,10 +31,8 @@ class Group implements Photographable {
 
   int centralUnitsNumber() => centralUnits.length;
 
-  int detectedLeaksCount() => centralUnits.fold(
-      0,
-      (sum, unit) =>
-          sum + unit.leakProbes.where((probe) => probe.blocked).length);
+  int detectedLeaksCount() =>
+      centralUnits.fold(0, (sum, unit) => sum + unit.detectedLeaksCount());
 
   int leakProbeNumber() =>
       centralUnits.fold(0, (sum, unit) => sum + unit.leakProbesCount());
@@ -48,7 +46,7 @@ class Group implements Photographable {
   }
 
   int lockedCentralUnitsCount() =>
-      centralUnits.fold(0, (sum, unit) => sum + unit.detectedLeaksCount());
+      centralUnits.fold(0, (sum, unit) => sum + (unit.isBlocked ? 1 : 0));
 
   // Update block status based on central units
   void updateBlockStatus() {

@@ -28,13 +28,15 @@ class _CentralUnitWidgetState extends State<CentralUnitWidget> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          widget.central.name,
-          style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                color: _color,
-              ),
+        Expanded(
+          child: Text(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            widget.central.name,
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  color: _color,
+                ),
+          ),
         ),
         _createTitleLeadingIcons(),
       ],
