@@ -2,8 +2,8 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 
-class AddNewGroupButton extends StatelessWidget {
-  const AddNewGroupButton({
+class AddUnitButton extends StatelessWidget {
+  const AddUnitButton({
     super.key,
     required this.onBack,
   });
@@ -32,13 +32,13 @@ class AddNewGroupButton extends StatelessWidget {
         onPressed: () {
           Navigator.pushNamed(
             context,
-            Routes.createGroup,
+            Routes.findCentralUnit,
           ).then((_) {
             onBack();
           });
         },
         child: Center(
-          child: Text('Add new group',
+          child: Text('Add new central unit',
               style: Theme.of(context).textTheme.titleLarge),
         ),
       ),

@@ -5,10 +5,10 @@ import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
-import 'package:leak_guard/widgets/add_new_group_button.dart';
-import 'package:leak_guard/widgets/app_bar.dart';
-import 'package:leak_guard/widgets/blurred_top_edge.dart';
-import 'package:leak_guard/widgets/group_button.dart';
+import 'package:leak_guard/widgets/add_group_button.dart';
+import 'package:leak_guard/widgets/custom_app_bar.dart';
+import 'package:leak_guard/widgets/blurred_top_widget.dart';
+import 'package:leak_guard/widgets/group_widget.dart';
 
 enum GroupManageMode {
   view,
@@ -39,7 +39,7 @@ class _ManageGroupsScreenState extends State<ManageGroupsScreen> {
   Widget _buildViewTile(Group group) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: GroupButton(
+      child: GroupWidget(
         group: group,
         onPressed: () {
           Navigator.pushNamed(
@@ -59,7 +59,7 @@ class _ManageGroupsScreenState extends State<ManageGroupsScreen> {
   Widget _buildAddGroupButton() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: AddNewGroupButton(
+      child: AddGroupButton(
         onBack: () => setState(() {}),
       ),
     );
@@ -194,7 +194,7 @@ class _ManageGroupsScreenState extends State<ManageGroupsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomNeumorphicAppBar(
+      appBar: CustomAppBar(
         height: 80,
         onLeadingTap: () {
           Navigator.pop(context);
@@ -210,7 +210,7 @@ class _ManageGroupsScreenState extends State<ManageGroupsScreen> {
         trailingIcon: const Icon(Icons.swap_vert),
         trailingDepth: _currentMode == GroupManageMode.editPosition ? -3 : 5,
       ),
-      body: BlurredTopEdge(
+      body: BlurredTopWidget(
         height: 20,
         child: ListView.builder(
           itemCount: _appData.groups.length + 1,

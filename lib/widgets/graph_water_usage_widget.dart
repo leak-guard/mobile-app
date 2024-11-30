@@ -2,12 +2,12 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/utils/colors.dart';
 
-class GraphWaterUsage extends StatefulWidget {
+class GraphWaterUsageWidget extends StatefulWidget {
   final List<WaterUsageData> data;
   final double maxHeight;
   final Duration animationDuration;
 
-  const GraphWaterUsage({
+  const GraphWaterUsageWidget({
     super.key,
     required this.data,
     this.maxHeight = 200,
@@ -15,10 +15,10 @@ class GraphWaterUsage extends StatefulWidget {
   });
 
   @override
-  State<GraphWaterUsage> createState() => _GraphWaterUsageState();
+  State<GraphWaterUsageWidget> createState() => _GraphWaterUsageWidgetState();
 }
 
-class _GraphWaterUsageState extends State<GraphWaterUsage> {
+class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
   bool _shouldAnimate = false;
 
   @override
@@ -61,7 +61,9 @@ class _GraphWaterUsageState extends State<GraphWaterUsage> {
             Text(
               "Max usage: ${(maxUsage * 100).roundToDouble() / 100}l",
               textAlign: TextAlign.start,
-              style: Theme.of(context).textTheme.displaySmall,
+              style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                    fontSize: 14,
+                  ),
             ),
             const SizedBox(height: 8),
             SizedBox(

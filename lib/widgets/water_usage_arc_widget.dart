@@ -3,12 +3,12 @@ import 'package:leak_guard/utils/arc_path_provider.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/widgets/arc_progress_widget.dart';
 
-class WaterUsageArc extends StatefulWidget {
+class WaterUsageArcWidget extends StatefulWidget {
   final double currentUsage;
   final double maxUsage;
   final double flowRate;
 
-  const WaterUsageArc({
+  const WaterUsageArcWidget({
     super.key,
     required this.currentUsage,
     required this.maxUsage,
@@ -16,10 +16,10 @@ class WaterUsageArc extends StatefulWidget {
   });
 
   @override
-  State<WaterUsageArc> createState() => _WaterUsageArcState();
+  State<WaterUsageArcWidget> createState() => _WaterUsageArcWidgetState();
 }
 
-class _WaterUsageArcState extends State<WaterUsageArc>
+class _WaterUsageArcWidgetState extends State<WaterUsageArcWidget>
     with SingleTickerProviderStateMixin {
   final double _thickness = 16;
 

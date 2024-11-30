@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:leak_guard/widgets/app_bar.dart';
+import 'package:leak_guard/widgets/custom_app_bar.dart';
 
 class ErrorScreen extends StatefulWidget {
   const ErrorScreen({super.key});
@@ -12,7 +12,7 @@ class _ErrorScreenState extends State<ErrorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomNeumorphicAppBar(
+      appBar: CustomAppBar(
         height: 80,
         onLeadingTap: () {
           Navigator.pop(context);

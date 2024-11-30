@@ -5,9 +5,9 @@ import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
-import 'package:leak_guard/widgets/app_bar.dart';
-import 'package:leak_guard/widgets/blurred_top_edge.dart';
-import 'package:leak_guard/widgets/central_unit_button.dart';
+import 'package:leak_guard/widgets/custom_app_bar.dart';
+import 'package:leak_guard/widgets/blurred_top_widget.dart';
+import 'package:leak_guard/widgets/central_unit_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
 
 class DetailsGroupScreen extends StatefulWidget {
@@ -306,14 +306,14 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
     return [
       ...groupCentrals.map((central) => Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-            child: CentralUnitButton(
+            child: CentralUnitWidget(
               central: central,
               onPressed: () => setState(() => central.chosen = !central.chosen),
               onLongPress: () {
                 Navigator.pushNamed(
                   context,
-                  Routes.detailsCentral,
-                  arguments: DetailsCentralcreenArguments(
+                  Routes.detailsCentralUnit,
+                  arguments: DetailsCentralUnitScreenArguments(
                     central,
                   ),
                 ).then((_) {
@@ -324,14 +324,14 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
           )),
       ...otherCentrals.map((central) => Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-            child: CentralUnitButton(
+            child: CentralUnitWidget(
               central: central,
               onPressed: () => setState(() => central.chosen = !central.chosen),
               onLongPress: () {
                 Navigator.pushNamed(
                   context,
-                  Routes.detailsCentral,
-                  arguments: DetailsCentralcreenArguments(
+                  Routes.detailsCentralUnit,
+                  arguments: DetailsCentralUnitScreenArguments(
                     central,
                   ),
                 ).then((_) {
@@ -346,7 +346,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomNeumorphicAppBar(
+      appBar: CustomAppBar(
         height: 80,
         onLeadingTap: () async {
           if (await _onWillPop()) {
@@ -360,7 +360,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
           Navigator.pop(context);
         },
       ),
-      body: BlurredTopEdge(
+      body: BlurredTopWidget(
         height: 20,
         child: Form(
           key: _formKey,
@@ -369,7 +369,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
             children: [
               Text('Group name',
                   style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _buildNeumorphicTextField(
                 controller: _nameController,
                 hintText: 'Enter group name...',
@@ -394,18 +394,18 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Text('Description',
                   style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _buildNeumorphicTextField(
                 controller: _descriptionController,
                 hintText: 'Enter description...',
                 maxLines: 3,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Text('Photo', style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               PhotoWidget(
                 item: widget.group,
                 size: MediaQuery.of(context).size.width - 32,
@@ -413,10 +413,9 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                   setState(() {});
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Text('Central units',
                   style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 16),
               ..._buildCentralUnitsList(),
               const SizedBox(height: 12),
               NeumorphicButton(

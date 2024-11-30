@@ -1,12 +1,12 @@
 import 'package:leak_guard/utils/colors.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
-class Panel extends StatelessWidget {
+class PanelWidget extends StatelessWidget {
   final String name;
   final Widget child;
   final VoidCallback onTap;
 
-  const Panel({
+  const PanelWidget({
     Key? key,
     required this.name,
     required this.child,

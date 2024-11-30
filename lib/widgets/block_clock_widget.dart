@@ -45,19 +45,19 @@ class ArcPathProvider extends NeumorphicPathProvider {
   }
 }
 
-class BlockTimeClock extends StatefulWidget {
+class BlockClockWidget extends StatefulWidget {
   final Group group;
 
-  const BlockTimeClock({
+  const BlockClockWidget({
     super.key,
     required this.group,
   });
 
   @override
-  State<BlockTimeClock> createState() => _BlockTimeClockState();
+  State<BlockClockWidget> createState() => _BlockClockWidgetState();
 }
 
-class _BlockTimeClockState extends State<BlockTimeClock> {
+class _BlockClockWidgetState extends State<BlockClockWidget> {
   Set<int> _selectedHours = {};
   bool _isLocked = false;
 
@@ -69,7 +69,7 @@ class _BlockTimeClockState extends State<BlockTimeClock> {
   }
 
   @override
-  void didUpdateWidget(BlockTimeClock oldWidget) {
+  void didUpdateWidget(BlockClockWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.group != oldWidget.group) {
       _selectedHours = Set.from(widget.group.blockedHours);

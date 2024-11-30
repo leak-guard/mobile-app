@@ -1,8 +1,8 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/app_data.dart';
-import 'package:leak_guard/widgets/app_bar.dart';
-import 'package:leak_guard/widgets/blurred_top_edge.dart';
+import 'package:leak_guard/widgets/custom_app_bar.dart';
+import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:nsd/nsd.dart';
 
@@ -104,7 +104,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomNeumorphicAppBar(
+      appBar: CustomAppBar(
         height: 80,
         onLeadingTap: () => Navigator.pop(context),
         title: 'Create Central Unit',
@@ -115,7 +115,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
           }
         },
       ),
-      body: BlurredTopEdge(
+      body: BlurredTopWidget(
         height: 20,
         child: Form(
           key: _formKey,

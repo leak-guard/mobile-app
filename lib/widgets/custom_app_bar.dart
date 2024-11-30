@@ -1,8 +1,7 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/utils/strings.dart';
 
-class CustomNeumorphicAppBar extends StatelessWidget
-    implements PreferredSizeWidget {
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final Widget? leadingIcon;
   final VoidCallback? onLeadingTap;
@@ -12,7 +11,7 @@ class CustomNeumorphicAppBar extends StatelessWidget
   final double height;
   final double trailingDepth;
 
-  const CustomNeumorphicAppBar({
+  const CustomAppBar({
     super.key,
     this.title,
     this.leadingIcon,

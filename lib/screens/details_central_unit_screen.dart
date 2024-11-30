@@ -1,22 +1,24 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
+import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
-import 'package:leak_guard/widgets/app_bar.dart';
-import 'package:leak_guard/widgets/blurred_top_edge.dart';
+import 'package:leak_guard/widgets/custom_app_bar.dart';
+import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
 
-class DetailsCentralScreen extends StatefulWidget {
-  const DetailsCentralScreen({super.key, required this.central});
+class DetailsCentralUnitScreen extends StatefulWidget {
+  const DetailsCentralUnitScreen({super.key, required this.central});
   final CentralUnit central;
 
   @override
-  State<DetailsCentralScreen> createState() => _DetailsCentralScreenState();
+  State<DetailsCentralUnitScreen> createState() =>
+      _DetailsCentralUnitScreenState();
 }
 
-class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
+class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -427,6 +429,11 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
 
     await _db.deleteCentralUnit(widget.central.centralUnitID!);
     _appData.centralUnits.remove(widget.central);
+
+    for (LeakProbe leakProbe in widget.central.leakProbes) {
+      _appData.leakProbes.remove(leakProbe);
+    }
+
     if (mounted) {
       Navigator.pop(context);
     }
@@ -468,7 +475,7 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
     );
   }
 
-  void _deleteGroup(VoidCallback onConfirm) {
+  void _deleteCentralUnit(VoidCallback onConfirm) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -527,7 +534,7 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomNeumorphicAppBar(
+      appBar: CustomAppBar(
         height: 80,
         onLeadingTap: () async {
           if (await _onWillPop()) {
@@ -541,7 +548,7 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
           Navigator.pop(context);
         },
       ),
-      body: BlurredTopEdge(
+      body: BlurredTopWidget(
         height: 20,
         child: Form(
           key: _formKey,
@@ -561,7 +568,7 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
                   ),
                 ),
                 onPressed: () {
-                  _deleteGroup(_confirmDelete);
+                  _deleteCentralUnit(_confirmDelete);
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(16),

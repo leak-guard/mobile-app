@@ -1,26 +1,37 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/screens/create_central_screen.dart';
-import 'package:leak_guard/screens/details_central_screen.dart';
+import 'package:leak_guard/screens/details_central_unit_screen.dart';
 import 'package:leak_guard/screens/details_group_screen.dart';
+import 'package:leak_guard/screens/details_leak_probe_screen.dart';
 import 'package:leak_guard/screens/error_screen.dart';
 import 'package:leak_guard/screens/find_central_screen.dart';
 import 'package:leak_guard/screens/create_group_screen.dart';
-import 'package:leak_guard/screens/manage_centrals_screen.dart';
+import 'package:leak_guard/screens/group_leak_probes_screen.dart';
+import 'package:leak_guard/screens/manage_central_units_screen.dart';
 import 'package:leak_guard/screens/manage_groups_screen.dart';
 import 'package:leak_guard/screens/main_screen.dart';
+import 'package:leak_guard/screens/manage_probes_screen.dart';
 import 'package:nsd/nsd.dart';
 
 class Routes {
   static const String main = '/';
+
+  static const String groupLeakProbes = '/groupLeakProbes';
+
   static const String manageGroups = '/manageGroups';
   static const String createGroup = '/createGroup';
   static const String detailsGroup = '/detailsGroup';
-  static const String manageCentrals = '/manageCentrals';
-  static const String createCentral = '/createCentral';
-  static const String detailsCentral = '/detailsCentral';
-  static const String findCentral = '/findCentral';
+
+  static const String manageCentralUnits = '/manageCentralUnits';
+  static const String createCentralUnit = '/createCentralUnit';
+  static const String detailsCentralUnit = '/detailsCentralUnit';
+  static const String findCentralUnit = '/findCentralUnit';
+
+  static const String manageLeakProbes = '/manageLeakProbes';
+  static const String detailsLeakProbe = '/detailsLeakProbe';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -34,9 +45,14 @@ class Routes {
           builder: (_) => const ManageGroupsScreen(),
         );
 
-      case manageCentrals:
+      case manageCentralUnits:
         return MaterialPageRoute(
-          builder: (_) => const ManageCentralsScreen(),
+          builder: (_) => const ManageCentralUnitsScreen(),
+        );
+
+      case manageLeakProbes:
+        return MaterialPageRoute(
+          builder: (_) => const ManageLeakProbesScreen(),
         );
 
       case createGroup:
@@ -44,12 +60,12 @@ class Routes {
           builder: (_) => const CreateGroupScreen(),
         );
 
-      case findCentral:
+      case findCentralUnit:
         return MaterialPageRoute(
           builder: (_) => const FindCentralScreen(),
         );
 
-      case createCentral:
+      case createCentralUnit:
         if (settings.arguments is CreateCentralScreenArguments) {
           final args = settings.arguments as CreateCentralScreenArguments;
           return MaterialPageRoute(
@@ -76,16 +92,41 @@ class Routes {
           builder: (_) => const ErrorScreen(),
         );
 
-      case detailsCentral:
-        if (settings.arguments is DetailsCentralcreenArguments) {
-          final args = settings.arguments as DetailsCentralcreenArguments;
+      case detailsCentralUnit:
+        if (settings.arguments is DetailsCentralUnitScreenArguments) {
+          final args = settings.arguments as DetailsCentralUnitScreenArguments;
           return MaterialPageRoute(
-            builder: (_) => DetailsCentralScreen(
+            builder: (_) => DetailsCentralUnitScreen(
               central: args.central,
             ),
           );
         }
+        return MaterialPageRoute(
+          builder: (_) => const ErrorScreen(),
+        );
 
+      case detailsLeakProbe:
+        if (settings.arguments is DetailsLeakProbeScreenArguments) {
+          final args = settings.arguments as DetailsLeakProbeScreenArguments;
+          return MaterialPageRoute(
+            builder: (_) => DetailsLeakProbeScreen(
+              leakProbe: args.leakProbe,
+            ),
+          );
+        }
+        return MaterialPageRoute(
+          builder: (_) => const ErrorScreen(),
+        );
+
+      case groupLeakProbes:
+        if (settings.arguments is GroupLeakProbesScreenArguments) {
+          final args = settings.arguments as GroupLeakProbesScreenArguments;
+          return MaterialPageRoute(
+            builder: (_) => GroupLeakProbesScreen(
+              group: args.group,
+            ),
+          );
+        }
         return MaterialPageRoute(
           builder: (_) => const ErrorScreen(),
         );
@@ -96,6 +137,18 @@ class Routes {
         );
     }
   }
+}
+
+class GroupLeakProbesScreenArguments {
+  final Group group;
+
+  GroupLeakProbesScreenArguments(this.group);
+}
+
+class DetailsLeakProbeScreenArguments {
+  final LeakProbe leakProbe;
+
+  DetailsLeakProbeScreenArguments(this.leakProbe);
 }
 
 class CreateCentralScreenArguments {
@@ -110,8 +163,8 @@ class DetailsGroupScreenArguments {
   DetailsGroupScreenArguments(this.chosenGroup);
 }
 
-class DetailsCentralcreenArguments {
+class DetailsCentralUnitScreenArguments {
   final CentralUnit central;
 
-  DetailsCentralcreenArguments(this.central);
+  DetailsCentralUnitScreenArguments(this.central);
 }

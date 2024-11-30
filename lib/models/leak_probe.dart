@@ -8,6 +8,7 @@ class LeakProbe implements Photographable {
   int address;
   int batteryLevel = 100;
   bool blocked = false;
+
   String? description;
   String? imagePath;
 

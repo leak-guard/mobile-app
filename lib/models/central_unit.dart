@@ -58,6 +58,9 @@ class CentralUnit implements Photographable {
 
   static const _flowRateCacheDuration = Duration(minutes: 1);
 
+  // TODO: Implement API call to check if central unit is connected
+  get isConnection => isBlocked;
+
   //TODO: Implement API call to update central unit data
   Future<void> updateFlowInfo() async {
     // Mocked update

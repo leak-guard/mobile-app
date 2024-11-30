@@ -6,10 +6,11 @@ import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
-import 'package:leak_guard/widgets/add_new_unit_button.dart';
-import 'package:leak_guard/widgets/app_bar.dart';
-import 'package:leak_guard/widgets/blurred_top_edge.dart';
-import 'package:leak_guard/widgets/central_unit_button.dart';
+import 'package:leak_guard/widgets/add_unit_button.dart';
+import 'package:leak_guard/widgets/custom_app_bar.dart';
+import 'package:leak_guard/widgets/blurred_top_widget.dart';
+import 'package:leak_guard/widgets/central_unit_widget.dart';
+import 'package:leak_guard/widgets/photo_widget.dart';
 
 class CreateGroupScreen extends StatefulWidget {
   const CreateGroupScreen({super.key});
@@ -22,8 +23,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isValid = true;
   final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
   final _db = DatabaseService.instance;
   final _appData = AppData();
+  final newGroup = Group(name: '');
 
   List<CentralUnit> get chosenCentrals =>
       _appData.centralUnits.where((central) => central.chosen).toList();
@@ -34,6 +37,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       central.chosen = false;
     }
     _nameController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -48,7 +52,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
     if (chosenCentrals.isEmpty) {
       _showValidationError(
-        context,
         'No central units',
         'Please select at least one central unit for the group',
       );
@@ -56,7 +59,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     }
 
     try {
-      final newGroup = Group(name: _nameController.text.trim());
+      newGroup.name = _nameController.text.trim();
+      newGroup.description = _descriptionController.text.trim();
       final groupId = await _db.addGroup(newGroup);
       newGroup.groupdID = groupId;
 
@@ -80,8 +84,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     }
   }
 
-  void _showValidationError(
-      BuildContext context, String title, String message) {
+  void _showValidationError(String title, String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -117,126 +120,134 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     );
   }
 
+  Widget _buildNeumorphicTextField({
+    required TextEditingController controller,
+    required String hintText,
+    String? Function(String?)? validator,
+    int? maxLines,
+  }) {
+    return Neumorphic(
+      style: NeumorphicStyle(
+        depth: -5,
+        intensity: 0.8,
+        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: TextFormField(
+        controller: controller,
+        maxLines: maxLines ?? 1,
+        style: Theme.of(context).textTheme.displaySmall!.copyWith(
+              fontWeight: FontWeight.normal,
+            ),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hintText,
+          hintStyle: TextStyle(color: MyColors.lightThemeFont.withOpacity(0.5)),
+        ),
+        validator: validator,
+      ),
+    );
+  }
+
+  List<Widget> _buildCentralUnitsList() {
+    return _appData.centralUnits.map((central) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: CentralUnitWidget(
+          central: central,
+          onPressed: () {
+            setState(() {
+              central.chosen = !central.chosen;
+            });
+          },
+          onLongPress: () {
+            Navigator.pushNamed(
+              context,
+              Routes.detailsCentralUnit,
+              arguments: DetailsCentralUnitScreenArguments(
+                central,
+              ),
+            ).then((_) {
+              setState(() {});
+            });
+          },
+        ),
+      );
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomNeumorphicAppBar(
+      appBar: CustomAppBar(
         height: 80,
         onLeadingTap: () => Navigator.pop(context),
         title: MyStrings.createGroup,
         trailingIcon: const Icon(Icons.check),
         onTrailingTap: _createGroup,
       ),
-      body: BlurredTopEdge(
+      body: BlurredTopWidget(
         height: 20,
         child: Form(
           key: _formKey,
-          child: ListView.builder(
-            itemCount: _appData.centralUnits.length + 4,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  child: Text('Group name',
-                      style: Theme.of(context).textTheme.displayMedium),
-                );
-              }
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text('Group name',
+                  style: Theme.of(context).textTheme.displayMedium),
+              const SizedBox(height: 8),
+              _buildNeumorphicTextField(
+                controller: _nameController,
+                hintText: 'Enter group name...',
+                validator: (value) {
+                  String? errorMessage;
+                  if (value == null || value.trim().isEmpty) {
+                    errorMessage = 'Please enter a group name';
+                  } else if (_appData.groups.any((g) =>
+                      g.name.toLowerCase() == value.trim().toLowerCase())) {
+                    errorMessage = 'Group name already exists';
+                  }
 
-              if (index == 1) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                  child: Neumorphic(
-                    style: NeumorphicStyle(
-                      depth: -5,
-                      intensity: 0.8,
-                      boxShape: NeumorphicBoxShape.roundRect(
-                        BorderRadius.circular(12),
-                      ),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
-                    ),
-                    child: TextFormField(
-                      controller: _nameController,
-                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                            fontWeight: FontWeight.normal,
-                          ),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Enter group name...',
-                        hintStyle: TextStyle(
-                            color: MyColors.lightThemeFont.withOpacity(0.5)),
-                      ),
-                      validator: (value) {
-                        String? errorMessage;
-                        if (value == null || value.trim().isEmpty) {
-                          errorMessage = 'Please enter a group name';
-                        } else if (_appData.groups.any((g) =>
-                            g.name.toLowerCase() ==
-                            value.trim().toLowerCase())) {
-                          errorMessage = 'Group name already exists';
-                        }
-
-                        if (errorMessage != null) {
-                          Future.microtask(() {
-                            setState(() => _isValid = false);
-                            _showValidationError(
-                                context, 'Wrong group name', errorMessage!);
-                          });
-                        } else {
-                          setState(() => _isValid = true);
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                );
-              }
-
-              if (index == 2) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                  child: Text('Chose central units',
-                      style: Theme.of(context).textTheme.displayMedium),
-                );
-              }
-
-              if (index == 3) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: AddNewUnitButton(
-                    onBack: () => setState(() {}),
-                  ),
-                );
-              }
-
-              final central = _appData.centralUnits[index - 4];
-
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                child: CentralUnitButton(
-                  central: central,
-                  onPressed: () {
-                    setState(() {
-                      central.chosen = !central.chosen;
+                  if (errorMessage != null) {
+                    Future.microtask(() {
+                      setState(() => _isValid = false);
+                      _showValidationError('Wrong group name', errorMessage!);
                     });
-                  },
-                  onLongPress: () {
-                    Navigator.pushNamed(
-                      context,
-                      Routes.detailsCentral,
-                      arguments: DetailsCentralcreenArguments(
-                        central,
-                      ),
-                    ).then((_) {
-                      setState(() {});
-                    });
-                  },
-                ),
-              );
-            },
+                  } else {
+                    setState(() => _isValid = true);
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              Text('Description',
+                  style: Theme.of(context).textTheme.displayMedium),
+              const SizedBox(height: 8),
+              _buildNeumorphicTextField(
+                controller: _descriptionController,
+                hintText: 'Enter description...',
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+              Text('Photo', style: Theme.of(context).textTheme.displayMedium),
+              const SizedBox(height: 8),
+              PhotoWidget(
+                item: newGroup,
+                size: MediaQuery.of(context).size.width - 32,
+                onPhotoChanged: () {
+                  setState(() {});
+                },
+              ),
+              const SizedBox(height: 24),
+              Text('Chose central units',
+                  style: Theme.of(context).textTheme.displayMedium),
+              const SizedBox(height: 8),
+              AddUnitButton(
+                onBack: () => setState(() {}),
+              ),
+              const SizedBox(height: 8),
+              ..._buildCentralUnitsList(),
+            ],
           ),
         ),
       ),
