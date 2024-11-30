@@ -61,11 +61,7 @@ class _GraphWaterUsageState extends State<GraphWaterUsage> {
             Text(
               "Max usage: ${(maxUsage * 100).roundToDouble() / 100}l",
               textAlign: TextAlign.start,
-              style: TextStyle(
-                color: MyColors.lightThemeFont,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
+              style: Theme.of(context).textTheme.displaySmall,
             ),
             const SizedBox(height: 8),
             SizedBox(

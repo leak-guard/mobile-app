@@ -22,10 +22,35 @@ class GroupButton extends StatefulWidget {
 }
 
 class _GroupButtonState extends State<GroupButton> {
+  final Color _color = MyColors.lightThemeFont;
+
+  Widget _createIcon(IconData icon, num number) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 25,
+        ),
+        const SizedBox(
+          width: 5,
+        ),
+        SizedBox(
+          width: 35,
+          child: Text(
+            textAlign: TextAlign.center,
+            number.toString(),
+            style: Theme.of(context)
+                .textTheme
+                .displayMedium!
+                .copyWith(color: _color, fontSize: 17),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    Color color = MyColors.lightThemeFont;
-
     return GestureDetector(
       onLongPress: widget.onLongPress,
       child: NeumorphicButton(
@@ -47,7 +72,7 @@ class _GroupButtonState extends State<GroupButton> {
                   overflow: TextOverflow.ellipsis,
                   widget.group.name,
                   style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                        color: color,
+                        color: _color,
                       ),
                 ),
               ),
@@ -58,7 +83,7 @@ class _GroupButtonState extends State<GroupButton> {
                     child: Container(
                       height: 130,
                       decoration: BoxDecoration(
-                        color: color,
+                        color: _color,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: widget.group.imagePath != null
@@ -69,26 +94,11 @@ class _GroupButtonState extends State<GroupButton> {
                                 fit: BoxFit.cover,
                               ),
                             )
-                          : Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    CustomIcons.central_unit,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                  Icon(
-                                    CustomIcons.central_unit,
-                                    color: Colors.white,
-                                    size: 40,
-                                  ),
-                                  Icon(
-                                    CustomIcons.central_unit,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ],
+                          : const Center(
+                              child: Icon(
+                                CustomIcons.group,
+                                color: Colors.white,
+                                size: 70,
                               ),
                             ),
                     ),
@@ -96,83 +106,41 @@ class _GroupButtonState extends State<GroupButton> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        // Probe information
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(CustomIcons.leak_probe,
-                                color: color, size: 30),
-                            const SizedBox(width: 8),
-                            Text(
-                              widget.group.leakProbeNumber().toString(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .displayMedium!
-                                  .copyWith(color: color),
-                            ),
-                            const SizedBox(width: 15),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 1, 0, 0),
-                              child: Icon(
-                                CustomIcons.battery_low,
-                                color: color,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 24),
-                            Text(
-                              widget.group
-                                  .leakProbeLowBatteryNumber()
-                                  .toString(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .displayMedium!
-                                  .copyWith(color: color),
-                            ),
+                            const SizedBox(width: 5),
+                            _createIcon(CustomIcons.central_unit,
+                                widget.group.centralUnitsNumber()),
+                            const SizedBox(width: 5),
+                            _createIcon(CustomIcons.probe,
+                                widget.group.leakProbeNumber())
                           ],
                         ),
-                        const SizedBox(height: 24),
-                        // Central units information
+                        const SizedBox(height: 5),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              CustomIcons.central_unit,
-                              color: color,
-                              size: 30,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              widget.group.centralUnitsNumber().toString(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .displayMedium!
-                                  .copyWith(color: color),
-                            ),
-                            const SizedBox(width: 16),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
-                              child: Icon(
-                                CustomIcons.broken_pipe,
-                                color: color,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 18),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(6, 0, 0, 0),
-                              child: Text(
-                                widget.group
-                                    .centralUnitsLeaksNumber()
-                                    .toString(),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .displayMedium!
-                                    .copyWith(color: color),
-                              ),
-                            ),
+                            const SizedBox(width: 5),
+                            _createIcon(Icons.signal_cellular_alt,
+                                widget.group.connectedCentralUnits()),
+                            const SizedBox(width: 5),
+                            _createIcon(CustomIcons.battery_low,
+                                widget.group.leakProbeLowBatteryNumber())
+                          ],
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(width: 5),
+                            _createIcon(Icons.lock_outline,
+                                widget.group.lockedCentralUnitsCount()),
+                            const SizedBox(width: 5),
+                            _createIcon(CustomIcons.leak,
+                                widget.group.detectedLeaksCount())
                           ],
                         ),
                       ],

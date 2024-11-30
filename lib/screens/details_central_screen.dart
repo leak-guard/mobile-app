@@ -263,7 +263,7 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
           maxLines: 3,
         ),
         const SizedBox(height: 16),
-        Text('Photography', style: Theme.of(context).textTheme.displayMedium),
+        Text('Photo', style: Theme.of(context).textTheme.displayMedium),
         const SizedBox(height: 12),
         PhotoWidget(
           item: widget.central,
@@ -342,7 +342,7 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Text("Normaly Closed",
+            Text("Normally Closed",
                 style: Theme.of(context).textTheme.displaySmall),
             NeumorphicSwitch(
               value: _isValveNO,
@@ -350,8 +350,8 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
                 trackDepth: 2,
                 thumbDepth: 4,
                 activeTrackColor: MyColors.lightThemeFont,
-                inactiveTrackColor: MyColors.lightThemeFont.withOpacity(0.1),
-                disableDepth: _isValveNO,
+                inactiveTrackColor: MyColors.lightThemeFont.withOpacity(0.7),
+                disableDepth: true,
               ),
               onChanged: (value) {
                 setState(() {
@@ -360,7 +360,7 @@ class _DetailsCentralScreenState extends State<DetailsCentralScreen> {
                 });
               },
             ),
-            Text("Normaly Open",
+            Text("Normally Open",
                 style: Theme.of(context).textTheme.displaySmall),
           ],
         ),

@@ -20,6 +20,34 @@ class CentralUnitButton extends StatefulWidget {
 }
 
 class _CentralUnitButtonState extends State<CentralUnitButton> {
+  final Color _color = MyColors.lightThemeFont;
+
+  Widget _createIcon(IconData icon, num number) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(width: 10),
+        Icon(
+          icon,
+          size: 35,
+        ),
+        const SizedBox(
+          width: 15,
+        ),
+        SizedBox(
+          width: 60,
+          child: Text(
+              textAlign: TextAlign.center,
+              number.toString(),
+              style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                    color: _color,
+                    fontSize: 25,
+                  )),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Color _color = !widget.central.chosen
@@ -72,11 +100,11 @@ class _CentralUnitButtonState extends State<CentralUnitButton> {
                                 colorBlendMode: BlendMode.overlay,
                               ),
                             )
-                          : Center(
+                          : const Center(
                               child: Icon(
                                 CustomIcons.central_unit,
                                 color: Colors.white,
-                                size: 50,
+                                size: 70,
                               ),
                             ),
                     ),
@@ -86,54 +114,12 @@ class _CentralUnitButtonState extends State<CentralUnitButton> {
                       child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(CustomIcons.leak_probe, color: _color, size: 50),
-                          const SizedBox(
-                            width: 24,
-                          ),
-                          Text(
-                            widget.central.leakProbeNumber().toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .displayLarge!
-                                .copyWith(
-                                  color: _color,
-                                ),
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 3,
-                          ),
-                          Icon(
-                            CustomIcons.battery_low,
-                            color: _color,
-                            size: 30,
-                          ),
-                          const SizedBox(
-                            width: 42,
-                          ),
-                          Text(
-                            widget.central
-                                .leakProbeLowBatteryNumber()
-                                .toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .displayLarge!
-                                .copyWith(
-                                  color: _color,
-                                ),
-                          )
-                        ],
-                      ),
+                      _createIcon(
+                          CustomIcons.probe, widget.central.leakProbesCount()),
+                      _createIcon(CustomIcons.battery_low,
+                          widget.central.leakProbeLowBatteryCount()),
+                      _createIcon(CustomIcons.leak,
+                          widget.central.detectedLeaksCount()),
                     ],
                   ))
                 ],

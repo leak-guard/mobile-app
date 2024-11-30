@@ -404,8 +404,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                 maxLines: 3,
               ),
               const SizedBox(height: 24),
-              Text('Photography',
-                  style: Theme.of(context).textTheme.displayMedium),
+              Text('Photo', style: Theme.of(context).textTheme.displayMedium),
               const SizedBox(height: 12),
               PhotoWidget(
                 item: widget.group,

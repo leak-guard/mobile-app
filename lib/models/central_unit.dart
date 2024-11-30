@@ -30,11 +30,11 @@ class CentralUnit implements Photographable {
   List<LeakProbe> leakProbes = [];
   final _db = DatabaseService.instance;
 
-  int leakProbeLowBatteryNumber() {
+  int leakProbeLowBatteryCount() {
     return leakProbes.where((probe) => probe.batteryLevel <= 20).length;
   }
 
-  int leakProbeNumber() {
+  int leakProbesCount() {
     return leakProbes.length;
   }
 
@@ -309,5 +309,9 @@ class CentralUnit implements Photographable {
   @override
   void setPhoto(String? path) {
     imagePath = path;
+  }
+
+  int detectedLeaksCount() {
+    return leakProbes.where((probe) => probe.blocked).length;
   }
 }

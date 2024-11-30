@@ -262,72 +262,65 @@ class _MainScreenState extends State<MainScreen> {
                   Panel(
                     name: "Leak probes",
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                      child: Column(
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                  height: 70,
-                                  child: Center(
-                                    child: NeumorphicIcon(
-                                      CustomIcons.leak_probe,
-                                      size: 80,
-                                      style: NeumorphicStyle(
-                                        color: MyColors.lightThemeFont,
-                                      ),
-                                    ),
-                                  ),
+                          Row(
+                            children: [
+                              NeumorphicIcon(
+                                CustomIcons.probe,
+                                size: 30,
+                                style: NeumorphicStyle(
+                                  color: MyColors.lightThemeFont,
                                 ),
-                                SizedBox(height: 10),
-                                Text(
-                                  currentGroup.leakProbeNumber().toString(),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                  'Leak probes count: ${currentGroup.leakProbeNumber()}',
                                   style: Theme.of(context)
                                       .textTheme
-                                      .titleLarge!
-                                      .copyWith(
-                                        color: MyColors.lightThemeFont,
-                                        fontSize: 50,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Column(
-                            children: [
-                              SizedBox(
-                                height: 80,
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(13, 0, 0, 0),
-                                  child: Center(
-                                    child: NeumorphicIcon(
-                                      CustomIcons.battery_low,
-                                      size: 50,
-                                      style: NeumorphicStyle(
-                                        color: MyColors.lightThemeFont,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                currentGroup
-                                    .leakProbeLowBatteryNumber()
-                                    .toString(),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge!
-                                    .copyWith(
-                                      color: MyColors.lightThemeFont,
-                                      fontSize: 50,
-                                    ),
-                              ),
+                                      .displaySmall!),
                             ],
-                          )
+                          ),
+                          const SizedBox(height: 5),
+                          Row(
+                            children: [
+                              NeumorphicIcon(
+                                size: 30,
+                                CustomIcons.battery_low,
+                                style: NeumorphicStyle(
+                                  color: MyColors.lightThemeFont,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 1,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                  "Low battery count: ${currentGroup.leakProbeLowBatteryNumber()}",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displaySmall!),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          Row(
+                            children: [
+                              NeumorphicIcon(
+                                CustomIcons.leak,
+                                size: 30,
+                                style: NeumorphicStyle(
+                                  color: MyColors.lightThemeFont,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                  "Detected leaks count: ${currentGroup.detectedLeaksCount()}",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displaySmall!),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -336,65 +329,62 @@ class _MainScreenState extends State<MainScreen> {
                   Panel(
                     name: "Central units",
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                      child: Column(
                         children: [
-                          Column(
+                          Row(
                             children: [
-                              SizedBox(
-                                height: 70,
-                                child: Center(
-                                  child: NeumorphicIcon(
-                                    CustomIcons.central_unit,
-                                    size: 70,
-                                    style: NeumorphicStyle(
-                                      color: MyColors.lightThemeFont,
-                                    ),
-                                  ),
+                              NeumorphicIcon(
+                                CustomIcons.central_unit,
+                                size: 30,
+                                style: NeumorphicStyle(
+                                  color: MyColors.lightThemeFont,
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              const SizedBox(width: 8),
                               Text(
-                                currentGroup.centralUnitsNumber().toString(),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge!
-                                    .copyWith(
-                                      color: MyColors.lightThemeFont,
-                                      fontSize: 50,
-                                    ),
-                              ),
+                                  'Central units count: ${currentGroup.centralUnitsNumber()}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displaySmall!),
                             ],
                           ),
-                          Column(
+                          const SizedBox(height: 5),
+                          Row(
                             children: [
-                              SizedBox(
-                                height: 80,
-                                child: Center(
-                                  child: NeumorphicIcon(
-                                    CustomIcons.broken_pipe,
-                                    size: 50,
-                                    style: NeumorphicStyle(
-                                      color: MyColors.lightThemeFont,
-                                    ),
-                                  ),
+                              NeumorphicIcon(
+                                Icons.signal_cellular_alt,
+                                size: 30,
+                                style: NeumorphicStyle(
+                                  color: MyColors.lightThemeFont,
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               Text(
-                                currentGroup
-                                    .centralUnitsLeaksNumber()
-                                    .toString(),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge!
-                                    .copyWith(
-                                      color: MyColors.lightThemeFont,
-                                      fontSize: 50,
-                                    ),
-                              ),
+                                  'Connected central units: ${currentGroup.connectedCentralUnits()}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displaySmall!),
                             ],
-                          )
+                          ),
+                          const SizedBox(height: 5),
+                          Row(
+                            children: [
+                              NeumorphicIcon(
+                                Icons.lock_outline,
+                                size: 30,
+                                style: NeumorphicStyle(
+                                  color: MyColors.lightThemeFont,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                  'Locked central units: ${currentGroup.lockedCentralUnitsCount()}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displaySmall!),
+                            ],
+                          ),
                         ],
                       ),
                     ),
