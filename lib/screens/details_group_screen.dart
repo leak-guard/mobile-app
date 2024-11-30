@@ -369,7 +369,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
             children: [
               Text('Group name',
                   style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _buildNeumorphicTextField(
                 controller: _nameController,
                 hintText: 'Enter group name...',
@@ -394,18 +394,18 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Text('Description',
                   style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _buildNeumorphicTextField(
                 controller: _descriptionController,
                 hintText: 'Enter description...',
                 maxLines: 3,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Text('Photo', style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               PhotoWidget(
                 item: widget.group,
                 size: MediaQuery.of(context).size.width - 32,
@@ -413,10 +413,9 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                   setState(() {});
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Text('Central units',
                   style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 16),
               ..._buildCentralUnitsList(),
               const SizedBox(height: 12),
               NeumorphicButton(
