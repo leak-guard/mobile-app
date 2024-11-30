@@ -4,8 +4,8 @@ import '../utils/colors.dart';
 import '../utils/routes.dart';
 import '../utils/strings.dart';
 
-class DrawerMenu extends StatelessWidget {
-  const DrawerMenu({super.key, required this.onBack});
+class CustomDrawer extends StatelessWidget {
+  const CustomDrawer({super.key, required this.onBack});
   final VoidCallback onBack;
 
   @override
@@ -49,7 +49,19 @@ class DrawerMenu extends StatelessWidget {
               Navigator.pop(context);
               Navigator.pushNamed(
                 context,
-                Routes.manageCentrals,
+                Routes.manageCentralUnits,
+              ).then((_) => onBack());
+            },
+          ),
+          NeumorphicListTile(
+            leading: Icon(CustomIcons.probe, color: MyColors.lightThemeFont),
+            title: Text('Manage leak probes',
+                style: Theme.of(context).textTheme.displaySmall),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(
+                context,
+                Routes.manageLeakProbes,
               ).then((_) => onBack());
             },
           ),

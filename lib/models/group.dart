@@ -24,6 +24,11 @@ class Group implements Photographable {
 
   Group({required this.name});
 
+  get leakProbes => centralUnits.fold<List<dynamic>>([], (acc, unit) {
+        acc.addAll(unit.leakProbes);
+        return acc;
+      });
+
   int centralUnitsNumber() => centralUnits.length;
 
   int detectedLeaksCount() => centralUnits.fold(

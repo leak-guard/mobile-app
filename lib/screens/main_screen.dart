@@ -2,20 +2,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/screens/group_leak_probes_screen.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/floating_data_generator.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
-import 'package:leak_guard/widgets/app_bar.dart';
-import 'package:leak_guard/widgets/block_time_clock.dart';
-import 'package:leak_guard/widgets/blurred_top_edge.dart';
-import 'package:leak_guard/widgets/drawer_menu.dart';
-import 'package:leak_guard/widgets/horizontal_group_list.dart';
-import 'package:leak_guard/widgets/panel.dart';
-import 'package:leak_guard/widgets/water_block_button.dart';
-import 'package:leak_guard/widgets/water_usage_arc.dart';
-import 'package:leak_guard/widgets/graph_water_usage.dart';
+import 'package:leak_guard/widgets/custom_app_bar.dart';
+import 'package:leak_guard/widgets/block_clock_widget.dart';
+import 'package:leak_guard/widgets/blurred_top_widget.dart';
+import 'package:leak_guard/widgets/custom_drawer.dart';
+import 'package:leak_guard/widgets/horizontal_list_widget.dart';
+import 'package:leak_guard/widgets/panel_widget.dart';
+import 'package:leak_guard/widgets/water_block_widget.dart';
+import 'package:leak_guard/widgets/water_usage_arc_widget.dart';
+import 'package:leak_guard/widgets/graph_water_usage_widget.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -166,18 +167,18 @@ class _MainScreenState extends State<MainScreen> {
       onHorizontalDragEnd: _handleSwipe,
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: DrawerMenu(
+        drawer: CustomDrawer(
           onBack: _onBack,
         ),
-        appBar: CustomNeumorphicAppBar(
+        appBar: CustomAppBar(
           leadingIcon: const Icon(Icons.menu),
           onLeadingTap: _openDrawer,
           title: MyStrings.appName,
           trailingIcon: const Icon(Icons.refresh),
           onTrailingTap: _refreshData,
           bottomWidgets: [
-            HorizontalGroupList(
-              groups: _appData.groups,
+            HorizontalListWidget(
+              groups: _appData.groups.map((e) => e.name).toList(),
               selectedIndex: groupIndex,
               onIndexChanged: _handleGroupChange,
             ),
@@ -206,7 +207,7 @@ class _MainScreenState extends State<MainScreen> {
 
             final data = snapshot.data!;
 
-            return BlurredTopEdge(
+            return BlurredTopWidget(
               height: 20,
               child: ListView(
                 cacheExtent: 1000,
@@ -218,7 +219,7 @@ class _MainScreenState extends State<MainScreen> {
                       SizedBox(
                         width: 170,
                         height: 170,
-                        child: WaterUsageArc(
+                        child: WaterUsageArcWidget(
                           currentUsage: data['todaysUsage'],
                           maxUsage: data['maxUsage'],
                           flowRate: data['flowRate'],
@@ -226,7 +227,7 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
-                        child: WaterBlockButton(
+                        child: WaterBlockWidget(
                           group: currentGroup,
                           handleButtonPress: () {
                             _handleBlockButtonTap(currentGroup);
@@ -241,25 +242,25 @@ class _MainScreenState extends State<MainScreen> {
                     ],
                   ),
                   SizedBox(height: 10),
-                  Panel(
+                  PanelWidget(
                     name: "Water usage",
-                    child: GraphWaterUsage(
+                    child: GraphWaterUsageWidget(
                       data: data['waterUsageData'],
                       maxHeight: 150,
                     ),
                     onTap: () {},
                   ),
-                  Panel(
+                  PanelWidget(
                     name: "Block time",
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                      child: BlockTimeClock(
+                      child: BlockClockWidget(
                         group: currentGroup,
                       ),
                     ),
                     onTap: () {},
                   ),
-                  Panel(
+                  PanelWidget(
                     name: "Leak probes",
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -324,9 +325,19 @@ class _MainScreenState extends State<MainScreen> {
                         ],
                       ),
                     ),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        Routes.groupLeakProbes,
+                        arguments: GroupLeakProbesScreenArguments(
+                          currentGroup,
+                        ),
+                      ).then((_) {
+                        setState(() {});
+                      });
+                    },
                   ),
-                  Panel(
+                  PanelWidget(
                     name: "Central units",
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/group_central_relation.dart';
@@ -10,6 +12,7 @@ class AppData {
 
   List<Group> groups = [];
   List<CentralUnit> centralUnits = [];
+  List<LeakProbe> leakProbes = [];
   bool isLoaded = false;
 
   factory AppData() {
@@ -30,7 +33,7 @@ class AppData {
     groups = futures[0] as List<Group>;
     final centralsMap = futures[1] as Map<int, CentralUnit>;
     final relations = futures[2] as List<GroupCentralRelation>;
-    final leakProbes = futures[3] as List<LeakProbe>;
+    leakProbes = futures[3] as List<LeakProbe>;
 
     centralUnits = centralsMap.values.toList();
 

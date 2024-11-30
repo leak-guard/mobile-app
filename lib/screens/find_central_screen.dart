@@ -1,7 +1,7 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/utils/routes.dart';
-import 'package:leak_guard/widgets/app_bar.dart';
-import 'package:leak_guard/widgets/blurred_top_edge.dart';
+import 'package:leak_guard/widgets/custom_app_bar.dart';
+import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:nsd/nsd.dart';
 
 //TODO:  Check if founded centrals are already in the list by MAC address
@@ -83,12 +83,12 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomNeumorphicAppBar(
+      appBar: CustomAppBar(
         height: 80,
         onLeadingTap: () => Navigator.pop(context),
         title: 'Find Central Unit',
       ),
-      body: BlurredTopEdge(
+      body: BlurredTopWidget(
         height: 20,
         child: ListView.builder(
           itemCount: _services.length + 2,
@@ -107,7 +107,7 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                   onPressed: () {
                     Navigator.pushNamed(
                       context,
-                      Routes.createCentral,
+                      Routes.createCentralUnit,
                     );
                   },
                   child: Padding(
@@ -171,7 +171,7 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                 onPressed: () {
                   Navigator.pushNamed(
                     context,
-                    Routes.createCentral,
+                    Routes.createCentralUnit,
                     arguments: CreateCentralScreenArguments(
                       service,
                     ),

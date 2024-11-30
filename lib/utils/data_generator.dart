@@ -207,6 +207,7 @@ class DataGenerator {
         imagePath: null,
         address: i,
       );
+      probe.batteryLevel = Random().nextInt(100);
       await _db.addLeakProbe(probe);
     }
   }

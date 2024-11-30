@@ -6,10 +6,10 @@ import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
-import 'package:leak_guard/widgets/add_new_unit_button.dart';
-import 'package:leak_guard/widgets/app_bar.dart';
-import 'package:leak_guard/widgets/blurred_top_edge.dart';
-import 'package:leak_guard/widgets/central_unit_button.dart';
+import 'package:leak_guard/widgets/add_unit_button.dart';
+import 'package:leak_guard/widgets/custom_app_bar.dart';
+import 'package:leak_guard/widgets/blurred_top_widget.dart';
+import 'package:leak_guard/widgets/central_unit_widget.dart';
 
 class CreateGroupScreen extends StatefulWidget {
   const CreateGroupScreen({super.key});
@@ -120,14 +120,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomNeumorphicAppBar(
+      appBar: CustomAppBar(
         height: 80,
         onLeadingTap: () => Navigator.pop(context),
         title: MyStrings.createGroup,
         trailingIcon: const Icon(Icons.check),
         onTrailingTap: _createGroup,
       ),
-      body: BlurredTopEdge(
+      body: BlurredTopWidget(
         height: 20,
         child: Form(
           key: _formKey,
@@ -205,7 +205,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               if (index == 3) {
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: AddNewUnitButton(
+                  child: AddUnitButton(
                     onBack: () => setState(() {}),
                   ),
                 );
@@ -216,7 +216,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               return Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                child: CentralUnitButton(
+                child: CentralUnitWidget(
                   central: central,
                   onPressed: () {
                     setState(() {
@@ -226,8 +226,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   onLongPress: () {
                     Navigator.pushNamed(
                       context,
-                      Routes.detailsCentral,
-                      arguments: DetailsCentralcreenArguments(
+                      Routes.detailsCentralUnit,
+                      arguments: DetailsCentralUnitScreenArguments(
                         central,
                       ),
                     ).then((_) {

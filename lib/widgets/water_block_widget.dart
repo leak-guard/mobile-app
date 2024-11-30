@@ -2,17 +2,17 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/utils/colors.dart';
 
-class WaterBlockButton extends StatefulWidget {
-  const WaterBlockButton(
+class WaterBlockWidget extends StatefulWidget {
+  const WaterBlockWidget(
       {super.key, required this.group, required this.handleButtonPress});
   final Group group;
   final VoidCallback handleButtonPress;
 
   @override
-  State<WaterBlockButton> createState() => _WaterBlockButtonState();
+  State<WaterBlockWidget> createState() => _WaterBlockWidgetState();
 }
 
-class _WaterBlockButtonState extends State<WaterBlockButton> {
+class _WaterBlockWidgetState extends State<WaterBlockWidget> {
   Color _getButtonColor() {
     if (widget.group.status == BlockStatus.noBlocked) {
       return MyColors.blue;

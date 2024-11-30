@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:leak_guard/utils/colors.dart';
 
-class BlurredTopEdge extends StatelessWidget {
+class BlurredTopWidget extends StatelessWidget {
   final Widget child;
   final double height;
 
-  const BlurredTopEdge({
+  const BlurredTopWidget({
     required this.child,
     this.height = 50.0,
     super.key,

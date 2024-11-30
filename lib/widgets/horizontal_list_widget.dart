@@ -2,23 +2,23 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/utils/colors.dart';
 
-class HorizontalGroupList extends StatefulWidget {
-  const HorizontalGroupList({
+class HorizontalListWidget extends StatefulWidget {
+  const HorizontalListWidget({
     super.key,
     required this.groups,
     required this.selectedIndex,
     required this.onIndexChanged,
   });
 
-  final List<Group> groups;
+  final List<String> groups;
   final int selectedIndex;
   final Function(int) onIndexChanged;
 
   @override
-  State<HorizontalGroupList> createState() => _HorizontalGroupListState();
+  State<HorizontalListWidget> createState() => _HorizontalListWidgetState();
 }
 
-class _HorizontalGroupListState extends State<HorizontalGroupList> {
+class _HorizontalListWidgetState extends State<HorizontalListWidget> {
   late ScrollController _scrollController;
   final List<GlobalKey> _keys = [];
 
@@ -39,7 +39,7 @@ class _HorizontalGroupListState extends State<HorizontalGroupList> {
   }
 
   @override
-  void didUpdateWidget(HorizontalGroupList oldWidget) {
+  void didUpdateWidget(HorizontalListWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.groups.length != oldWidget.groups.length) {
       _initializeKeys();
@@ -140,7 +140,7 @@ class _HorizontalGroupListState extends State<HorizontalGroupList> {
                             vertical: BUTTON_VERTICAL_PADDING,
                           ),
                           child: Text(
-                            widget.groups[index].name,
+                            widget.groups[index],
                             style: TextStyle(
                               color: widget.selectedIndex == index
                                   ? MyColors.lightThemeFont

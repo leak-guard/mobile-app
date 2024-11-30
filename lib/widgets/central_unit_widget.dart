@@ -5,8 +5,8 @@ import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/utils/colors.dart';
 
-class CentralUnitButton extends StatefulWidget {
-  const CentralUnitButton(
+class CentralUnitWidget extends StatefulWidget {
+  const CentralUnitWidget(
       {super.key,
       required this.central,
       required this.onPressed,
@@ -16,13 +16,11 @@ class CentralUnitButton extends StatefulWidget {
   final VoidCallback? onLongPress;
 
   @override
-  State<CentralUnitButton> createState() => _CentralUnitButtonState();
+  State<CentralUnitWidget> createState() => _CentralUnitWidgetState();
 }
 
-class _CentralUnitButtonState extends State<CentralUnitButton> {
-  final Color _color = MyColors.lightThemeFont;
-
-  Widget _createIcon(IconData icon, num number) {
+class _CentralUnitWidgetState extends State<CentralUnitWidget> {
+  Widget _createIcon(IconData icon, num number, Color color) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -30,6 +28,7 @@ class _CentralUnitButtonState extends State<CentralUnitButton> {
         Icon(
           icon,
           size: 35,
+          color: color,
         ),
         const SizedBox(
           width: 15,
@@ -40,7 +39,7 @@ class _CentralUnitButtonState extends State<CentralUnitButton> {
               textAlign: TextAlign.center,
               number.toString(),
               style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                    color: _color,
+                    color: color,
                     fontSize: 25,
                   )),
         ),
@@ -50,9 +49,10 @@ class _CentralUnitButtonState extends State<CentralUnitButton> {
 
   @override
   Widget build(BuildContext context) {
-    Color _color = !widget.central.chosen
-        ? MyColors.lightThemeFont
-        : MyColors.lightThemeFont.withOpacity(0.7);
+    Color color = widget.central.chosen
+        ? MyColors.lightThemeFont.withOpacity(0.7)
+        : MyColors.lightThemeFont;
+
     return GestureDetector(
       onLongPress: widget.onLongPress,
       child: NeumorphicButton(
@@ -74,7 +74,7 @@ class _CentralUnitButtonState extends State<CentralUnitButton> {
                   overflow: TextOverflow.ellipsis,
                   widget.central.name,
                   style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                        color: _color,
+                        color: color,
                       ),
                 ),
               ),
@@ -85,7 +85,7 @@ class _CentralUnitButtonState extends State<CentralUnitButton> {
                     child: Container(
                       height: 130,
                       decoration: BoxDecoration(
-                        color: MyColors.lightThemeFont,
+                        color: color,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: widget.central.imagePath != null
@@ -114,12 +114,12 @@ class _CentralUnitButtonState extends State<CentralUnitButton> {
                       child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _createIcon(
-                          CustomIcons.probe, widget.central.leakProbesCount()),
+                      _createIcon(CustomIcons.probe,
+                          widget.central.leakProbesCount(), color),
                       _createIcon(CustomIcons.battery_low,
-                          widget.central.leakProbeLowBatteryCount()),
+                          widget.central.leakProbeLowBatteryCount(), color),
                       _createIcon(CustomIcons.leak,
-                          widget.central.detectedLeaksCount()),
+                          widget.central.detectedLeaksCount(), color),
                     ],
                   ))
                 ],
