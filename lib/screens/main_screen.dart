@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/group.dart';
-import 'package:leak_guard/screens/group_leak_probes_screen.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/floating_data_generator.dart';
@@ -364,7 +363,7 @@ class _MainScreenState extends State<MainScreen> {
                           Row(
                             children: [
                               NeumorphicIcon(
-                                Icons.signal_cellular_alt,
+                                Icons.wifi,
                                 size: 30,
                                 style: NeumorphicStyle(
                                   color: MyColors.lightThemeFont,
@@ -382,7 +381,7 @@ class _MainScreenState extends State<MainScreen> {
                           Row(
                             children: [
                               NeumorphicIcon(
-                                Icons.lock_outline,
+                                Icons.lock,
                                 size: 30,
                                 style: NeumorphicStyle(
                                   color: MyColors.lightThemeFont,

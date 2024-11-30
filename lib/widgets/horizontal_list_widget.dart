@@ -1,5 +1,4 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/utils/colors.dart';
 
 class HorizontalListWidget extends StatefulWidget {
@@ -22,7 +21,6 @@ class _HorizontalListWidgetState extends State<HorizontalListWidget> {
   late ScrollController _scrollController;
   final List<GlobalKey> _keys = [];
 
-  // Stałe do zarządzania paddingami
   static const double ITEM_HORIZONTAL_PADDING = 8.0;
   static const double BUTTON_HORIZONTAL_PADDING = 20.0;
   static const double ITEM_VERTICAL_PADDING = 10.0;
@@ -110,14 +108,14 @@ class _HorizontalListWidgetState extends State<HorizontalListWidget> {
                 controller: _scrollController,
                 scrollDirection: Axis.horizontal,
                 child: Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: ITEM_HORIZONTAL_PADDING),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: ITEM_HORIZONTAL_PADDING),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: List.generate(
                       widget.groups.length,
                       (index) => Padding(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: ITEM_HORIZONTAL_PADDING,
                           vertical: ITEM_VERTICAL_PADDING,
                         ),
@@ -135,7 +133,7 @@ class _HorizontalListWidgetState extends State<HorizontalListWidget> {
                             ),
                             lightSource: LightSource.topLeft,
                           ),
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: BUTTON_HORIZONTAL_PADDING,
                             vertical: BUTTON_VERTICAL_PADDING,
                           ),

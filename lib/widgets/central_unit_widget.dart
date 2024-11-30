@@ -20,6 +20,45 @@ class CentralUnitWidget extends StatefulWidget {
 }
 
 class _CentralUnitWidgetState extends State<CentralUnitWidget> {
+  get _color => widget.central.chosen
+      ? MyColors.lightThemeFont.withOpacity(0.7)
+      : MyColors.lightThemeFont;
+
+  Widget _createTitle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          widget.central.name,
+          style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                color: _color,
+              ),
+        ),
+        _createTitleLeadingIcons(),
+      ],
+    );
+  }
+
+  Widget _createTitleLeadingIcons() {
+    return Row(
+      children: [
+        Icon(
+          widget.central.isBlocked ? Icons.lock_outline : Icons.lock_open,
+          color: _color,
+          size: 30,
+        ),
+        const SizedBox(width: 7),
+        Icon(
+          widget.central.isConnection ? Icons.wifi : Icons.wifi_off,
+          color: _color,
+          size: 30,
+        ),
+      ],
+    );
+  }
+
   Widget _createIcon(IconData icon, num number, Color color) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -49,10 +88,6 @@ class _CentralUnitWidgetState extends State<CentralUnitWidget> {
 
   @override
   Widget build(BuildContext context) {
-    Color color = widget.central.chosen
-        ? MyColors.lightThemeFont.withOpacity(0.7)
-        : MyColors.lightThemeFont;
-
     return GestureDetector(
       onLongPress: widget.onLongPress,
       child: NeumorphicButton(
@@ -68,16 +103,7 @@ class _CentralUnitWidgetState extends State<CentralUnitWidget> {
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
           child: Column(
             children: [
-              Center(
-                child: Text(
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  widget.central.name,
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                        color: color,
-                      ),
-                ),
-              ),
+              _createTitle(),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -85,7 +111,7 @@ class _CentralUnitWidgetState extends State<CentralUnitWidget> {
                     child: Container(
                       height: 130,
                       decoration: BoxDecoration(
-                        color: color,
+                        color: _color,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: widget.central.imagePath != null
@@ -115,11 +141,11 @@ class _CentralUnitWidgetState extends State<CentralUnitWidget> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _createIcon(CustomIcons.probe,
-                          widget.central.leakProbesCount(), color),
+                          widget.central.leakProbesCount(), _color),
                       _createIcon(CustomIcons.battery_low,
-                          widget.central.leakProbeLowBatteryCount(), color),
+                          widget.central.leakProbeLowBatteryCount(), _color),
                       _createIcon(CustomIcons.leak,
-                          widget.central.detectedLeaksCount(), color),
+                          widget.central.detectedLeaksCount(), _color),
                     ],
                   ))
                 ],
