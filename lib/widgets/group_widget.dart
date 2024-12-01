@@ -106,10 +106,10 @@ class _GroupWidgetState extends State<GroupWidget> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(width: 5),
+                          const SizedBox(width: 3),
                           _createIcon(CustomIcons.central_unit,
                               widget.group.centralUnitsNumber()),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 7),
                           _createIcon(
                               CustomIcons.probe, widget.group.leakProbeNumber())
                         ],
@@ -118,10 +118,10 @@ class _GroupWidgetState extends State<GroupWidget> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(width: 5),
+                          const SizedBox(width: 3),
                           _createIcon(Icons.signal_cellular_alt,
                               widget.group.connectedCentralUnits()),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 7),
                           _createIcon(CustomIcons.battery_low,
                               widget.group.leakProbeLowBatteryNumber())
                         ],
@@ -130,10 +130,10 @@ class _GroupWidgetState extends State<GroupWidget> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(width: 5),
+                          const SizedBox(width: 3),
                           _createIcon(Icons.lock_outline,
                               widget.group.lockedCentralUnitsCount()),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 7),
                           _createIcon(CustomIcons.leak,
                               widget.group.detectedLeaksCount())
                         ],

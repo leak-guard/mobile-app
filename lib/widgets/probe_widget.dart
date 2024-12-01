@@ -70,7 +70,7 @@ class _ProbeWidgetState extends State<ProbeWidget> {
       );
     }
 
-    return Row(
+    return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(width: 10),

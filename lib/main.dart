@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:leak_guard/services/app_data.dart';
+import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
@@ -13,6 +14,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDocDirectory = await getApplicationDocumentsDirectory();
   await configureNetworkTools(appDocDirectory.path, enableDebugging: true);
+
+  NetworkService();
 
   await Firebase.initializeApp();
   final notificationSettings =
