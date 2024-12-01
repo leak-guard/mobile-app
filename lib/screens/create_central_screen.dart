@@ -4,6 +4,7 @@ import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/widgets/wifi_dropdown_widget.dart';
 import 'package:nsd/nsd.dart';
 
 class CreateCentralScreen extends StatefulWidget {
@@ -21,11 +22,14 @@ class CreateCentralScreen extends StatefulWidget {
 class _CreateCentralScreenState extends State<CreateCentralScreen> {
   final _formKey = GlobalKey<FormState>();
   final _appData = AppData();
-  bool _isValid = true;
+  final api = CustomApi();
+
   final _nameController = TextEditingController();
   final _ipController = TextEditingController();
+  final _ssidController = TextEditingController();
+
   bool _isCentralFound = false;
-  final api = CustomApi();
+  bool _isValid = true;
 
   @override
   void initState() {
@@ -42,6 +46,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
   void dispose() {
     _nameController.dispose();
     _ipController.dispose();
+    _ssidController.dispose();
     super.dispose();
   }
 
@@ -160,6 +165,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
                   ),
                   const SizedBox(width: 8),
                   NeumorphicButton(
+                    padding: const EdgeInsets.all(8),
                     style: NeumorphicStyle(
                       depth: 5,
                       intensity: 0.8,
@@ -223,6 +229,19 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
                     return null;
                   },
                 ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'WiFi Network',
+                style: Theme.of(context).textTheme.displayMedium,
+              ),
+              const SizedBox(height: 12),
+              WifiDropdown(
+                controller: _ssidController,
+                availableNetworks: ['WiFi_1', 'WiFi_2', 'WiFi_3'],
+                onSSIDSelected: (String ssid) {
+                  print('Selected network: $ssid');
+                },
               ),
               const SizedBox(height: 24),
               NeumorphicButton(

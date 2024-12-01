@@ -108,20 +108,17 @@ class CentralUnit implements Photographable {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    // Check if we need to reset cache for new day
     if (_lastTodaysUsageUpdate != null &&
         _lastTodaysUsageUpdate!.day != now.day) {
       _cachedTodaysUsage = null;
     }
 
-    // If we have cached value and it's recent enough, use it
     if (_cachedTodaysUsage != null &&
         _lastTodaysUsageUpdate != null &&
         now.difference(_lastTodaysUsageUpdate!) < _flowRateCacheDuration) {
       return _cachedTodaysUsage!;
     }
 
-    // Get latest data from database
     final flows = await _db.getCentralUnitFlowsBetweenDates(
       centralUnitID!,
       today,
@@ -144,7 +141,6 @@ class CentralUnit implements Photographable {
     final yesterday = DateTime(now.year, now.month, now.day - 1);
     final todayStart = DateTime(now.year, now.month, now.day);
 
-    // Check if we need to reset cache for new day
     if (_lastYesterdayUsageDate != null &&
         _lastYesterdayUsageDate!.day != now.day) {
       _cachedYesterdayUsage = null;
