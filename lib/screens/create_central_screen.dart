@@ -238,7 +238,17 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
               const SizedBox(height: 12),
               WifiDropdown(
                 controller: _ssidController,
-                availableNetworks: ['WiFi_1', 'WiFi_2', 'WiFi_3'],
+                availableNetworks: [
+                  'WiFi_1',
+                  'WiFi_2',
+                  'WiFi_3',
+                  'WiFi_1',
+                  'WiFi_2',
+                  'WiFi_3',
+                  'WiFi_1',
+                  'WiFi_2',
+                  'WiFi_3'
+                ],
                 onSSIDSelected: (String ssid) {
                   print('Selected network: $ssid');
                 },
