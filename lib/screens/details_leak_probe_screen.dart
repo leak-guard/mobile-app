@@ -3,7 +3,7 @@ import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
-import 'package:leak_guard/utils/custom_text_filed_decorator.dart';
+import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
@@ -178,7 +178,7 @@ class _DetailsLeakProbeScreenState extends State<DetailsLeakProbeScreen> {
           style: Theme.of(context).textTheme.displayMedium,
         ),
         const SizedBox(height: 8),
-        _buildNeumorphicTextField(
+        CustomTextField(
           controller: _nameController,
           hintText: 'Enter leak probe unit name...',
           validator: (value) {
@@ -208,7 +208,7 @@ class _DetailsLeakProbeScreenState extends State<DetailsLeakProbeScreen> {
           style: Theme.of(context).textTheme.displayMedium,
         ),
         const SizedBox(height: 12),
-        _buildNeumorphicTextField(
+        CustomTextField(
           controller: _descriptionController,
           hintText: 'Enter description...',
           maxLines: 3,
@@ -224,45 +224,6 @@ class _DetailsLeakProbeScreenState extends State<DetailsLeakProbeScreen> {
           },
         ),
       ],
-    );
-  }
-
-  Widget _buildNeumorphicTextField({
-    required TextEditingController controller,
-    required String hintText,
-    String? Function(String?)? validator,
-    void Function(String)? onChanged,
-    TextInputType? keyboardType,
-    int? maxLines,
-    bool enabled = true,
-  }) {
-    return Neumorphic(
-      style: NeumorphicStyle(
-        depth: -5,
-        intensity: 0.8,
-        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: CustomTextFiledDecorator(
-        textFormField: TextFormField(
-          controller: controller,
-          enabled: enabled,
-          maxLines: maxLines ?? 1,
-          keyboardType: keyboardType,
-          style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                fontWeight: FontWeight.normal,
-              ),
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: hintText,
-            hintStyle: TextStyle(
-              color: MyColors.lightThemeFont.withOpacity(0.5),
-            ),
-          ),
-          validator: validator,
-          onChanged: onChanged,
-        ),
-      ),
     );
   }
 

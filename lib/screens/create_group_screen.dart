@@ -4,7 +4,7 @@ import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
-import 'package:leak_guard/utils/custom_text_filed_decorator.dart';
+import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/add_unit_button.dart';
@@ -121,38 +121,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     );
   }
 
-  Widget _buildNeumorphicTextField({
-    required TextEditingController controller,
-    required String hintText,
-    String? Function(String?)? validator,
-    int? maxLines,
-  }) {
-    return Neumorphic(
-      style: NeumorphicStyle(
-        depth: -5,
-        intensity: 0.8,
-        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: CustomTextFiledDecorator(
-        textFormField: TextFormField(
-          controller: controller,
-          maxLines: maxLines ?? 1,
-          style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                fontWeight: FontWeight.normal,
-              ),
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: hintText,
-            hintStyle:
-                TextStyle(color: MyColors.lightThemeFont.withOpacity(0.5)),
-          ),
-          validator: validator,
-        ),
-      ),
-    );
-  }
-
   List<Widget> _buildCentralUnitsList() {
     return _appData.centralUnits.map((central) {
       return Padding(
@@ -200,7 +168,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               Text('Group name',
                   style: Theme.of(context).textTheme.displayMedium),
               const SizedBox(height: 8),
-              _buildNeumorphicTextField(
+              CustomTextField(
                 controller: _nameController,
                 hintText: 'Enter group name...',
                 validator: (value) {
@@ -227,7 +195,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               Text('Description',
                   style: Theme.of(context).textTheme.displayMedium),
               const SizedBox(height: 8),
-              _buildNeumorphicTextField(
+              CustomTextField(
                 controller: _descriptionController,
                 hintText: 'Enter description...',
                 maxLines: 3,

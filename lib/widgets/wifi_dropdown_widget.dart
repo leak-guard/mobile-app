@@ -3,7 +3,7 @@ import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/services/permissions_service.dart';
 import 'package:leak_guard/models/wifi_network.dart';
-import 'package:leak_guard/utils/custom_text_filed_decorator.dart';
+import 'package:leak_guard/widgets/custom_text_filed.dart';
 
 class WifiDropdown extends StatefulWidget {
   final TextEditingController controller;
@@ -152,36 +152,10 @@ class _WifiDropdownState extends State<WifiDropdown> {
         Row(
           children: [
             Expanded(
-              child: Neumorphic(
-                style: NeumorphicStyle(
-                  depth: -5,
-                  intensity: 0.8,
-                  boxShape: NeumorphicBoxShape.roundRect(
-                    BorderRadius.circular(12),
-                  ),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                child: CustomTextFiledDecorator(
-                  textFormField: TextFormField(
-                    controller: widget.controller,
-                    style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                          fontWeight: FontWeight.normal,
-                        ),
-                    decoration: InputDecoration(
-                      fillColor: MyColors.background,
-                      border: InputBorder.none,
-                      hintText: 'Select WiFi network...',
-                      hintStyle: TextStyle(
-                        color: MyColors.lightThemeFont.withOpacity(0.5),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+                child: CustomTextField(
+              controller: widget.controller,
+              hintText: 'Select WiFi network...',
+            )),
             const SizedBox(width: 8),
             NeumorphicButton(
               padding: const EdgeInsets.all(8),

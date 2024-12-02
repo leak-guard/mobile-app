@@ -2,7 +2,7 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/wifi_network.dart';
 import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/app_data.dart';
-import 'package:leak_guard/utils/custom_text_filed_decorator.dart';
+import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/utils/colors.dart';
@@ -29,6 +29,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
   final _nameController = TextEditingController();
   final _ipController = TextEditingController();
   final _wifiController = TextEditingController();
+  WifiNetwork? _selectedNetwork;
 
   bool _isCentralFound = false;
   bool _isValid = true;
@@ -70,6 +71,36 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
         });
       }
     }
+  }
+
+  Widget _buildWifiSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'WiFi credentials',
+          style: Theme.of(context).textTheme.displayLarge,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'WiFi SSID',
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
+        const SizedBox(height: 12),
+        WifiDropdown(
+          controller: _wifiController,
+          onNetworkSelected: (network) {
+            // Obsługa wybranej sieci
+            print('Selected network: ${network.ssid}');
+            print('Signal strength: ${network.signalStrength}');
+            print('Is secure: ${network.isSecure}');
+            _selectedNetwork = network;
+          },
+        ),
+        const SizedBox(height: 12),
+        const SizedBox(height: 24),
+      ],
+    );
   }
 
   void _showDialog(BuildContext context, String title, String message) {
@@ -137,37 +168,10 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: Neumorphic(
-                      style: NeumorphicStyle(
-                        depth: -5,
-                        intensity: 0.8,
-                        boxShape: NeumorphicBoxShape.roundRect(
-                          BorderRadius.circular(12),
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      child: CustomTextFiledDecorator(
-                        textFormField: TextFormField(
-                          controller: _ipController,
-                          readOnly: _isCentralFound,
-                          style: Theme.of(context)
-                              .textTheme
-                              .displaySmall!
-                              .copyWith(
-                                fontWeight: FontWeight.normal,
-                              ),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Enter IP address...',
-                            hintStyle: TextStyle(
-                                color:
-                                    MyColors.lightThemeFont.withOpacity(0.5)),
-                          ),
-                        ),
-                      ),
+                    child: CustomTextField(
+                      controller: _ipController,
+                      hintText: 'Enter IP address...',
+                      readOnly: _isCentralFound,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -193,68 +197,31 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
                 style: Theme.of(context).textTheme.displayMedium,
               ),
               const SizedBox(height: 12),
-              Neumorphic(
-                style: NeumorphicStyle(
-                  depth: -5,
-                  intensity: 0.8,
-                  boxShape: NeumorphicBoxShape.roundRect(
-                    BorderRadius.circular(12),
-                  ),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                child: CustomTextFiledDecorator(
-                  textFormField: TextFormField(
-                    controller: _nameController,
-                    style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                          fontWeight: FontWeight.normal,
-                        ),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Enter name...',
-                      hintStyle: TextStyle(
-                          color: MyColors.lightThemeFont.withOpacity(0.5)),
-                    ),
-                    validator: (value) {
-                      String? errorMessage;
-                      if (value == null || value.trim().isEmpty) {
-                        errorMessage = 'Please enter a name';
-                      } else if (_appData.centralUnits.any((c) =>
-                          c.name.toLowerCase() == value.trim().toLowerCase())) {
-                        errorMessage = 'Central unit name already exists';
-                      }
+              CustomTextField(
+                controller: _nameController,
+                hintText: 'Enter name...',
+                validator: (value) {
+                  String? errorMessage;
+                  if (value == null || value.trim().isEmpty) {
+                    errorMessage = 'Please enter a name';
+                  } else if (_appData.centralUnits.any((c) =>
+                      c.name.toLowerCase() == value.trim().toLowerCase())) {
+                    errorMessage = 'Central unit name already exists';
+                  }
 
-                      if (errorMessage != null) {
-                        Future.microtask(() {
-                          setState(() => _isValid = false);
-                          _showDialog(context, 'Wrong name', errorMessage!);
-                        });
-                      } else {
-                        setState(() => _isValid = true);
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'WiFi Network',
-                style: Theme.of(context).textTheme.displayMedium,
-              ),
-              const SizedBox(height: 12),
-              WifiDropdown(
-                controller: _wifiController,
-                onNetworkSelected: (network) {
-                  // Obsługa wybranej sieci
-                  print('Selected network: ${network.ssid}');
-                  print('Signal strength: ${network.signalStrength}');
-                  print('Is secure: ${network.isSecure}');
+                  if (errorMessage != null) {
+                    Future.microtask(() {
+                      setState(() => _isValid = false);
+                      _showDialog(context, 'Wrong name', errorMessage!);
+                    });
+                  } else {
+                    setState(() => _isValid = true);
+                  }
+                  return null;
                 },
               ),
               const SizedBox(height: 24),
+              _buildWifiSection(),
               NeumorphicButton(
                 onPressed: () => _checkCentralUnit(_ipController.text),
                 child: const Text("Central Unit info"),
