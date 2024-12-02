@@ -4,6 +4,7 @@ import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/utils/custom_text_filed_decorator.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
@@ -279,18 +280,21 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
         boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: TextFormField(
-        controller: controller,
-        maxLines: maxLines ?? 1,
-        style: Theme.of(context).textTheme.displaySmall!.copyWith(
-              fontWeight: FontWeight.normal,
-            ),
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: hintText,
-          hintStyle: TextStyle(color: MyColors.lightThemeFont.withOpacity(0.5)),
+      child: CustomTextFiledDecorator(
+        textFormField: TextFormField(
+          controller: controller,
+          maxLines: maxLines ?? 1,
+          style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                fontWeight: FontWeight.normal,
+              ),
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: hintText,
+            hintStyle:
+                TextStyle(color: MyColors.lightThemeFont.withOpacity(0.5)),
+          ),
+          validator: validator,
         ),
-        validator: validator,
       ),
     );
   }

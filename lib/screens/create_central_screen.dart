@@ -1,6 +1,8 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/models/wifi_network.dart';
 import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/app_data.dart';
+import 'package:leak_guard/utils/custom_text_filed_decorator.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/utils/colors.dart';
@@ -26,7 +28,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
 
   final _nameController = TextEditingController();
   final _ipController = TextEditingController();
-  final _ssidController = TextEditingController();
+  final _wifiController = TextEditingController();
 
   bool _isCentralFound = false;
   bool _isValid = true;
@@ -46,7 +48,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
   void dispose() {
     _nameController.dispose();
     _ipController.dispose();
-    _ssidController.dispose();
+    _wifiController.dispose();
     super.dispose();
   }
 
@@ -147,18 +149,23 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
                         horizontal: 16,
                         vertical: 4,
                       ),
-                      child: TextFormField(
-                        controller: _ipController,
-                        readOnly: _isCentralFound,
-                        style:
-                            Theme.of(context).textTheme.displaySmall!.copyWith(
-                                  fontWeight: FontWeight.normal,
-                                ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Enter IP address...',
-                          hintStyle: TextStyle(
-                              color: MyColors.lightThemeFont.withOpacity(0.5)),
+                      child: CustomTextFiledDecorator(
+                        textFormField: TextFormField(
+                          controller: _ipController,
+                          readOnly: _isCentralFound,
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall!
+                              .copyWith(
+                                fontWeight: FontWeight.normal,
+                              ),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Enter IP address...',
+                            hintStyle: TextStyle(
+                                color:
+                                    MyColors.lightThemeFont.withOpacity(0.5)),
+                          ),
                         ),
                       ),
                     ),
@@ -198,36 +205,38 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
                   horizontal: 16,
                   vertical: 4,
                 ),
-                child: TextFormField(
-                  controller: _nameController,
-                  style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                        fontWeight: FontWeight.normal,
-                      ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Enter name...',
-                    hintStyle: TextStyle(
-                        color: MyColors.lightThemeFont.withOpacity(0.5)),
-                  ),
-                  validator: (value) {
-                    String? errorMessage;
-                    if (value == null || value.trim().isEmpty) {
-                      errorMessage = 'Please enter a name';
-                    } else if (_appData.centralUnits.any((c) =>
-                        c.name.toLowerCase() == value.trim().toLowerCase())) {
-                      errorMessage = 'Central unit name already exists';
-                    }
+                child: CustomTextFiledDecorator(
+                  textFormField: TextFormField(
+                    controller: _nameController,
+                    style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                          fontWeight: FontWeight.normal,
+                        ),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Enter name...',
+                      hintStyle: TextStyle(
+                          color: MyColors.lightThemeFont.withOpacity(0.5)),
+                    ),
+                    validator: (value) {
+                      String? errorMessage;
+                      if (value == null || value.trim().isEmpty) {
+                        errorMessage = 'Please enter a name';
+                      } else if (_appData.centralUnits.any((c) =>
+                          c.name.toLowerCase() == value.trim().toLowerCase())) {
+                        errorMessage = 'Central unit name already exists';
+                      }
 
-                    if (errorMessage != null) {
-                      Future.microtask(() {
-                        setState(() => _isValid = false);
-                        _showDialog(context, 'Wrong name', errorMessage!);
-                      });
-                    } else {
-                      setState(() => _isValid = true);
-                    }
-                    return null;
-                  },
+                      if (errorMessage != null) {
+                        Future.microtask(() {
+                          setState(() => _isValid = false);
+                          _showDialog(context, 'Wrong name', errorMessage!);
+                        });
+                      } else {
+                        setState(() => _isValid = true);
+                      }
+                      return null;
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -237,20 +246,12 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
               ),
               const SizedBox(height: 12),
               WifiDropdown(
-                controller: _ssidController,
-                availableNetworks: [
-                  'WiFi_1',
-                  'WiFi_2',
-                  'WiFi_3',
-                  'WiFi_1',
-                  'WiFi_2',
-                  'WiFi_3',
-                  'WiFi_1',
-                  'WiFi_2',
-                  'WiFi_3'
-                ],
-                onSSIDSelected: (String ssid) {
-                  print('Selected network: $ssid');
+                controller: _wifiController,
+                onNetworkSelected: (network) {
+                  // Obsługa wybranej sieci
+                  print('Selected network: ${network.ssid}');
+                  print('Signal strength: ${network.signalStrength}');
+                  print('Is secure: ${network.isSecure}');
                 },
               ),
               const SizedBox(height: 24),

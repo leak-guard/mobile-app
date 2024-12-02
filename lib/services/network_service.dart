@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:app_settings/app_settings.dart';
 import 'package:leak_guard/models/wifi_network.dart';
+import 'package:leak_guard/services/permissions_service.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:nsd/nsd.dart';
 import 'package:wifi_scan/wifi_scan.dart';
@@ -36,6 +36,8 @@ class NetworkService {
   Future<void> scanWifiNetworks() async {
     isSearchingWifi = true;
     _wifiStreamController.add(availableWifiNetworks);
+    //TODO: Remove this delay
+    await Future.delayed(const Duration(seconds: 1));
 
     try {
       final locationEnabled = await requestLocationService();
@@ -164,12 +166,11 @@ class NetworkService {
   Future<bool> requestLocationService() async {
     final can = await WiFiScan.instance.canStartScan();
     if (can == CanStartScan.noLocationServiceDisabled) {
-      await AppSettings.openAppSettings(type: AppSettingsType.location);
-      //TODO: delete the delay
-      await Future.delayed(const Duration(seconds: 2));
-      return await WiFiScan.instance.canStartScan() == CanStartScan.yes;
+      final locationGranted =
+          await PermissionsService().ensureLocationPermission();
+      if (!locationGranted) return false;
     }
-    return can == CanStartScan.yes;
+    return true;
   }
 
   Future<void> dispose() async {

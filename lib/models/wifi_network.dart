@@ -14,9 +14,8 @@ class WifiNetwork {
   });
 
   SignalStrength get signalQuality {
-    if (signalStrength >= -50) return SignalStrength.excellent;
-    if (signalStrength >= -60) return SignalStrength.good;
-    if (signalStrength >= -70) return SignalStrength.fair;
+    if (signalStrength >= -60) return SignalStrength.excellent;
+    if (signalStrength >= -75) return SignalStrength.good;
     return SignalStrength.poor;
   }
 
@@ -44,7 +43,6 @@ class WifiNetwork {
 enum SignalStrength {
   excellent,
   good,
-  fair,
   poor;
 
   String get label {
@@ -53,8 +51,6 @@ enum SignalStrength {
         return 'Excellent';
       case SignalStrength.good:
         return 'Good';
-      case SignalStrength.fair:
-        return 'Fair';
       case SignalStrength.poor:
         return 'Poor';
     }

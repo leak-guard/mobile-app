@@ -1,16 +1,18 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/services/network_service.dart';
+import 'package:leak_guard/services/permissions_service.dart';
+import 'package:leak_guard/models/wifi_network.dart';
+import 'package:leak_guard/utils/custom_text_filed_decorator.dart';
 
 class WifiDropdown extends StatefulWidget {
   final TextEditingController controller;
-  final List<String> availableNetworks;
-  final Function(String)? onSSIDSelected;
+  final Function(WifiNetwork) onNetworkSelected;
 
   const WifiDropdown({
     super.key,
     required this.controller,
-    required this.availableNetworks,
-    this.onSSIDSelected,
+    required this.onNetworkSelected,
   });
 
   @override
@@ -20,42 +22,53 @@ class WifiDropdown extends StatefulWidget {
 class _WifiDropdownState extends State<WifiDropdown> {
   bool _isExpanded = false;
   final ScrollController _scrollController = ScrollController();
-  get _listHeight => widget.availableNetworks.length >= 3
-      ? 150.0
-      : widget.availableNetworks.length * 55.0;
+  final _networkService = NetworkService();
+  final _permissionsService = PermissionsService();
 
-  Widget _buildListContent() {
-    if (widget.availableNetworks.isEmpty) {
-      return SizedBox(
-        height: 150,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.wifi_off_rounded,
-                  size: 32,
-                  color: MyColors.lightThemeFont.withOpacity(0.5),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'No WiFi networks found',
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: MyColors.lightThemeFont.withOpacity(0.5),
-                      ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
+  double _getListHeight(List<WifiNetwork> networks) {
+    return networks.length >= 3 ? 150.0 : networks.length * 55.0;
+  }
 
+  Widget _buildPermissionMessage() {
     return SizedBox(
-      height: _listHeight,
+      height: 150,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.location_disabled,
+                size: 32,
+                color: MyColors.lightThemeFont.withOpacity(0.5),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Location permission required',
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      color: MyColors.lightThemeFont.withOpacity(0.5),
+                    ),
+              ),
+              const SizedBox(height: 16),
+              NeumorphicButton(
+                onPressed: () => _permissionsService.ensureLocationPermission(),
+                child: Text(
+                  'Grant Permission',
+                  style: Theme.of(context).textTheme.displaySmall,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildListContent(List<WifiNetwork> networks) {
+    return SizedBox(
+      height: _getListHeight(networks),
       child: RawScrollbar(
         controller: _scrollController,
         thumbVisibility: true,
@@ -67,9 +80,9 @@ class _WifiDropdownState extends State<WifiDropdown> {
           controller: _scrollController,
           shrinkWrap: true,
           padding: EdgeInsets.zero,
-          itemCount: widget.availableNetworks.length,
+          itemCount: networks.length,
           itemBuilder: (context, index) {
-            final network = widget.availableNetworks[index];
+            final network = networks[index];
             return NeumorphicButton(
               style: NeumorphicStyle(
                 depth: 0,
@@ -83,17 +96,34 @@ class _WifiDropdownState extends State<WifiDropdown> {
                 vertical: 12,
               ),
               onPressed: () {
-                widget.controller.text = network;
-                widget.onSSIDSelected?.call(network);
+                widget.controller.text = network.ssid;
+                widget.onNetworkSelected(network);
               },
               child: Row(
                 children: [
-                  const Icon(Icons.wifi),
+                  Icon(_getSignalIcon(network.signalQuality)),
                   const SizedBox(width: 12),
-                  Text(
-                    network,
-                    style: Theme.of(context).textTheme.displaySmall,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          network.ssid,
+                          style: Theme.of(context).textTheme.displaySmall,
+                        ),
+                        Text(
+                          '${network.signalStrength} dBm',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                color: MyColors.lightThemeFont.withOpacity(0.5),
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
+                  if (network.isSecure) const Icon(Icons.lock, size: 16),
                 ],
               ),
             );
@@ -101,6 +131,17 @@ class _WifiDropdownState extends State<WifiDropdown> {
         ),
       ),
     );
+  }
+
+  IconData _getSignalIcon(SignalStrength strength) {
+    switch (strength) {
+      case SignalStrength.excellent:
+        return Icons.wifi;
+      case SignalStrength.good:
+        return Icons.wifi_2_bar;
+      case SignalStrength.poor:
+        return Icons.wifi_1_bar;
+    }
   }
 
   @override
@@ -123,16 +164,19 @@ class _WifiDropdownState extends State<WifiDropdown> {
                   horizontal: 16,
                   vertical: 4,
                 ),
-                child: TextFormField(
-                  controller: widget.controller,
-                  style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                        fontWeight: FontWeight.normal,
+                child: CustomTextFiledDecorator(
+                  textFormField: TextFormField(
+                    controller: widget.controller,
+                    style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                          fontWeight: FontWeight.normal,
+                        ),
+                    decoration: InputDecoration(
+                      fillColor: MyColors.background,
+                      border: InputBorder.none,
+                      hintText: 'Select WiFi network...',
+                      hintStyle: TextStyle(
+                        color: MyColors.lightThemeFont.withOpacity(0.5),
                       ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Select WiFi network...',
-                    hintStyle: TextStyle(
-                      color: MyColors.lightThemeFont.withOpacity(0.5),
                     ),
                   ),
                 ),
@@ -149,9 +193,12 @@ class _WifiDropdownState extends State<WifiDropdown> {
                 ),
               ),
               onPressed: () {
-                setState(() {
-                  _isExpanded = !_isExpanded;
-                });
+                if (_isExpanded) {
+                  setState(() => _isExpanded = false);
+                } else {
+                  _networkService.scanWifiNetworks();
+                  setState(() => _isExpanded = true);
+                }
               },
               child: AnimatedRotation(
                 duration: const Duration(milliseconds: 200),
@@ -175,7 +222,64 @@ class _WifiDropdownState extends State<WifiDropdown> {
                   BorderRadius.circular(12),
                 ),
               ),
-              child: _buildListContent(),
+              child: StreamBuilder<List<WifiNetwork>>(
+                stream: _networkService.wifiStream,
+                builder: (context, snapshot) {
+                  if (_networkService.isSearchingWifi) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                            height: 150,
+                            child: Center(
+                                child: CircularProgressIndicator(
+                              color: MyColors.lightThemeFont,
+                            ))),
+                      ],
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return _buildPermissionMessage();
+                  }
+
+                  final networks = snapshot.data ?? [];
+                  if (networks.isEmpty) {
+                    return SizedBox(
+                      height: 150,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.wifi_off_rounded,
+                                size: 32,
+                                color: MyColors.lightThemeFont.withOpacity(0.5),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'No WiFi networks found',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .displaySmall
+                                    ?.copyWith(
+                                      color: MyColors.lightThemeFont
+                                          .withOpacity(0.5),
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return _buildListContent(networks);
+                },
+              ),
             ),
           ),
         ),
