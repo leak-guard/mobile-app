@@ -4,15 +4,18 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:leak_guard/models/photographable.dart';
+import 'package:leak_guard/services/permissions_service.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PhotoWidget extends StatelessWidget {
   final Photographable item;
   final double size;
   final Function onPhotoChanged;
+  final _permissionsService = PermissionsService();
 
-  const PhotoWidget({
+  PhotoWidget({
     Key? key,
     required this.item,
     this.size = 120,
@@ -44,34 +47,6 @@ class PhotoWidget extends StatelessWidget {
     return croppedFile?.path;
   }
 
-  Future<void> _checkAndRequestPermissions(ImageSource source) async {
-    if (source == ImageSource.camera) {
-      final status = await Permission.camera.status;
-      if (status.isDenied) {
-        final result = await Permission.camera.request();
-        if (result.isPermanentlyDenied) {
-          // Przekieruj użytkownika do ustawień
-          openAppSettings();
-          return;
-        }
-        if (result.isDenied) {
-          return;
-        }
-      }
-    } else {
-      if (Platform.isAndroid && await Permission.storage.status.isDenied) {
-        final result = await Permission.storage.request();
-        if (result.isPermanentlyDenied) {
-          openAppSettings();
-          return;
-        }
-        if (result.isDenied) {
-          return;
-        }
-      }
-    }
-  }
-
   Future<void> _pickAndCropImage(BuildContext context) async {
     final ImagePicker picker = ImagePicker();
 
@@ -97,9 +72,14 @@ class PhotoWidget extends StatelessWidget {
                     NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
               ),
               onPressed: () async {
-                await _checkAndRequestPermissions(ImageSource.camera);
-                Navigator.pop(context,
-                    await picker.pickImage(source: ImageSource.camera));
+                if (await _permissionsService
+                    .requestPermission(Permission.camera)) {
+                  Navigator.pop(context,
+                      await picker.pickImage(source: ImageSource.camera));
+                } else {
+                  Navigator.pop(context);
+                  CustomToast.toast('Permission for camera is denied');
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -125,9 +105,14 @@ class PhotoWidget extends StatelessWidget {
                     NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
               ),
               onPressed: () async {
-                await _checkAndRequestPermissions(ImageSource.gallery);
-                Navigator.pop(context,
-                    await picker.pickImage(source: ImageSource.gallery));
+                if (await _permissionsService
+                    .requestPermission(Permission.storage)) {
+                  Navigator.pop(context,
+                      await picker.pickImage(source: ImageSource.gallery));
+                } else {
+                  Navigator.pop(context);
+                  CustomToast.toast('Permission for storage is denied');
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -150,7 +135,6 @@ class PhotoWidget extends StatelessWidget {
     );
 
     if (image != null) {
-      // Przytnij zdjęcie
       final croppedPath = await _cropImage(image.path);
       if (croppedPath != null) {
         item.setPhoto(croppedPath);

@@ -220,7 +220,9 @@ class _DetailsLeakProbeScreenState extends State<DetailsLeakProbeScreen> {
           item: widget.leakProbe,
           size: MediaQuery.of(context).size.width - 32,
           onPhotoChanged: () {
-            setState(() {});
+            if (mounted) {
+              setState(() {});
+            }
           },
         ),
       ],

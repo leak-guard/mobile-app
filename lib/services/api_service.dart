@@ -16,6 +16,9 @@ class CustomApi {
     _client.connectionTimeout = const Duration(seconds: 5);
   }
 
+  String _user = "root";
+  String _password = "admin1";
+
   Future<Map<String, dynamic>?> _makeRequest(
     String ip,
     String path, {
@@ -44,9 +47,15 @@ class CustomApi {
           throw Exception('Unsupported HTTP method');
       }
 
+      request.headers.set('Authorization',
+          'Basic ${base64Encode(utf8.encode('$_user:$_password'))}');
+
       if (body != null) {
         request.headers.contentType = ContentType.json;
-        request.write(jsonEncode(body));
+        String bodyString = jsonEncode(body);
+        request.headers.contentLength = utf8.encode(bodyString).length;
+        request.write(bodyString);
+        print('Request body: $bodyString');
       }
 
       final response = await request.close();
@@ -56,10 +65,11 @@ class CustomApi {
         if (content.isNotEmpty) {
           return jsonDecode(content);
         }
-        return null;
+        return {"message": "Request successful"};
       }
       throw HttpException('Request failed with status: ${response.statusCode}');
     } catch (e) {
+      print("Error: $e");
       return null;
     }
   }
@@ -173,7 +183,7 @@ class CustomApi {
   }
 
   // MAC Address endpoint (already implemented)
-  Future<(String?, bool)> getCentralMacAddress(String ip) async {
+  Future<String?> getCentralMacAddress(String ip) async {
     int port = ip == MyStrings.mockIp ? 8000 : 80;
 
     try {
@@ -183,11 +193,12 @@ class CustomApi {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(content);
-        return (data['mac'] as String, true);
+        return data['mac'] as String;
       }
-      return (null, false);
+      return null;
     } catch (e) {
-      return (null, false);
+      print("Error: $e");
+      return null;
     }
   }
 }

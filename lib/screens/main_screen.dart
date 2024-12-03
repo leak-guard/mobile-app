@@ -65,7 +65,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void _refreshData() async {
     setState(() {
-      _appData.loadData();
+      _appData.fetchDataFromApi();
     });
   }
 

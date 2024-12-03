@@ -18,6 +18,7 @@ class DetailsCentralUnitScreen extends StatefulWidget {
   State<DetailsCentralUnitScreen> createState() =>
       _DetailsCentralUnitScreenState();
 }
+//TODO: add updating configuration via API
 
 class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -34,7 +35,6 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   late String _initialDescription;
 
   bool _isValid = true;
-  bool _isCentralFound = false;
   bool _isValveNO = false;
   bool _isConfigurationChanged = false;
 
@@ -71,20 +71,14 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   }
 
   Future<void> _checkCentralUnit(String ip) async {
-    setState(() {
-      _isCentralFound = true;
-    });
-    final (macAddress, success) = await _api.getCentralMacAddress(ip);
+    final macAddress = await _api.getCentralMacAddress(ip);
 
     if (mounted) {
-      if (success) {
+      if (macAddress != null) {
         _showDialog(
             'Success', 'Connected to central unit with MAC:\n$macAddress');
       } else {
         _showDialog('Error', 'Could not connect to central unit at IP:\n$ip');
-        setState(() {
-          _isCentralFound = false;
-        });
       }
     }
   }
@@ -300,7 +294,6 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
                 child: CustomTextField(
                   controller: _ipController,
                   hintText: 'IP Address',
-                  enabled: !_isCentralFound,
                 ),
               ),
             ),
@@ -308,15 +301,13 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
             NeumorphicButton(
               padding: const EdgeInsets.all(8),
               style: NeumorphicStyle(
-                depth: !_isCentralFound ? 5 : 0,
+                depth: 5,
                 intensity: 0.8,
                 boxShape: NeumorphicBoxShape.roundRect(
                   BorderRadius.circular(8),
                 ),
               ),
-              onPressed: !_isCentralFound
-                  ? () => _checkCentralUnit(_ipController.text)
-                  : null,
+              onPressed: () => _checkCentralUnit(_ipController.text),
               child: const Icon(
                 Icons.search,
               ),
@@ -336,6 +327,28 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
                 keyboardType: TextInputType.number,
                 onChanged: (_) =>
                     setState(() => _isConfigurationChanged = true),
+                validator: (value) {
+                  int? impulses = int.tryParse(value ?? '');
+                  String? errorMessage;
+                  if (value == null || value.trim().isEmpty) {
+                    errorMessage = 'Please enter a impulses per liter';
+                  }
+
+                  if (impulses != null && impulses <= 0) {
+                    errorMessage =
+                        'Impulses per liter must be a positive number';
+                  }
+
+                  if (errorMessage != null) {
+                    Future.microtask(() {
+                      setState(() => _isValid = false);
+                      _showDialog('Hardware configuration', errorMessage!);
+                    });
+                  } else {
+                    setState(() => _isValid = true);
+                  }
+                  return null;
+                },
               ),
             ),
           ],

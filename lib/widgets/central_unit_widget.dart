@@ -53,7 +53,7 @@ class _CentralUnitWidgetState extends State<CentralUnitWidget> {
         ),
         const SizedBox(width: 7),
         Icon(
-          widget.central.isConnection ? Icons.wifi : Icons.wifi_off,
+          widget.central.isOnline ? Icons.wifi : Icons.wifi_off,
           color: _color,
           size: 30,
         ),

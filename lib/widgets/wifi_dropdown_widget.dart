@@ -4,15 +4,20 @@ import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/services/permissions_service.dart';
 import 'package:leak_guard/models/wifi_network.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class WifiDropdown extends StatefulWidget {
   final TextEditingController controller;
   final Function(WifiNetwork) onNetworkSelected;
+  final VoidCallback? onTextFieldChanged;
+  final String? Function(String?)? validator;
 
   const WifiDropdown({
     super.key,
     required this.controller,
     required this.onNetworkSelected,
+    this.onTextFieldChanged,
+    this.validator,
   });
 
   @override
@@ -53,7 +58,12 @@ class _WifiDropdownState extends State<WifiDropdown> {
               ),
               const SizedBox(height: 16),
               NeumorphicButton(
-                onPressed: () => _permissionsService.ensureLocationPermission(),
+                onPressed: () {
+                  setState(() {
+                    _isExpanded = false;
+                  });
+                  _permissionsService.requestPermission(Permission.location);
+                },
                 child: Text(
                   'Grant Permission',
                   style: Theme.of(context).textTheme.displaySmall,
@@ -96,6 +106,7 @@ class _WifiDropdownState extends State<WifiDropdown> {
                 vertical: 12,
               ),
               onPressed: () {
+                _isExpanded = false;
                 widget.controller.text = network.ssid;
                 widget.onNetworkSelected(network);
               },
@@ -154,7 +165,11 @@ class _WifiDropdownState extends State<WifiDropdown> {
             Expanded(
                 child: CustomTextField(
               controller: widget.controller,
+              onChanged: (_) {
+                widget.onTextFieldChanged?.call();
+              },
               hintText: 'Select WiFi network...',
+              validator: widget.validator,
             )),
             const SizedBox(width: 8),
             NeumorphicButton(
@@ -213,7 +228,7 @@ class _WifiDropdownState extends State<WifiDropdown> {
                     );
                   }
 
-                  if (snapshot.hasError) {
+                  if (_networkService.permissionGranted == false) {
                     return _buildPermissionMessage();
                   }
 

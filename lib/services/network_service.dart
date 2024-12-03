@@ -3,6 +3,7 @@ import 'package:leak_guard/models/wifi_network.dart';
 import 'package:leak_guard/services/permissions_service.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:nsd/nsd.dart';
+import 'package:permission_handler/permission_handler.dart' as ph;
 import 'package:wifi_scan/wifi_scan.dart';
 
 class NetworkService {
@@ -21,6 +22,7 @@ class NetworkService {
   String? currentWifiName;
   bool isSearchingWifi = false;
   bool isSearchingServices = false;
+  bool permissionGranted = true;
 
   final _wifiStreamController = StreamController<List<WifiNetwork>>.broadcast();
   final _servicesStreamController = StreamController<List<Service>>.broadcast();
@@ -30,7 +32,13 @@ class NetworkService {
 
   Future<void> _initializeNetworkInfo() async {
     await scanWifiNetworks();
+    print('Current WiFi network: $currentWifiName');
     startServiceDiscovery();
+  }
+
+  Future<void> getCurrentWifiName() async {
+    currentWifiName = await _networkInfo.getWifiName();
+    currentWifiName = currentWifiName?.replaceAll('"', '');
   }
 
   Future<void> scanWifiNetworks() async {
@@ -40,8 +48,9 @@ class NetworkService {
     await Future.delayed(const Duration(seconds: 1));
 
     try {
-      final locationEnabled = await requestLocationService();
-      if (!locationEnabled) {
+      permissionGranted =
+          await PermissionsService().requestPermission(ph.Permission.location);
+      if (!permissionGranted) {
         throw Exception('Location services are required for WiFi scanning');
       }
 
@@ -50,8 +59,7 @@ class NetworkService {
         throw Exception(_getErrorMessage(can));
       }
 
-      currentWifiName = await _networkInfo.getWifiName();
-      currentWifiName = currentWifiName?.replaceAll('"', '');
+      await getCurrentWifiName();
 
       final result = await WiFiScan.instance.startScan();
       if (!result) {
@@ -167,7 +175,7 @@ class NetworkService {
     final can = await WiFiScan.instance.canStartScan();
     if (can == CanStartScan.noLocationServiceDisabled) {
       final locationGranted =
-          await PermissionsService().ensureLocationPermission();
+          await PermissionsService().requestPermission(ph.Permission.location);
       if (!locationGranted) return false;
     }
     return true;
