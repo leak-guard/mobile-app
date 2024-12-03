@@ -183,7 +183,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
   }
 
   Widget _buildIpSection() {
-    if ((_networkService?.currentWifiName ?? "") == "LeakGuardConfig") {
+    if ((_networkService.currentWifiName ?? "") == "LeakGuardConfig") {
       return const SizedBox();
     }
 

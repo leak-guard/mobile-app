@@ -26,6 +26,9 @@ class CustomApi {
     Map<String, dynamic>? body,
   }) async {
     int port = ip == MyStrings.mockIp ? 8000 : 80;
+    if (ip == "localhost") {
+      return null;
+    }
 
     try {
       late HttpClientRequest request;

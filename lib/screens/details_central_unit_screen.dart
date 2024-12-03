@@ -5,10 +5,12 @@ import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
+import 'package:leak_guard/widgets/probe_widget.dart';
 
 class DetailsCentralUnitScreen extends StatefulWidget {
   const DetailsCentralUnitScreen({super.key, required this.central});
@@ -290,11 +292,9 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
         Row(
           children: [
             Expanded(
-              child: Expanded(
-                child: CustomTextField(
-                  controller: _ipController,
-                  hintText: 'IP Address',
-                ),
+              child: CustomTextField(
+                controller: _ipController,
+                hintText: 'IP Address',
               ),
             ),
             const SizedBox(width: 8),
@@ -510,6 +510,34 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     );
   }
 
+  Widget _buildLeakProbes() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Leak Probes',
+          style: Theme.of(context).textTheme.displayLarge,
+        ),
+        const SizedBox(height: 16),
+        for (LeakProbe leakProbe in widget.central.leakProbes)
+          ProbeWidget(
+            probe: leakProbe,
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                Routes.detailsLeakProbe,
+                arguments: DetailsLeakProbeScreenArguments(
+                  leakProbe,
+                ),
+              ).then((_) {
+                setState(() {});
+              });
+            },
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -537,6 +565,8 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
               _buildInfoSection(),
               const SizedBox(height: 32),
               _buildHardwareConfigSection(),
+              const SizedBox(height: 24),
+              _buildLeakProbes(),
               const SizedBox(height: 24),
               NeumorphicButton(
                 style: NeumorphicStyle(

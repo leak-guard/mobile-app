@@ -2,6 +2,7 @@ import 'package:leak_guard/models/flow.dart';
 import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/models/photographable.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
+import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/database_service.dart';
 
 class CentralUnit implements Photographable {
@@ -15,6 +16,8 @@ class CentralUnit implements Photographable {
   String? description;
   String? imagePath;
   bool isOnline = false;
+
+  final CustomApi _api = CustomApi();
 
   CentralUnit(
       {required this.name,
@@ -81,6 +84,12 @@ class CentralUnit implements Photographable {
   Future<double> getCurrentFlowRate() async {
     if (isBlocked) {
       return 0.0;
+    }
+    final result = await _api.getWaterUsage(addressIP);
+
+    if (result != null) {
+      _cachedCurrentFlowRate = (result['flow_rate'] as int) / 1000.0;
+      return _cachedCurrentFlowRate!;
     }
 
     if (_cachedCurrentFlowRate != null &&

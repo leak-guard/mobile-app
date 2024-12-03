@@ -38,7 +38,7 @@ class AddUnitButton extends StatelessWidget {
         ),
         onPressed: () async {
           await _networkService.getCurrentWifiName();
-          if ((_networkService?.currentWifiName ?? "") == "LeakGuardConfig") {
+          if ((_networkService.currentWifiName ?? "") == "LeakGuardConfig") {
             Service service = Service(
               name: "LeakGuardConfig",
               type: "_leakguard._tcp",

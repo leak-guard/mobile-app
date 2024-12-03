@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
@@ -28,6 +30,17 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _appData = AppData();
   int groupIndex = 0;
+
+  // late final Timer _timer;
+  // @override
+  // void initState() {
+  //   _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+  //     if (mounted) {
+  //       _refreshData();
+  //     }
+  //   });
+  //   super.initState();
+  // }
 
   void _handleGroupChange(int newIndex) {
     setState(() {
@@ -64,9 +77,12 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _refreshData() async {
-    setState(() {
-      _appData.fetchDataFromApi();
-    });
+    print("Refreshing data");
+    if (mounted) {
+      setState(() {
+        _appData.fetchDataFromApi();
+      });
+    }
   }
 
   void _onBack() {
