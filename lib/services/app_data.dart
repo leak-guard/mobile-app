@@ -21,6 +21,8 @@ class AppData {
 
   AppData._internal();
 
+  //TODO: Optimise loading data from the database via group transaction
+
   Future<void> loadData() async {
     // await Future.delayed(const Duration(seconds: 2));
     final futures = await Future.wait([
