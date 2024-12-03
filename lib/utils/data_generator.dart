@@ -233,6 +233,7 @@ class DataGenerator {
         impulsesPerLiter: 1000,
         description: 'Test unit ${i + 1} description',
         imagePath: null,
+        timezoneId: 37,
       );
 
       final centralUnitId = await _db.addCentralUnit(unit);

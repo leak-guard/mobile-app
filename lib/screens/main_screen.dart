@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
+import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/utils/floating_data_generator.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
@@ -30,17 +32,6 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _appData = AppData();
   int groupIndex = 0;
-
-  // late final Timer _timer;
-  // @override
-  // void initState() {
-  //   _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-  //     if (mounted) {
-  //       _refreshData();
-  //     }
-  //   });
-  //   super.initState();
-  // }
 
   void _handleGroupChange(int newIndex) {
     setState(() {
@@ -85,8 +76,217 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  void _refreshDataForCentrals(Group group) async {
+    if (mounted) {
+      CustomToast.toast("Refreshing data");
+      bool successForAll = true;
+      for (CentralUnit central in group.centralUnits) {
+        central.refreshData().then((success) {
+          if (success) {
+            setState(() {});
+          } else {
+            CustomToast.toast(
+                "Could not connect to Central Unit at ip:\n${central.addressIP}");
+            successForAll = false;
+          }
+        });
+      }
+      if (!successForAll) {
+        CustomToast.toast("Could not connect to all Central Units");
+      }
+    }
+  }
+
   void _onBack() {
     setState(() {});
+  }
+
+  Widget _buildScreen(Map<String, dynamic> data, Group currentGroup) {
+    return BlurredTopWidget(
+      height: 20,
+      child: ListView(
+        cacheExtent: 1000,
+        children: [
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              SizedBox(
+                width: 170,
+                height: 170,
+                child: WaterUsageArcWidget(
+                  currentUsage: data['todaysUsage'],
+                  maxUsage: data['maxUsage'],
+                  flowRate: data['flowRate'],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                child: WaterBlockWidget(
+                  group: currentGroup,
+                  handleButtonPress: () {
+                    _handleBlockButtonTap(currentGroup);
+                    setState(() {
+                      for (Group group in _appData.groups) {
+                        group.updateBlockStatus();
+                      }
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          PanelWidget(
+            name: "Water usage",
+            child: GraphWaterUsageWidget(
+              data: data['waterUsageData'],
+              maxHeight: 150,
+            ),
+            onTap: () {},
+          ),
+          PanelWidget(
+            name: "Block time",
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+              child: BlockClockWidget(
+                group: currentGroup,
+              ),
+            ),
+            onTap: () {},
+          ),
+          PanelWidget(
+            name: "Leak probes",
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      NeumorphicIcon(
+                        CustomIcons.probe,
+                        size: 30,
+                        style: NeumorphicStyle(
+                          color: MyColors.lightThemeFont,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                          'Leak probes count: ${currentGroup.leakProbeNumber()}',
+                          style: Theme.of(context).textTheme.displaySmall!),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      NeumorphicIcon(
+                        size: 30,
+                        CustomIcons.battery_low,
+                        style: NeumorphicStyle(
+                          color: MyColors.lightThemeFont,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 1,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                          "Low battery count: ${currentGroup.leakProbeLowBatteryNumber()}",
+                          style: Theme.of(context).textTheme.displaySmall!),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      NeumorphicIcon(
+                        CustomIcons.leak,
+                        size: 30,
+                        style: NeumorphicStyle(
+                          color: MyColors.lightThemeFont,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                          "Detected leaks count: ${currentGroup.detectedLeaksCount()}",
+                          style: Theme.of(context).textTheme.displaySmall!),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                Routes.groupLeakProbes,
+                arguments: GroupLeakProbesScreenArguments(
+                  currentGroup,
+                ),
+              ).then((_) {
+                setState(() {});
+              });
+            },
+          ),
+          PanelWidget(
+            name: "Central units",
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      NeumorphicIcon(
+                        CustomIcons.central_unit,
+                        size: 30,
+                        style: NeumorphicStyle(
+                          color: MyColors.lightThemeFont,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                          'Central units count: ${currentGroup.centralUnitsNumber()}',
+                          style: Theme.of(context).textTheme.displaySmall!),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      NeumorphicIcon(
+                        Icons.wifi,
+                        size: 30,
+                        style: NeumorphicStyle(
+                          color: MyColors.lightThemeFont,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                          'Connected central units: ${currentGroup.connectedCentralUnits()}',
+                          style: Theme.of(context).textTheme.displaySmall!),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      NeumorphicIcon(
+                        Icons.lock,
+                        size: 30,
+                        style: NeumorphicStyle(
+                          color: MyColors.lightThemeFont,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                          'Locked central units: ${currentGroup.lockedCentralUnitsCount()}',
+                          style: Theme.of(context).textTheme.displaySmall!),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -190,7 +390,7 @@ class _MainScreenState extends State<MainScreen> {
           onLeadingTap: _openDrawer,
           title: MyStrings.appName,
           trailingIcon: const Icon(Icons.refresh),
-          onTrailingTap: _refreshData,
+          onTrailingTap: () => _refreshDataForCentrals(currentGroup),
           bottomWidgets: [
             HorizontalListWidget(
               groups: _appData.groups.map((e) => e.name).toList(),
@@ -215,210 +415,16 @@ class _MainScreenState extends State<MainScreen> {
               }),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return const Center(
-                child: CircularProgressIndicator(),
+              return Center(
+                child: CircularProgressIndicator(
+                  color: MyColors.lightThemeFont,
+                ),
               );
             }
 
-            final data = snapshot.data!;
+            Map<String, dynamic> data = snapshot.data!;
 
-            return BlurredTopWidget(
-              height: 20,
-              child: ListView(
-                cacheExtent: 1000,
-                children: [
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      SizedBox(
-                        width: 170,
-                        height: 170,
-                        child: WaterUsageArcWidget(
-                          currentUsage: data['todaysUsage'],
-                          maxUsage: data['maxUsage'],
-                          flowRate: data['flowRate'],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
-                        child: WaterBlockWidget(
-                          group: currentGroup,
-                          handleButtonPress: () {
-                            _handleBlockButtonTap(currentGroup);
-                            setState(() {
-                              for (Group group in _appData.groups) {
-                                group.updateBlockStatus();
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  PanelWidget(
-                    name: "Water usage",
-                    child: GraphWaterUsageWidget(
-                      data: data['waterUsageData'],
-                      maxHeight: 150,
-                    ),
-                    onTap: () {},
-                  ),
-                  PanelWidget(
-                    name: "Block time",
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                      child: BlockClockWidget(
-                        group: currentGroup,
-                      ),
-                    ),
-                    onTap: () {},
-                  ),
-                  PanelWidget(
-                    name: "Leak probes",
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              NeumorphicIcon(
-                                CustomIcons.probe,
-                                size: 30,
-                                style: NeumorphicStyle(
-                                  color: MyColors.lightThemeFont,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                  'Leak probes count: ${currentGroup.leakProbeNumber()}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displaySmall!),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              NeumorphicIcon(
-                                size: 30,
-                                CustomIcons.battery_low,
-                                style: NeumorphicStyle(
-                                  color: MyColors.lightThemeFont,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 1,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                  "Low battery count: ${currentGroup.leakProbeLowBatteryNumber()}",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displaySmall!),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              NeumorphicIcon(
-                                CustomIcons.leak,
-                                size: 30,
-                                style: NeumorphicStyle(
-                                  color: MyColors.lightThemeFont,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                  "Detected leaks count: ${currentGroup.detectedLeaksCount()}",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displaySmall!),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        Routes.groupLeakProbes,
-                        arguments: GroupLeakProbesScreenArguments(
-                          currentGroup,
-                        ),
-                      ).then((_) {
-                        setState(() {});
-                      });
-                    },
-                  ),
-                  PanelWidget(
-                    name: "Central units",
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              NeumorphicIcon(
-                                CustomIcons.central_unit,
-                                size: 30,
-                                style: NeumorphicStyle(
-                                  color: MyColors.lightThemeFont,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                  'Central units count: ${currentGroup.centralUnitsNumber()}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displaySmall!),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              NeumorphicIcon(
-                                Icons.wifi,
-                                size: 30,
-                                style: NeumorphicStyle(
-                                  color: MyColors.lightThemeFont,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                  'Connected central units: ${currentGroup.connectedCentralUnits()}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displaySmall!),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              NeumorphicIcon(
-                                Icons.lock,
-                                size: 30,
-                                style: NeumorphicStyle(
-                                  color: MyColors.lightThemeFont,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                  'Locked central units: ${currentGroup.lockedCentralUnitsCount()}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displaySmall!),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    onTap: () {},
-                  ),
-                ],
-              ),
-            );
+            return _buildScreen(data, currentGroup);
           },
         ),
       ),

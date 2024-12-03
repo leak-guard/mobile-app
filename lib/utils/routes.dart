@@ -15,7 +15,6 @@ import 'package:leak_guard/screens/manage_groups_screen.dart';
 import 'package:leak_guard/screens/main_screen.dart';
 import 'package:leak_guard/screens/manage_probes_screen.dart';
 import 'package:leak_guard/screens/test_screen.dart';
-import 'package:nsd/nsd.dart';
 
 class Routes {
   static const String main = '/';
@@ -158,7 +157,7 @@ class DetailsLeakProbeScreenArguments {
 }
 
 class CreateCentralScreenArguments {
-  final Service? chosenCentral;
+  final CentralUnit? chosenCentral;
 
   CreateCentralScreenArguments([this.chosenCentral]);
 }

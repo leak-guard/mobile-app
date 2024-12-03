@@ -4,17 +4,16 @@ import 'package:leak_guard/models/wifi_network.dart';
 import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
-import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
+import 'package:leak_guard/widgets/timezone_dropdown_widget.dart';
 import 'package:leak_guard/widgets/wifi_dropdown_widget.dart';
-import 'package:nsd/nsd.dart';
 
 class CreateCentralScreen extends StatefulWidget {
-  final Service? chosenCentral;
+  final CentralUnit? chosenCentral;
 
   const CreateCentralScreen({
     super.key,
@@ -29,7 +28,6 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
   final _formKey = GlobalKey<FormState>();
   final _appData = AppData();
   final _api = CustomApi();
-  final _networkService = NetworkService();
   final _db = DatabaseService.instance;
 
   WifiNetwork? _selectedNetwork;
@@ -53,16 +51,20 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     isValveNO: true,
     password: "admin1",
     addressMAC: '',
+    timezoneId: 37,
   );
 
   @override
   void initState() {
     super.initState();
     if (widget.chosenCentral != null) {
-      if (widget.chosenCentral!.addresses != null) {
-        _ipController.text = widget.chosenCentral!.addresses!.first.address;
-        _isCentralFound = true;
-      }
+      _ipController.text = widget.chosenCentral!.addressIP;
+      _isCentralFound = true;
+      _wifiPasswordController.text = widget.chosenCentral!.wifiPassword ?? '';
+      _wifiSsidController.text = widget.chosenCentral!.wifiSSID ?? "";
+      _impulsesController.text =
+          widget.chosenCentral!.impulsesPerLiter.toString();
+      _isValveNO = widget.chosenCentral!.isValveNO;
     }
   }
 
@@ -108,7 +110,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
           'WiFi SSID',
           style: Theme.of(context).textTheme.displaySmall,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         WifiDropdown(
           controller: _wifiSsidController,
           onNetworkSelected: (network) {
@@ -153,7 +155,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
           'Password',
           style: Theme.of(context).textTheme.displaySmall,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         CustomTextField(
           hintText: 'Enter password...',
           validator: (value) {
@@ -183,10 +185,6 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
   }
 
   Widget _buildIpSection() {
-    if ((_networkService.currentWifiName ?? "") == "LeakGuardConfig") {
-      return const SizedBox();
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -194,7 +192,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
           'IP Address',
           style: Theme.of(context).textTheme.displayMedium,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
@@ -202,6 +200,22 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
                 controller: _ipController,
                 hintText: 'Enter IP address...',
                 readOnly: _isCentralFound,
+                validator: (value) {
+                  String? errorMessage;
+                  if (value == null || value.trim().isEmpty) {
+                    errorMessage = 'Please enter a IP address';
+                  }
+
+                  if (errorMessage != null) {
+                    Future.microtask(() {
+                      setState(() => _isValid = false);
+                      _showDialog('Hardware configuration', errorMessage!);
+                    });
+                  } else {
+                    setState(() => _isValid = true);
+                  }
+                  return null;
+                },
               ),
             ),
             const SizedBox(width: 8),
@@ -214,14 +228,12 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
                   BorderRadius.circular(8),
                 ),
               ),
-              onPressed: !_isCentralFound
-                  ? () => _checkCentralUnit(_ipController.text)
-                  : null,
+              onPressed: () => _checkCentralUnit(_ipController.text),
               child: const Icon(Icons.search),
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -272,6 +284,15 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
         ),
         const SizedBox(height: 16),
         _buildIpSection(),
+        Text('Time Zone', style: Theme.of(context).textTheme.displayMedium),
+        const SizedBox(height: 8),
+        TimeZoneDropdown(
+          onTimeZoneSelected: (timeZone) {
+            setState(() => _central.timezoneId = timeZone.timeZoneId);
+          },
+          centralUnit: widget.chosenCentral,
+        ),
+        const SizedBox(height: 12),
         Text('Impulses Per Liter',
             style: Theme.of(context).textTheme.displayMedium),
         const SizedBox(height: 8),
@@ -308,10 +329,10 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text('Electrovalve Type',
             style: Theme.of(context).textTheme.displayMedium),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -353,7 +374,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
           'Name',
           style: Theme.of(context).textTheme.displayMedium,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         CustomTextField(
           controller: _nameController,
           hintText: 'Enter name...',
@@ -377,19 +398,20 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
             return null;
           },
         ),
+        const SizedBox(height: 12),
         Text(
           'Description',
           style: Theme.of(context).textTheme.displayMedium,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         CustomTextField(
           controller: _descriptionController,
           hintText: 'Enter description...',
           maxLines: 3,
         ),
-        const SizedBox(height: 16),
-        Text('Photo', style: Theme.of(context).textTheme.displayMedium),
         const SizedBox(height: 12),
+        Text('Photo', style: Theme.of(context).textTheme.displayMedium),
+        const SizedBox(height: 8),
         PhotoWidget(
           item: _central,
           size: MediaQuery.of(context).size.width - 32,
@@ -407,9 +429,10 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
       "passphrase": _wifiPasswordController.text,
       "flow_meter_impulses": centralUnit.impulsesPerLiter,
       "valve_type": centralUnit.isValveNO ? "no" : "nc",
-      // TODO: Add timezone to configuration
-      "timezone_id": 37,
+      "timezone_id": centralUnit.timezoneId,
     };
+
+    print(config);
 
     if (!(await _api.putConfig(centralUnit.addressIP, config))) return false;
 
@@ -431,7 +454,13 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     _central.isValveNO = _isValveNO;
     _central.impulsesPerLiter = int.tryParse(_impulsesController.text) ?? 0;
     String? adresMac = await _api.getCentralMacAddress(_central.addressIP);
-    _central.addressMAC = adresMac ?? '';
+    if (adresMac == null) {
+      _showDialog(
+          'Error', 'Could not find central unit at IP:\n${_central.addressIP}');
+      return false;
+    }
+    // TODO: Check if nullable safe is needed
+    _central.addressMAC = adresMac;
 
     if (await _sendConfiguration(_central)) {
       int centralID = await _db.addCentralUnit(_central);
@@ -469,9 +498,9 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
             padding: const EdgeInsets.all(16),
             children: [
               _buildCentralUnitInformation(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               _buildWifiSection(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               _buildHardwareConfigSection(),
             ],
           ),

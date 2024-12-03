@@ -41,8 +41,7 @@ class Group implements Photographable {
       0, (sum, unit) => sum + unit.leakProbeLowBatteryCount());
 
   int connectedCentralUnits() {
-    // TODO: implement centralsConnected
-    return centralUnits.length;
+    return centralUnits.where((unit) => unit.isOnline).length;
   }
 
   int lockedCentralUnitsCount() =>

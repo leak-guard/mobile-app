@@ -13,9 +13,12 @@ class CentralUnit implements Photographable {
   String password = "admin";
   bool isValveNO = true;
   int impulsesPerLiter = 1000;
+  int? timezoneId = 37;
   String? description;
   String? imagePath;
   bool isOnline = false;
+  String? wifiSSID = "";
+  String? wifiPassword = "";
 
   final CustomApi _api = CustomApi();
 
@@ -26,8 +29,11 @@ class CentralUnit implements Photographable {
       required this.password,
       required this.isValveNO,
       required this.impulsesPerLiter,
+      this.timezoneId,
       this.description,
-      this.imagePath});
+      this.imagePath,
+      this.wifiSSID,
+      this.wifiPassword});
 
   bool isBlocked = false;
   bool chosen = false;
@@ -62,6 +68,25 @@ class CentralUnit implements Photographable {
 
   static const _flowRateCacheDuration = Duration(minutes: 1);
 
+  Future<bool> refreshData() async {
+    if (addressIP == "localhost") {
+      return true;
+    }
+    String? resultMacAddress = await _api.getCentralMacAddress(addressIP);
+    if (resultMacAddress != null && addressMAC == resultMacAddress) {
+      isOnline = true;
+
+      Map<String, dynamic>? data = await _api.getConfig(addressIP);
+      print('Config for ${name}: $data');
+      if (data != null) {
+        isValveNO = data['valve_type'] as String == "no";
+        impulsesPerLiter = data['flow_meter_impulses'] as int;
+        return true;
+      }
+    }
+    return false;
+  }
+
   //TODO: Implement API call to update central unit data
   Future<void> updateFlowInfo() async {
     // Mocked update
@@ -81,6 +106,8 @@ class CentralUnit implements Photographable {
     return allFlows;
   }
 
+  // TODO: Implement API call to get current flow rate
+  // Currently mocked with database data
   Future<double> getCurrentFlowRate() async {
     if (isBlocked) {
       return 0.0;
@@ -99,8 +126,6 @@ class CentralUnit implements Photographable {
       return _cachedCurrentFlowRate!;
     }
 
-    // TODO: Implement API call to get current flow rate
-    // Currently mocked with database data
     final now = DateTime.now();
     final flow = await _db.getLatestFlow(
         centralUnitID!, now.millisecondsSinceEpoch ~/ 1000);

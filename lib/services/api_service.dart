@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/utils/strings.dart';
 
 // TODO: Make all endpoints return type, message if the request was successful or not
@@ -73,6 +74,7 @@ class CustomApi {
       throw HttpException('Request failed with status: ${response.statusCode}');
     } catch (e) {
       print("Error: $e");
+      CustomToast.toast("Could not connect to Central Unit at ip:\n$ip");
       return null;
     }
   }

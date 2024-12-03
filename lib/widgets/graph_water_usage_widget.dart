@@ -47,9 +47,10 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
   Widget build(BuildContext context) {
     if (widget.data.isEmpty) return const SizedBox();
 
-    double maxUsage =
+    double maxValue =
         widget.data.map((d) => d.usage).reduce((a, b) => a > b ? a : b);
-    if (maxUsage == 0) maxUsage = 12;
+    double boxHeighs = maxValue;
+    if (maxValue == 0) boxHeighs = 12;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -59,7 +60,7 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Max usage: ${(maxUsage * 100).roundToDouble() / 100}l",
+              "Max usage: ${(maxValue * 100).roundToDouble() / 100}l",
               textAlign: TextAlign.start,
               style: Theme.of(context).textTheme.displaySmall!.copyWith(
                     fontSize: 14,
@@ -72,7 +73,7 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: widget.data.map((item) {
                   final targetHeight =
-                      (item.usage / maxUsage) * widget.maxHeight;
+                      (item.usage / boxHeighs) * widget.maxHeight;
                   final currentHeight = _shouldAnimate ? targetHeight : 0.0;
 
                   return Expanded(

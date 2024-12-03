@@ -80,6 +80,9 @@ class AppData {
           if (config != null) {
             central.isValveNO = config['valve_type'] as String == "no";
             central.impulsesPerLiter = config['flow_meter_impulses'] as int;
+            central.timezoneId = config['timezone_id'] as int;
+            central.wifiSSID = config['ssid'] as String;
+            central.wifiPassword = config['passphrase'] as String;
           }
         });
       }

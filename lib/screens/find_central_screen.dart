@@ -1,4 +1,6 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/models/central_unit.dart';
+import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
@@ -16,6 +18,7 @@ class FindCentralScreen extends StatefulWidget {
 
 class _FindCentralScreenState extends State<FindCentralScreen> {
   final _networkService = NetworkService();
+  final _api = CustomApi();
 
   @override
   void initState() {
@@ -121,11 +124,30 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: NeumorphicButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        Map<String, dynamic>? config = await _api
+                            .getConfig(service.addresses!.first.address);
+                        String? macAddress = await _api.getCentralMacAddress(
+                            service.addresses!.first.address);
+                        print(config);
+
+                        CentralUnit mdnsCentral = CentralUnit(
+                          name: "",
+                          addressIP: service.addresses!.first.address,
+                          addressMAC: macAddress ?? '',
+                          password: 'admin1',
+                          isValveNO: (config!['valve_type'] as String) == "no",
+                          impulsesPerLiter:
+                              config['flow_meter_impulses'] as int,
+                          timezoneId: config['timezone_id'] as int,
+                          wifiSSID: config['ssid'] as String,
+                          wifiPassword: config['passphrase'] as String,
+                        );
+
                         Navigator.pushNamed(
                           context,
                           Routes.createCentralUnit,
-                          arguments: CreateCentralScreenArguments(service),
+                          arguments: CreateCentralScreenArguments(mdnsCentral),
                         );
                       },
                       style: NeumorphicStyle(

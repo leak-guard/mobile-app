@@ -1,11 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/utils/routes.dart';
-import 'package:nsd/nsd.dart';
 
 class AddUnitButton extends StatelessWidget {
   AddUnitButton({
@@ -38,17 +36,21 @@ class AddUnitButton extends StatelessWidget {
         ),
         onPressed: () async {
           await _networkService.getCurrentWifiName();
+          print("Current wifi name: ${_networkService.currentWifiName}");
           if ((_networkService.currentWifiName ?? "") == "LeakGuardConfig") {
-            Service service = Service(
-              name: "LeakGuardConfig",
-              type: "_leakguard._tcp",
-              port: 80,
-              addresses: [InternetAddress("192.168.4.1")],
+            CentralUnit newCentral = CentralUnit(
+              name: "",
+              addressIP: "192.168.4.1",
+              addressMAC: '',
+              password: '',
+              isValveNO: true,
+              impulsesPerLiter: 477,
+              timezoneId: 37,
             );
             Navigator.pushNamed(
               context,
               Routes.createCentralUnit,
-              arguments: CreateCentralScreenArguments(service),
+              arguments: CreateCentralScreenArguments(newCentral),
             ).then((_) {
               onBack();
             });

@@ -11,6 +11,7 @@ import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
 import 'package:leak_guard/widgets/probe_widget.dart';
+import 'package:leak_guard/widgets/timezone_dropdown_widget.dart';
 
 class DetailsCentralUnitScreen extends StatefulWidget {
   const DetailsCentralUnitScreen({super.key, required this.central});
@@ -250,20 +251,20 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
             return null;
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text(
           'Description',
           style: Theme.of(context).textTheme.displayMedium,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         CustomTextField(
           controller: _descriptionController,
           hintText: 'Enter description...',
           maxLines: 3,
         ),
-        const SizedBox(height: 16),
-        Text('Photo', style: Theme.of(context).textTheme.displayMedium),
         const SizedBox(height: 12),
+        Text('Photo', style: Theme.of(context).textTheme.displayMedium),
+        const SizedBox(height: 8),
         PhotoWidget(
           item: widget.central,
           size: MediaQuery.of(context).size.width - 32,
@@ -314,7 +315,16 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
+        Text('Time Zone', style: Theme.of(context).textTheme.displayMedium),
+        const SizedBox(height: 8),
+        TimeZoneDropdown(
+          onTimeZoneSelected: (timeZone) {
+            setState(() => widget.central.timezoneId = timeZone.timeZoneId);
+          },
+          centralUnit: widget.central,
+        ),
+        const SizedBox(height: 12),
         Text('Impulses Per Liter',
             style: Theme.of(context).textTheme.displayMedium),
         const SizedBox(height: 8),
@@ -353,10 +363,10 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text('Electrovalve Type',
             style: Theme.of(context).textTheme.displayMedium),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -382,7 +392,7 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
                 style: Theme.of(context).textTheme.displaySmall),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text('MAC Address', style: Theme.of(context).textTheme.displayMedium),
         const SizedBox(height: 8),
         Text(widget.central.addressMAC,
