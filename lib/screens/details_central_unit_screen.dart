@@ -562,6 +562,7 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     for (var group in _appData.groups) {
       if (group.centralUnits.contains(widget.central)) {
         group.centralUnits.remove(widget.central);
+        group.updateBlockStatus();
       }
     }
 

@@ -136,7 +136,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
       key: ValueKey('button_content_${hour}_$isSelected'),
       child: Text(
         hour.toString(),
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.black,
           fontSize: 12,
           fontWeight: FontWeight.w800,
@@ -297,7 +297,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
               children: [
                 Positioned.fill(
                   child: Neumorphic(
-                    style: NeumorphicStyle(
+                    style: const NeumorphicStyle(
                       depth: 10,
                       intensity: 0.5,
                       shape: NeumorphicShape.flat,
