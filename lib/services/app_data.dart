@@ -2,13 +2,11 @@ import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/group_central_relation.dart';
 import 'package:leak_guard/models/leak_probe.dart';
-import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/database_service.dart';
 
 class AppData {
   static final AppData _instance = AppData._internal();
   final _db = DatabaseService.instance;
-  final _api = CustomApi();
 
   List<Group> groups = [];
   List<CentralUnit> centralUnits = [];

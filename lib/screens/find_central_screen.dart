@@ -1,6 +1,7 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/services/api_service.dart';
+import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
@@ -94,10 +95,11 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   if (_networkService.isSearchingServices)
-                                    const SizedBox(
+                                    SizedBox(
                                       width: 20,
                                       height: 20,
                                       child: CircularProgressIndicator(
+                                          color: MyColors.lightThemeFont,
                                           strokeWidth: 2),
                                     ),
                                   if (!_networkService.isSearchingServices)

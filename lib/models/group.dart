@@ -88,6 +88,7 @@ class Group implements Photographable {
   Future<double> flowRate() async {
     double total = 0.0;
     for (var unit in centralUnits) {
+      print('Getting flow rate for unit ${unit.name}');
       final usage = await unit.getCurrentFlowRate();
       total += usage;
     }
@@ -96,11 +97,18 @@ class Group implements Photographable {
 
   Future<double> todaysWaterUsage() async {
     double total = 0.0;
+    List<Future<double?>> futures = [];
+
     for (var unit in centralUnits) {
-      final usage = await unit.getTodaysWaterUsage();
-      total += usage;
+      futures.add(unit.getTodaysWaterUsage());
     }
-    return total;
+
+    return Future.wait(futures).then((value) {
+      for (var usage in value) {
+        total += usage ?? 0.0;
+      }
+      return total;
+    });
   }
 
   Future<double> yesterdayWaterUsage() async {

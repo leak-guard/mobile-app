@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:leak_guard/utils/custom_toast.dart';
+import 'package:leak_guard/models/block_schedule.dart';
 import 'package:leak_guard/utils/strings.dart';
 
 // TODO: Make all endpoints return type, message if the request was successful or not
@@ -20,17 +20,15 @@ class CustomApi {
   String _user = "root";
   String _password = "admin1";
 
-  // TODO: make it return response
   Future<Map<String, dynamic>?> _makeRequest(
     String ip,
     String path, {
     String method = 'GET',
     Map<String, dynamic>? body,
   }) async {
-    int port = ip == MyStrings.mockIp ? 8000 : 80;
-    if (ip == "localhost") {
-      return null;
-    }
+    if (ip == MyStrings.mockIp) ip = MyStrings.myIp;
+
+    int port = ip == MyStrings.myIp ? 8000 : 80;
 
     try {
       late HttpClientRequest request;
@@ -66,7 +64,8 @@ class CustomApi {
       final response = await request.close();
       final content = await response.transform(utf8.decoder).join();
 
-      if (response.statusCode >= 200 && response.statusCode < 300) {
+      if ((response.statusCode >= 200 && response.statusCode < 300) ||
+          response.statusCode == 409) {
         if (content.isNotEmpty) {
           return jsonDecode(content);
         }
@@ -93,8 +92,17 @@ class CustomApi {
 
   // Water usage endpoints
   //TODO: Make it return double
-  Future<Map<String, dynamic>?> getWaterUsage(String ip) async {
-    return await _makeRequest(ip, '/water-usage');
+  //
+  // "flow_rate": 0,
+  // "total_volume": 0,
+  // "today_volume": 0,
+
+  Future<double?> getWaterUsage(String ip) async {
+    // CONTINUE HERE
+    final result = await _makeRequest(ip, '/water-usage');
+    print(result);
+    if (result == null) return null;
+    return (result['flow_rate'] as int) / 1000.0;
   }
 
   //TODO: Make it return List<Flow>
@@ -108,16 +116,18 @@ class CustomApi {
     return await _makeRequest(ip, path);
   }
 
-  //TODO: Make it return double
-  Future<Map<String, dynamic>?> getWaterUsageToday(String ip) async {
-    return await _makeRequest(ip, '/water-usage/today');
+  Future<double?> getWaterUsageToday(String ip) async {
+    //TODO: If implemented remove next line
+    ip = MyStrings.myIp;
+    final response = await _makeRequest(ip, '/water-usage/today');
+    if (response == null) return null;
+    double? usage = response['usage'];
+    return usage;
   }
 
   // TODO: Probe endpoints, GET, PUT and DELETE
 
   // Probe pairing endpoints
-  // TODO: 403 means already in paring mode.
-  // TODO: if 403 return true <- already in pairing mode
   Future<bool> enterPairingMode(String ip) async {
     final response = await _makeRequest(
       ip,
@@ -125,6 +135,17 @@ class CustomApi {
       method: 'POST',
     );
     return response != null;
+  }
+
+  Future<bool?> getParingMode(String ip) async {
+    final response = await _makeRequest(
+      ip,
+      '/probe/pair',
+      method: 'GET',
+    );
+    if (response == null) return null;
+
+    return response['pairing'] as bool;
   }
 
   Future<bool> exitPairingMode(String ip) async {
@@ -136,11 +157,17 @@ class CustomApi {
     return response != null;
   }
 
-  // TODO: Make it return bool
-  Future<Map<String, dynamic>?> getWaterBlock(String ip) async {
-    return await _makeRequest(ip, '/water-block');
+  Future<bool?> getWaterBlock(String ip) async {
+    //TODO: If implemented remove next line
+    ip = MyStrings.myIp;
+
+    final result = await _makeRequest(ip, '/water-block');
+    print(result);
+    if (result == null) return null;
+    return result['block'] == "active";
   }
 
+  //TODO:
   Future<bool> postWaterBlock(String ip, Map<String, dynamic> blockData) async {
     final response = await _makeRequest(
       ip,
@@ -151,11 +178,45 @@ class CustomApi {
     return response != null;
   }
 
-  // TODO: Make it return List<List<int>>
-  Future<Map<String, dynamic>?> getWaterBlockSchedule(String ip) async {
-    return await _makeRequest(ip, '/water-block/schedule');
+  Future<BlockSchedule?> getWaterBlockSchedule(String ip) async {
+    final response = await _makeRequest(ip, '/water-block/schedule');
+    if (response == null) return null;
+
+    final schedule = BlockSchedule(
+      sunday: BlockDay(
+        enabled: response['sunday']['enabled'],
+        hours: List<bool>.from(response['sunday']['hours']),
+      ),
+      monday: BlockDay(
+        enabled: response['monday']['enabled'],
+        hours: List<bool>.from(response['monday']['hours']),
+      ),
+      tuesday: BlockDay(
+        enabled: response['tuesday']['enabled'],
+        hours: List<bool>.from(response['tuesday']['hours']),
+      ),
+      wednesday: BlockDay(
+        enabled: response['wednesday']['enabled'],
+        hours: List<bool>.from(response['wednesday']['hours']),
+      ),
+      thursday: BlockDay(
+        enabled: response['thursday']['enabled'],
+        hours: List<bool>.from(response['thursday']['hours']),
+      ),
+      friday: BlockDay(
+        enabled: response['friday']['enabled'],
+        hours: List<bool>.from(response['friday']['hours']),
+      ),
+      saturday: BlockDay(
+        enabled: response['saturday']['enabled'],
+        hours: List<bool>.from(response['saturday']['hours']),
+      ),
+    );
+
+    return schedule;
   }
 
+  // TODO:
   Future<bool> postWaterBlockSchedule(
     String ip,
     Map<String, dynamic> scheduleData,

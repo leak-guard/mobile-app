@@ -1,3 +1,4 @@
+import 'package:leak_guard/models/block_schedule.dart';
 import 'package:leak_guard/models/flow.dart';
 import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/models/photographable.dart';
@@ -9,17 +10,25 @@ import 'package:leak_guard/utils/custom_toast.dart';
 class CentralUnit implements Photographable {
   int? centralUnitID;
   String name;
-  String addressIP;
-  String addressMAC;
-  String password = "admin";
-  bool isValveNO = true;
-  int impulsesPerLiter = 1000;
-  int? timezoneId = 37;
   String? description;
   String? imagePath;
-  bool isOnline = false;
+  String password = "admin";
+
+  BlockSchedule? blockSchedule;
+  bool isBlocked = false;
+
+  String addressIP;
+  String addressMAC;
+
   String? wifiSSID = "";
   String? wifiPassword = "";
+  bool isOnline = false;
+  int? timezoneId = 37;
+
+  bool isValveNO = true;
+  int impulsesPerLiter = 1000;
+
+  bool chosen = false;
 
   final CustomApi _api = CustomApi();
 
@@ -36,8 +45,6 @@ class CentralUnit implements Photographable {
       this.wifiSSID,
       this.wifiPassword});
 
-  bool isBlocked = false;
-  bool chosen = false;
   List<LeakProbe> leakProbes = [];
   final _db = DatabaseService.instance;
 
@@ -49,8 +56,6 @@ class CentralUnit implements Photographable {
     return leakProbes.length;
   }
 
-  double? _cachedCurrentFlowRate;
-  DateTime? _lastFlowRateUpdate;
   double? _cachedTodaysUsage;
   DateTime? _lastTodaysUsageUpdate;
   double? _cachedYesterdayUsage;
@@ -58,8 +63,6 @@ class CentralUnit implements Photographable {
   List<WaterUsageData>? _cachedWaterUsageData;
 
   void invalidateCache() {
-    _cachedCurrentFlowRate = null;
-    _lastFlowRateUpdate = null;
     _cachedTodaysUsage = null;
     _lastTodaysUsageUpdate = null;
     _cachedYesterdayUsage = null;
@@ -68,43 +71,6 @@ class CentralUnit implements Photographable {
   }
 
   static const _flowRateCacheDuration = Duration(minutes: 1);
-
-  Future<bool> refreshData() async {
-    try {
-      if (addressIP == "localhost") {
-        return true;
-      }
-      String? resultMacAddress = await _api.getCentralMacAddress(addressIP);
-
-      if (resultMacAddress == null) {
-        throw Exception("Could not connect with $name");
-      }
-
-      if (addressMAC != resultMacAddress) {
-        throw Exception("MAC address mismatch for $name");
-      }
-
-      isOnline = true;
-
-      Map<String, dynamic>? data = await _api.getConfig(addressIP);
-      print('Config for ${name}: $data');
-      if (data != null) {
-        isValveNO = data['valve_type'] as String == "no";
-        impulsesPerLiter = data['flow_meter_impulses'] as int;
-        timezoneId = data['timezone_id'] as int;
-        wifiSSID = data['ssid'] as String;
-        wifiPassword = data['passphrase'] as String;
-      } else {
-        throw Exception("Failed to get config for $name");
-      }
-
-      return true;
-    } catch (e) {
-      CustomToast.toast(e.toString().replaceAll("Exception: ", ""));
-      isOnline = false;
-      return false;
-    }
-  }
 
   //TODO: Implement API call to update central unit data
   Future<void> updateFlowInfo() async {
@@ -131,31 +97,15 @@ class CentralUnit implements Photographable {
     if (isBlocked) {
       return 0.0;
     }
-    final result = await _api.getWaterUsage(addressIP);
 
-    if (result != null) {
-      _cachedCurrentFlowRate = (result['flow_rate'] as int) / 1000.0;
-      return _cachedCurrentFlowRate!;
-    }
-
-    if (_cachedCurrentFlowRate != null &&
-        _lastFlowRateUpdate != null &&
-        DateTime.now().difference(_lastFlowRateUpdate!) <
-            _flowRateCacheDuration) {
-      return _cachedCurrentFlowRate!;
-    }
-
-    final now = DateTime.now();
-    final flow = await _db.getLatestFlow(
-        centralUnitID!, now.millisecondsSinceEpoch ~/ 1000);
-
-    _cachedCurrentFlowRate = flow?.volume.toDouble() ?? 0.0;
-    _lastFlowRateUpdate = now;
-
-    return _cachedCurrentFlowRate!;
+    return await _api.getWaterUsage(addressIP) ?? 0.0;
   }
 
-  Future<double> getTodaysWaterUsage() async {
+  Future<double?> getTodaysWaterUsage() async {
+    if (addressIP != "localhost") {
+      return _api.getWaterUsageToday(addressIP);
+    }
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -363,5 +313,53 @@ class CentralUnit implements Photographable {
 
   int detectedLeaksCount() {
     return leakProbes.where((probe) => probe.blocked).length;
+  }
+
+  Future<bool> refreshData() async {
+    try {
+      if (addressIP == "localhost") {
+        return true;
+      }
+      String? resultMacAddress = await _api.getCentralMacAddress(addressIP);
+
+      if (resultMacAddress == null) {
+        throw Exception("Could not connect with $name");
+      }
+
+      if (addressMAC != resultMacAddress) {
+        throw Exception("MAC address mismatch for $name");
+      }
+
+      isOnline = true;
+
+      Map<String, dynamic>? data = await _api.getConfig(addressIP);
+      if (data != null) {
+        isValveNO = data['valve_type'] as String == "no";
+        impulsesPerLiter = data['flow_meter_impulses'] as int;
+        timezoneId = data['timezone_id'] as int;
+        wifiSSID = data['ssid'] as String;
+        wifiPassword = data['passphrase'] as String;
+      } else {
+        throw Exception("Failed to get config for $name");
+      }
+
+      blockSchedule = await _api.getWaterBlockSchedule(addressIP);
+      if (blockSchedule == null) {
+        throw Exception("Failed to get block schedule for $name");
+      }
+
+      bool? isBlockedResult = await _api.getWaterBlock(addressIP);
+      if (isBlockedResult == null) {
+        throw Exception("Failed to get block status for $name");
+      }
+      isBlocked = isBlockedResult;
+      print('Block status for ${name}: $isBlocked');
+
+      return true;
+    } catch (e) {
+      CustomToast.toast(e.toString().replaceAll("Exception: ", ""));
+      isOnline = false;
+      return false;
+    }
   }
 }
