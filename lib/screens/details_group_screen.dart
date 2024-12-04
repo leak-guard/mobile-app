@@ -281,7 +281,9 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
             child: CentralUnitWidget(
               central: central,
               onPressed: () => setState(() => central.chosen = !central.chosen),
-              onLongPress: () {
+              onLongPress: () async {
+                await central.refreshData();
+
                 Navigator.pushNamed(
                   context,
                   Routes.detailsCentralUnit,
@@ -299,7 +301,8 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
             child: CentralUnitWidget(
               central: central,
               onPressed: () => setState(() => central.chosen = !central.chosen),
-              onLongPress: () {
+              onLongPress: () async {
+                await central.refreshData();
                 Navigator.pushNamed(
                   context,
                   Routes.detailsCentralUnit,

@@ -50,7 +50,9 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
                 onLongPress: () {
                   print(central);
                 },
-                onPressed: () {
+                onPressed: () async {
+                  await central.refreshData();
+
                   Navigator.pushNamed(
                     context,
                     Routes.detailsCentralUnit,

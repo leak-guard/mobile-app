@@ -14,12 +14,13 @@ class CustomApi {
   }
 
   CustomApi._internal() : _client = HttpClient() {
-    _client.connectionTimeout = const Duration(seconds: 5);
+    _client.connectionTimeout = const Duration(seconds: 2);
   }
 
   String _user = "root";
   String _password = "admin1";
 
+  // TODO: make it return response
   Future<Map<String, dynamic>?> _makeRequest(
     String ip,
     String path, {
@@ -74,7 +75,6 @@ class CustomApi {
       throw HttpException('Request failed with status: ${response.statusCode}');
     } catch (e) {
       print("Error: $e");
-      CustomToast.toast("Could not connect to Central Unit at ip:\n$ip");
       return null;
     }
   }
@@ -116,6 +116,8 @@ class CustomApi {
   // TODO: Probe endpoints, GET, PUT and DELETE
 
   // Probe pairing endpoints
+  // TODO: 403 means already in paring mode.
+  // TODO: if 403 return true <- already in pairing mode
   Future<bool> enterPairingMode(String ip) async {
     final response = await _makeRequest(
       ip,

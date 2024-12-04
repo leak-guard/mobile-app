@@ -151,4 +151,17 @@ class Group implements Photographable {
   void setPhoto(String? path) {
     imagePath = path;
   }
+
+  Future<bool> refreshData() async {
+    List<Future<bool>> futures = [];
+    for (var unit in centralUnits) {
+      futures.add(unit.refreshData());
+    }
+    final result = await Future.wait(futures);
+    if (result.contains(false)) {
+      return false;
+    }
+    updateBlockStatus();
+    return true;
+  }
 }

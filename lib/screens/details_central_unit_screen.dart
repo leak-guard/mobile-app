@@ -1,17 +1,22 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/leak_probe.dart';
+import 'package:leak_guard/models/time_zone.dart';
+import 'package:leak_guard/models/wifi_network.dart';
 import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/utils/routes.dart';
+import 'package:leak_guard/utils/time_zone_helper.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
 import 'package:leak_guard/widgets/probe_widget.dart';
 import 'package:leak_guard/widgets/timezone_dropdown_widget.dart';
+import 'package:leak_guard/widgets/wifi_dropdown_widget.dart';
 
 class DetailsCentralUnitScreen extends StatefulWidget {
   const DetailsCentralUnitScreen({super.key, required this.central});
@@ -25,10 +30,12 @@ class DetailsCentralUnitScreen extends StatefulWidget {
 
 class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _ipController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _wifiSsidController = TextEditingController();
+  final _wifiPasswordController = TextEditingController();
   final _impulsesController = TextEditingController();
 
   final _db = DatabaseService.instance;
@@ -36,6 +43,9 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   final _api = CustomApi();
   late String? _initialImagePath;
   late String _initialDescription;
+
+  WifiNetwork? _selectedNetwork;
+  late TimeZone _selectedTimeZone;
 
   bool _isValid = true;
   bool _isValveNO = false;
@@ -47,8 +57,12 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     _nameController.text = widget.central.name;
     _descriptionController.text = widget.central.description ?? '';
     _ipController.text = widget.central.addressIP;
-    _passwordController.text = widget.central.password;
+    _wifiSsidController.text = widget.central.wifiSSID ?? "";
+    _wifiPasswordController.text = widget.central.wifiPassword ?? "";
     _impulsesController.text = widget.central.impulsesPerLiter.toString();
+    _selectedTimeZone =
+        TimeZoneHelper.getCurrentTimeZonebyId(widget.central.timezoneId ?? 37);
+
     _isValveNO = widget.central.isValveNO;
     _initialImagePath = widget.central.imagePath;
     _initialDescription = widget.central.description ?? '';
@@ -59,7 +73,7 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     _nameController.dispose();
     _descriptionController.dispose();
     _ipController.dispose();
-    _passwordController.dispose();
+    _wifiSsidController.dispose();
     _impulsesController.dispose();
     super.dispose();
   }
@@ -161,10 +175,11 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
       await _db.updateCentralUnit(widget.central);
 
       if (_isConfigurationChanged) {
-        // TODO: Implement sending configuration to central unit
-        // here we will send the configuration to the central unit
-        // if the configuration is changed
-        // and save the new configuration in the database
+        if (widget.central.isOnline) {
+          await _sendConfiguration();
+        } else {
+          CustomToast.toast('Central unit is offline\nConfiguration not sent');
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -173,6 +188,102 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
         );
       }
     }
+  }
+
+  Widget _buildWifiSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'WiFi credentials',
+          style: Theme.of(context).textTheme.displayLarge,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'WiFi SSID',
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
+        const SizedBox(height: 8),
+        WifiDropdown(
+          controller: _wifiSsidController,
+          onNetworkSelected: (network) {
+            setState(() {
+              _isConfigurationChanged = true;
+              _selectedNetwork = network;
+            });
+          },
+          onTextFieldChanged: () {
+            setState(() {
+              _isConfigurationChanged = true;
+              _selectedNetwork = null;
+            });
+          },
+          validator: (value) {
+            if (!widget.central.isOnline) {
+              return null;
+            }
+            String? errorMessage;
+
+            if (value == null || value.trim().isEmpty) {
+              errorMessage = 'Please enter a WiFi SSID';
+            }
+
+            if (errorMessage != null) {
+              Future.microtask(() {
+                setState(() => _isValid = false);
+                _showDialog('Wifi credentials', errorMessage!);
+              });
+            } else {
+              setState(() => _isValid = true);
+            }
+            return null;
+          },
+        ),
+        if (_selectedNetwork?.isSecure ?? true) _buildPassword(),
+      ],
+    );
+  }
+
+  Widget _buildPassword() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        Text(
+          'Password',
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
+        const SizedBox(height: 8),
+        CustomTextField(
+          hintText: 'Enter password...',
+          onChanged: (_) => setState(() => _isConfigurationChanged = true),
+          validator: (value) {
+            if (!widget.central.isOnline) {
+              return null;
+            }
+            String? errorMessage;
+            if (!(_selectedNetwork?.isSecure ?? true)) {
+              return null;
+            }
+
+            if (value == null || value.trim().isEmpty) {
+              errorMessage = 'Please enter a WiFi password';
+            }
+
+            if (errorMessage != null) {
+              Future.microtask(() {
+                setState(() => _isValid = false);
+                _showDialog('Wifi credentials', errorMessage!);
+              });
+            } else {
+              setState(() => _isValid = true);
+            }
+            return null;
+          },
+          controller: _wifiPasswordController,
+        ),
+      ],
+    );
   }
 
   void _showDialog(String title, String message) {
@@ -209,8 +320,40 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     );
   }
 
-  Future<void> _sendConfiguration() async {
-    //TODO: Implement sending configuration to central unit
+  Future<bool> _sendConfiguration() async {
+    String? macAddress =
+        await _api.getCentralMacAddress(widget.central.addressIP);
+    if (macAddress == null) {
+      CustomToast.toast(
+          'Could not connect to central unit\nConfiguration not sent');
+      return false;
+    }
+
+    if (macAddress != widget.central.addressMAC) {
+      CustomToast.toast('MAC address does not match\nConfiguration not sent');
+      return false;
+    }
+
+    Map<String, dynamic> config = {
+      "ssid": _wifiSsidController.text,
+      "passphrase": _wifiPasswordController.text,
+      "flow_meter_impulses": int.tryParse(_impulsesController.text) ?? 0,
+      "valve_type": _isValveNO ? "no" : "nc",
+      "timezone_id": _selectedTimeZone.timeZoneId,
+    };
+    if (await _api.putConfig(_ipController.text, config)) {
+      widget.central.wifiSSID = _wifiSsidController.text;
+      widget.central.wifiPassword = _wifiPasswordController.text;
+      widget.central.impulsesPerLiter =
+          int.tryParse(_impulsesController.text) ?? 0;
+      widget.central.isValveNO = _isValveNO;
+      widget.central.timezoneId = _selectedTimeZone.timeZoneId;
+      return true;
+    } else {
+      CustomToast.toast(
+          'Could not connect to central unit\nConfiguration not sent');
+      return false;
+    }
   }
 
   Widget _buildInfoSection() {
@@ -320,7 +463,10 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
         const SizedBox(height: 8),
         TimeZoneDropdown(
           onTimeZoneSelected: (timeZone) {
-            setState(() => widget.central.timezoneId = timeZone.timeZoneId);
+            setState(() {
+              _selectedTimeZone = timeZone;
+              _isConfigurationChanged = true;
+            });
           },
           centralUnit: widget.central,
         ),
@@ -338,6 +484,9 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
                 onChanged: (_) =>
                     setState(() => _isConfigurationChanged = true),
                 validator: (value) {
+                  if (!widget.central.isOnline) {
+                    return null;
+                  }
                   int? impulses = int.tryParse(value ?? '');
                   String? errorMessage;
                   if (value == null || value.trim().isEmpty) {
@@ -573,7 +722,9 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
             padding: const EdgeInsets.all(16),
             children: [
               _buildInfoSection(),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
+              _buildWifiSection(),
+              const SizedBox(height: 24),
               _buildHardwareConfigSection(),
               const SizedBox(height: 24),
               _buildLeakProbes(),

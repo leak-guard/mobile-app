@@ -132,7 +132,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               central.chosen = !central.chosen;
             });
           },
-          onLongPress: () {
+          onLongPress: () async {
+            await central.refreshData();
             Navigator.pushNamed(
               context,
               Routes.detailsCentralUnit,

@@ -67,26 +67,11 @@ class AppData {
   // - Fetch Probes data for each central unit
 
   Future<void> fetchDataFromApi() async {
+    List<Future<bool>> futures = [];
     for (var central in centralUnits) {
-      if (central.addressIP == "localhost") {
-        continue;
-      }
-      String? addressMac = await _api.getCentralMacAddress(central.addressIP);
-      if (addressMac != null && central.addressMAC == addressMac) {
-        central.isOnline = true;
-
-        _api.getConfig(central.addressIP).then((config) {
-          print('Config for ${central.name}: $config');
-          if (config != null) {
-            central.isValveNO = config['valve_type'] as String == "no";
-            central.impulsesPerLiter = config['flow_meter_impulses'] as int;
-            central.timezoneId = config['timezone_id'] as int;
-            central.wifiSSID = config['ssid'] as String;
-            central.wifiPassword = config['passphrase'] as String;
-          }
-        });
-      }
+      futures.add(central.refreshData());
     }
+    await Future.wait(futures);
   }
 
   void clearData() {

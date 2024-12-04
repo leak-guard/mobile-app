@@ -91,7 +91,9 @@ class MyApp extends StatelessWidget {
                             .titleLarge!
                             .copyWith(fontSize: 50)),
                     const SizedBox(height: 50),
-                    const CircularProgressIndicator(),
+                    CircularProgressIndicator(
+                      color: MyColors.lightThemeFont,
+                    ),
                   ],
                 ),
               ),

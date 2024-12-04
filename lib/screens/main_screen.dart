@@ -79,20 +79,9 @@ class _MainScreenState extends State<MainScreen> {
   void _refreshDataForCentrals(Group group) async {
     if (mounted) {
       CustomToast.toast("Refreshing data");
-      bool successForAll = true;
-      for (CentralUnit central in group.centralUnits) {
-        central.refreshData().then((success) {
-          if (success) {
-            setState(() {});
-          } else {
-            CustomToast.toast(
-                "Could not connect to Central Unit at ip:\n${central.addressIP}");
-            successForAll = false;
-          }
-        });
-      }
-      if (!successForAll) {
-        CustomToast.toast("Could not connect to all Central Units");
+      if (await group.refreshData()) {
+        CustomToast.toast("Data refreshed successfully!");
+        setState(() {});
       }
     }
   }

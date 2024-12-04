@@ -4,6 +4,7 @@ import 'package:leak_guard/models/photographable.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/database_service.dart';
+import 'package:leak_guard/utils/custom_toast.dart';
 
 class CentralUnit implements Photographable {
   int? centralUnitID;
@@ -69,11 +70,20 @@ class CentralUnit implements Photographable {
   static const _flowRateCacheDuration = Duration(minutes: 1);
 
   Future<bool> refreshData() async {
-    if (addressIP == "localhost") {
-      return true;
-    }
-    String? resultMacAddress = await _api.getCentralMacAddress(addressIP);
-    if (resultMacAddress != null && addressMAC == resultMacAddress) {
+    try {
+      if (addressIP == "localhost") {
+        return true;
+      }
+      String? resultMacAddress = await _api.getCentralMacAddress(addressIP);
+
+      if (resultMacAddress == null) {
+        throw Exception("Could not connect with $name");
+      }
+
+      if (addressMAC != resultMacAddress) {
+        throw Exception("MAC address mismatch for $name");
+      }
+
       isOnline = true;
 
       Map<String, dynamic>? data = await _api.getConfig(addressIP);
@@ -81,10 +91,19 @@ class CentralUnit implements Photographable {
       if (data != null) {
         isValveNO = data['valve_type'] as String == "no";
         impulsesPerLiter = data['flow_meter_impulses'] as int;
-        return true;
+        timezoneId = data['timezone_id'] as int;
+        wifiSSID = data['ssid'] as String;
+        wifiPassword = data['passphrase'] as String;
+      } else {
+        throw Exception("Failed to get config for $name");
       }
+
+      return true;
+    } catch (e) {
+      CustomToast.toast(e.toString().replaceAll("Exception: ", ""));
+      isOnline = false;
+      return false;
     }
-    return false;
   }
 
   //TODO: Implement API call to update central unit data
