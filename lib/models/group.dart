@@ -87,12 +87,17 @@ class Group implements Photographable {
 
   Future<double> flowRate() async {
     double total = 0.0;
+    List<Future<double>> futures = [];
     for (var unit in centralUnits) {
-      print('Getting flow rate for unit ${unit.name}');
-      final usage = await unit.getCurrentFlowRate();
-      total += usage;
+      futures.add(unit.getCurrentFlowRate());
     }
-    return total;
+    return Future.wait(futures).then((value) {
+      print("zebrałem");
+      for (var usage in value) {
+        total += usage;
+      }
+      return total;
+    });
   }
 
   Future<double> todaysWaterUsage() async {
@@ -113,11 +118,18 @@ class Group implements Photographable {
 
   Future<double> yesterdayWaterUsage() async {
     double total = 0.0;
+    List<Future<double?>> futures = [];
+
     for (var unit in centralUnits) {
-      final usage = await unit.getYesterdayWaterUsage();
-      total += usage;
+      futures.add(unit.getYesterdayWaterUsage());
     }
-    return total;
+
+    return Future.wait(futures).then((value) {
+      for (var usage in value) {
+        total += usage ?? 0.0;
+      }
+      return total;
+    });
   }
 
   Future<List<WaterUsageData>> getWaterUsageData(int hoursToFetch) async {
@@ -137,14 +149,19 @@ class Group implements Photographable {
       ));
     }
 
+    List<Future<List<WaterUsageData>>> futures = [];
     for (var unit in centralUnits) {
-      final unitData = await unit.getWaterUsageData(hoursToFetch);
-      for (int i = 0; i < hoursToFetch; i++) {
-        result[i].usage += unitData[i].usage;
-      }
+      futures.add(unit.getWaterUsageData(hoursToFetch));
     }
 
-    return result;
+    return Future.wait(futures).then((value) {
+      for (var data in value) {
+        for (int i = 0; i < hoursToFetch; i++) {
+          result[i].usage += data[i].usage;
+        }
+      }
+      return result;
+    });
   }
 
   @override
@@ -161,15 +178,22 @@ class Group implements Photographable {
   }
 
   Future<bool> refreshData() async {
+    //TODO: Refresh
+    // current flow - DONE via main screen refresh
+    // todays usgae - DONE via main screen refresh
+    // block status
+    // new flows info (get from api and to database)
+    // probe status
+
     List<Future<bool>> futures = [];
     for (var unit in centralUnits) {
-      futures.add(unit.refreshData());
+      futures.add(unit.refreshBlockStatus());
     }
     final result = await Future.wait(futures);
+    updateBlockStatus();
     if (result.contains(false)) {
       return false;
     }
-    updateBlockStatus();
     return true;
   }
 }

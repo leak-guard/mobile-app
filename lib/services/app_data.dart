@@ -53,16 +53,12 @@ class AppData {
 
     await fetchDataFromApi();
 
+    for (var group in groups) {
+      group.updateBlockStatus();
+    }
+
     isLoaded = true;
   }
-
-  //TODO: Implement fetching data from API:
-  // - Fetch MAC address for each central unit - check if it's online
-  // - Fetch leak probe data for each central unit
-  // - Fetch water usage data for each central unit
-  // - Fetch blockStatus for each central unit
-  // - Fetch block schedule for each central unit
-  // - Fetch Probes data for each central unit
 
   Future<void> fetchDataFromApi() async {
     List<Future<bool>> futures = [];

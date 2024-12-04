@@ -66,21 +66,27 @@ class _MainScreenState extends State<MainScreen> {
     _scaffoldKey.currentState?.openDrawer();
   }
 
-  void _refreshData() async {
-    print("Refreshing data");
+  Future<void> _refreshData() async {
+    await _appData.fetchDataFromApi();
     if (mounted) {
       setState(() {
-        _appData.fetchDataFromApi();
+        for (Group group in _appData.groups) {
+          group.updateBlockStatus();
+        }
       });
     }
   }
 
   void _refreshDataForCentrals(Group group) async {
     if (mounted) {
-      CustomToast.toast("Refreshing data");
       if (await group.refreshData()) {
-        CustomToast.toast("Data refreshed successfully!");
-        setState(() {});
+        setState(() {
+          for (Group group in _appData.groups) {
+            group.updateBlockStatus();
+          }
+        });
+      } else {
+        CustomToast.toast("Data refreshed failed");
       }
     }
   }
@@ -270,7 +276,21 @@ class _MainScreenState extends State<MainScreen> {
                 ],
               ),
             ),
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                Routes.groupCentralUnits,
+                arguments: GroupCentralUnitsScreenArguments(
+                  currentGroup,
+                ),
+              ).then((_) {
+                setState(() {
+                  for (Group group in _appData.groups) {
+                    group.updateBlockStatus();
+                  }
+                });
+              });
+            },
           ),
         ],
       ),
@@ -307,7 +327,7 @@ class _MainScreenState extends State<MainScreen> {
                   Navigator.pushNamed(
                     context,
                     Routes.createGroup,
-                  ).then((_) => _refreshData());
+                  ).then((_) => setState(() {}));
                 },
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,

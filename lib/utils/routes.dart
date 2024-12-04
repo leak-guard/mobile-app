@@ -9,6 +9,7 @@ import 'package:leak_guard/screens/details_leak_probe_screen.dart';
 import 'package:leak_guard/screens/error_screen.dart';
 import 'package:leak_guard/screens/find_central_screen.dart';
 import 'package:leak_guard/screens/create_group_screen.dart';
+import 'package:leak_guard/screens/group_central_units_screen.dart';
 import 'package:leak_guard/screens/group_leak_probes_screen.dart';
 import 'package:leak_guard/screens/manage_central_units_screen.dart';
 import 'package:leak_guard/screens/manage_groups_screen.dart';
@@ -21,6 +22,7 @@ class Routes {
   static const String tests = '/tests';
 
   static const String groupLeakProbes = '/groupLeakProbes';
+  static const String groupCentralUnits = '/groupCentralUnits';
 
   static const String manageGroups = '/manageGroups';
   static const String createGroup = '/createGroup';
@@ -136,12 +138,31 @@ class Routes {
           builder: (_) => const ErrorScreen(),
         );
 
+      case groupCentralUnits:
+        if (settings.arguments is GroupCentralUnitsScreenArguments) {
+          final args = settings.arguments as GroupCentralUnitsScreenArguments;
+          return MaterialPageRoute(
+            builder: (_) => GroupCentralUnitsScreen(
+              group: args.group,
+            ),
+          );
+        }
+        return MaterialPageRoute(
+          builder: (_) => const ErrorScreen(),
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) => const ErrorScreen(),
         );
     }
   }
+}
+
+class GroupCentralUnitsScreenArguments {
+  final Group group;
+
+  GroupCentralUnitsScreenArguments(this.group);
 }
 
 class GroupLeakProbesScreenArguments {

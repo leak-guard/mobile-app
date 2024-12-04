@@ -73,6 +73,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       }
 
       _appData.groups.add(newGroup);
+      newGroup.updateBlockStatus();
       if (mounted) {
         Navigator.pop(context);
       }
@@ -133,7 +134,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             });
           },
           onLongPress: () async {
-            await central.refreshData();
+            await central.refreshConfig();
             Navigator.pushNamed(
               context,
               Routes.detailsCentralUnit,

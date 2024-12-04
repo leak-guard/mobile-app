@@ -26,6 +26,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
   final _db = DatabaseService.instance;
   final _appData = AppData();
   bool _isValid = true;
+  bool _centralChoosen = false;
 
   late String? _initialImagePath;
   late String _initialDescription;
@@ -282,8 +283,9 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
               central: central,
               onPressed: () => setState(() => central.chosen = !central.chosen),
               onLongPress: () async {
-                await central.refreshData();
-
+                if (_centralChoosen) return;
+                _centralChoosen = true;
+                await central.refreshConfig();
                 Navigator.pushNamed(
                   context,
                   Routes.detailsCentralUnit,
@@ -291,7 +293,9 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                     central,
                   ),
                 ).then((_) {
-                  setState(() {});
+                  setState(() {
+                    _centralChoosen = false;
+                  });
                 });
               },
             ),
@@ -302,7 +306,9 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
               central: central,
               onPressed: () => setState(() => central.chosen = !central.chosen),
               onLongPress: () async {
-                await central.refreshData();
+                if (_centralChoosen) return;
+                _centralChoosen = true;
+                await central.refreshConfig();
                 Navigator.pushNamed(
                   context,
                   Routes.detailsCentralUnit,
@@ -310,7 +316,9 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                     central,
                   ),
                 ).then((_) {
-                  setState(() {});
+                  setState(() {
+                    _centralChoosen = false;
+                  });
                 });
               },
             ),
@@ -323,16 +331,23 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         height: 80,
-        onLeadingTap: () async {
-          if (await _onWillPop()) {
-            Navigator.pop(context);
-          }
+        onLeadingTap: () {
+          _onWillPop().then((onValue) {
+            if (onValue) {
+              if (mounted) {
+                Navigator.pop(context);
+              }
+            }
+          });
         },
         title: 'Edit ${widget.group.name}',
         trailingIcon: const Icon(Icons.check),
-        onTrailingTap: () async {
-          await _saveChanges();
-          Navigator.pop(context);
+        onTrailingTap: () {
+          _saveChanges().then((_) {
+            if (mounted) {
+              Navigator.pop(context);
+            }
+          });
         },
       ),
       body: BlurredTopWidget(

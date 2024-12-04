@@ -90,15 +90,7 @@ class CustomApi {
     return response != null;
   }
 
-  // Water usage endpoints
-  //TODO: Make it return double
-  //
-  // "flow_rate": 0,
-  // "total_volume": 0,
-  // "today_volume": 0,
-
   Future<double?> getWaterUsage(String ip) async {
-    // CONTINUE HERE
     final result = await _makeRequest(ip, '/water-usage');
     print(result);
     if (result == null) return null;
@@ -119,10 +111,10 @@ class CustomApi {
   Future<double?> getWaterUsageToday(String ip) async {
     //TODO: If implemented remove next line
     ip = MyStrings.myIp;
-    final response = await _makeRequest(ip, '/water-usage/today');
-    if (response == null) return null;
-    double? usage = response['usage'];
-    return usage;
+    final result = await _makeRequest(ip, '/water-usage');
+    print(result);
+    if (result == null) return null;
+    return (result['today_volume'] as int) / 1000.0;
   }
 
   // TODO: Probe endpoints, GET, PUT and DELETE
@@ -181,6 +173,8 @@ class CustomApi {
   Future<BlockSchedule?> getWaterBlockSchedule(String ip) async {
     final response = await _makeRequest(ip, '/water-block/schedule');
     if (response == null) return null;
+
+    print(response);
 
     final schedule = BlockSchedule(
       sunday: BlockDay(
