@@ -469,7 +469,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
       _appData.centralUnits.add(_central);
       return true;
     } else {
-      _showDialog('Error', 'Errors occurred while using API');
+      _showDialog('Error', 'Errors occurred while connecting to central unit');
       return false;
     }
   }
@@ -485,7 +485,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
         onTrailingTap: () {
           _createCentralUnit().then((success) {
             if (success) {
-              Navigator.pop(context);
+              Navigator.pop(context, success);
             }
           });
         },

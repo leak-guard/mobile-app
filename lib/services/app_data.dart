@@ -2,13 +2,11 @@ import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/group_central_relation.dart';
 import 'package:leak_guard/models/leak_probe.dart';
-import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/database_service.dart';
 
 class AppData {
   static final AppData _instance = AppData._internal();
   final _db = DatabaseService.instance;
-  final _api = CustomApi();
 
   List<Group> groups = [];
   List<CentralUnit> centralUnits = [];
@@ -24,7 +22,6 @@ class AppData {
   //TODO: Optimise loading data from the database via group transaction
 
   Future<void> loadData() async {
-    // await Future.delayed(const Duration(seconds: 2));
     final futures = await Future.wait([
       _db.getGroups(),
       _db.getCentralUnitsAndIDs(),
@@ -55,16 +52,14 @@ class AppData {
 
     await fetchDataFromApi();
 
+    for (var group in groups) {
+      group.updateBlockStatus();
+      if (group.centralUnits.isNotEmpty) {
+        group.blockSchedule = group.centralUnits.first.blockSchedule;
+      }
+    }
     isLoaded = true;
   }
-
-  //TODO: Implement fetching data from API:
-  // - Fetch MAC address for each central unit - check if it's online
-  // - Fetch leak probe data for each central unit
-  // - Fetch water usage data for each central unit
-  // - Fetch blockStatus for each central unit
-  // - Fetch block schedule for each central unit
-  // - Fetch Probes data for each central unit
 
   Future<void> fetchDataFromApi() async {
     List<Future<bool>> futures = [];

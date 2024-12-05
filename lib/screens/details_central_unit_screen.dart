@@ -9,6 +9,7 @@ import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/utils/routes.dart';
+import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/utils/time_zone_helper.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
@@ -54,6 +55,10 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   @override
   void initState() {
     super.initState();
+    if (!widget.central.isOnline) {
+      CustomToast.toast("Central unit is offline");
+    }
+
     _nameController.text = widget.central.name;
     _descriptionController.text = widget.central.description ?? '';
     _ipController.text = widget.central.addressIP;
@@ -80,11 +85,57 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
 
   bool _hasUnsavedChanges() {
     bool imagePathDif = widget.central.imagePath != _initialImagePath;
+    print("imagePathDif: $imagePathDif");
     bool nameDif = widget.central.name != _nameController.text.trim();
+    print("nameDif: $nameDif");
     bool descriptionDif =
         _initialDescription != _descriptionController.text.trim();
+    print("descriptionDif: $descriptionDif");
 
-    return imagePathDif || nameDif || descriptionDif;
+    bool ipDif = widget.central.addressIP != _ipController.text;
+    print("ipDif: $ipDif");
+
+    bool wifiSsidDif;
+    if (widget.central.wifiSSID == null) {
+      wifiSsidDif = false;
+    } else {
+      wifiSsidDif = widget.central.wifiSSID != _wifiSsidController.text;
+    }
+    print("wifiSsidDif: $wifiSsidDif");
+
+    bool wifiPasswordDif;
+    if (widget.central.wifiPassword == null) {
+      wifiPasswordDif = false;
+    } else {
+      wifiPasswordDif =
+          widget.central.wifiPassword != _wifiPasswordController.text;
+    }
+    print("wifiPasswordDif: $wifiPasswordDif");
+
+    bool impulsesDif = widget.central.impulsesPerLiter !=
+        int.tryParse(_impulsesController.text);
+    print("impulsesDif: $impulsesDif");
+
+    bool timeZoneDif;
+    if (widget.central.timezoneId == null) {
+      timeZoneDif = false;
+    } else {
+      timeZoneDif = widget.central.timezoneId != _selectedTimeZone.timeZoneId;
+    }
+    print("timeZoneDif: $timeZoneDif");
+
+    bool isValveNoDif = _isValveNO != widget.central.isValveNO;
+    print("isValveNoDif: $isValveNoDif");
+
+    return imagePathDif ||
+        nameDif ||
+        descriptionDif ||
+        ipDif ||
+        wifiSsidDif ||
+        wifiPasswordDif ||
+        impulsesDif ||
+        timeZoneDif ||
+        isValveNoDif;
   }
 
   Future<void> _checkCentralUnit(String ip) async {
@@ -153,19 +204,19 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     );
 
     if (result == true) {
-      await _saveChanges();
+      return await _saveChanges();
     }
 
     return true;
   }
 
-  Future<void> _saveChanges() async {
+  Future<bool> _saveChanges() async {
     bool? isFormValid = _formKey.currentState?.validate();
 
     await Future.microtask(() => null);
 
     if (isFormValid != true || !_isValid) {
-      return;
+      return false;
     }
 
     try {
@@ -175,18 +226,16 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
       await _db.updateCentralUnit(widget.central);
 
       if (_isConfigurationChanged) {
-        if (widget.central.isOnline) {
-          await _sendConfiguration();
-        } else {
-          CustomToast.toast('Central unit is offline\nConfiguration not sent');
-        }
+        await _sendConfiguration();
       }
+      return true;
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error updating central unit: $e')),
         );
       }
+      return false;
     }
   }
 
@@ -329,7 +378,8 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
       return false;
     }
 
-    if (macAddress != widget.central.addressMAC) {
+    if (macAddress != widget.central.addressMAC &&
+        widget.central.addressIP != MyStrings.mockIp) {
       CustomToast.toast('MAC address does not match\nConfiguration not sent');
       return false;
     }
@@ -562,6 +612,7 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     for (var group in _appData.groups) {
       if (group.centralUnits.contains(widget.central)) {
         group.centralUnits.remove(widget.central);
+        group.updateBlockStatus();
       }
     }
 
@@ -670,6 +721,9 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   }
 
   Widget _buildLeakProbes() {
+    if (widget.central.leakProbes.isEmpty) {
+      return const SizedBox();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -679,19 +733,22 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
         ),
         const SizedBox(height: 16),
         for (LeakProbe leakProbe in widget.central.leakProbes)
-          ProbeWidget(
-            probe: leakProbe,
-            onPressed: () {
-              Navigator.pushNamed(
-                context,
-                Routes.detailsLeakProbe,
-                arguments: DetailsLeakProbeScreenArguments(
-                  leakProbe,
-                ),
-              ).then((_) {
-                setState(() {});
-              });
-            },
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+            child: ProbeWidget(
+              probe: leakProbe,
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  Routes.detailsLeakProbe,
+                  arguments: DetailsLeakProbeScreenArguments(
+                    leakProbe,
+                  ),
+                ).then((_) {
+                  setState(() {});
+                });
+              },
+            ),
           ),
       ],
     );

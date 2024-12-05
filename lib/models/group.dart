@@ -1,3 +1,4 @@
+import 'package:leak_guard/models/block_schedule.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/photographable.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
@@ -18,9 +19,8 @@ class Group implements Photographable {
   String? imagePath;
   String? description;
   BlockStatus status = BlockStatus.noBlocked;
-  bool isTimeBlockSetted = false;
-  List<int> blockedHours = [];
   List<CentralUnit> centralUnits = [];
+  BlockSchedule blockSchedule = BlockSchedule.defaultSchedule();
 
   Group({required this.name});
 
@@ -80,36 +80,50 @@ class Group implements Photographable {
     status = BlockStatus.noBlocked;
   }
 
-  void blockHours(List<int> hours) {
-    blockedHours = hours;
-    isTimeBlockSetted = hours.isNotEmpty;
-  }
-
   Future<double> flowRate() async {
     double total = 0.0;
+    List<Future<double>> futures = [];
     for (var unit in centralUnits) {
-      final usage = await unit.getCurrentFlowRate();
-      total += usage;
+      futures.add(unit.getCurrentFlowRate());
     }
-    return total;
+    return Future.wait(futures).then((value) {
+      for (var usage in value) {
+        total += usage;
+      }
+      return total;
+    });
   }
 
   Future<double> todaysWaterUsage() async {
     double total = 0.0;
+    List<Future<double?>> futures = [];
+
     for (var unit in centralUnits) {
-      final usage = await unit.getTodaysWaterUsage();
-      total += usage;
+      futures.add(unit.getTodaysWaterUsage());
     }
-    return total;
+
+    return Future.wait(futures).then((value) {
+      for (var usage in value) {
+        total += usage ?? 0.0;
+      }
+      return total;
+    });
   }
 
   Future<double> yesterdayWaterUsage() async {
     double total = 0.0;
+    List<Future<double?>> futures = [];
+
     for (var unit in centralUnits) {
-      final usage = await unit.getYesterdayWaterUsage();
-      total += usage;
+      futures.add(unit.getYesterdayWaterUsage());
     }
-    return total;
+
+    return Future.wait(futures).then((value) {
+      for (var usage in value) {
+        total += usage ?? 0.0;
+      }
+      return total;
+    });
   }
 
   Future<List<WaterUsageData>> getWaterUsageData(int hoursToFetch) async {
@@ -129,14 +143,19 @@ class Group implements Photographable {
       ));
     }
 
+    List<Future<List<WaterUsageData>>> futures = [];
     for (var unit in centralUnits) {
-      final unitData = await unit.getWaterUsageData(hoursToFetch);
-      for (int i = 0; i < hoursToFetch; i++) {
-        result[i].usage += unitData[i].usage;
-      }
+      futures.add(unit.getWaterUsageData(hoursToFetch));
     }
 
-    return result;
+    return Future.wait(futures).then((value) {
+      for (var data in value) {
+        for (int i = 0; i < hoursToFetch; i++) {
+          result[i].usage += data[i].usage;
+        }
+      }
+      return result;
+    });
   }
 
   @override
@@ -153,15 +172,32 @@ class Group implements Photographable {
   }
 
   Future<bool> refreshData() async {
+    //TODO: Refresh
+    // current flow - DONE via main screen refresh
+    // todays usgae - DONE via main screen refresh
+    // block status
+    // new flows info (get from api and to database)
+    // probe status
+
     List<Future<bool>> futures = [];
     for (var unit in centralUnits) {
-      futures.add(unit.refreshData());
+      futures.add(unit.refreshBlockStatus());
     }
     final result = await Future.wait(futures);
+    updateBlockStatus();
     if (result.contains(false)) {
       return false;
     }
-    updateBlockStatus();
     return true;
+  }
+
+  Future<bool> sendBlockSchedule() {
+    List<Future<void>> futures = [];
+    for (var central in centralUnits) {
+      futures.add(central.sendBlockSchedule(blockSchedule));
+    }
+    return Future.wait(futures).then((value) {
+      return !value.contains(false);
+    });
   }
 }

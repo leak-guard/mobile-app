@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:leak_guard/services/app_data.dart';
+import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/utils/routes.dart';
-import 'package:leak_guard/utils/strings.dart';
-import 'package:leak_guard/widgets/add_unit_button.dart';
+import 'package:leak_guard/widgets/central_unit_widget.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
-import 'package:leak_guard/widgets/central_unit_widget.dart';
 
-class ManageCentralUnitsScreen extends StatefulWidget {
-  const ManageCentralUnitsScreen({super.key});
+class GroupCentralUnitsScreen extends StatefulWidget {
+  const GroupCentralUnitsScreen({super.key, required this.group});
+  final Group group;
 
   @override
-  State<ManageCentralUnitsScreen> createState() =>
-      _ManageCentralUnitsScreenState();
+  State<GroupCentralUnitsScreen> createState() =>
+      _GroupCentralUnitsScreenState();
 }
 
-class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
-  final _appData = AppData();
-  bool _centralChosen = false;
+class _GroupCentralUnitsScreenState extends State<GroupCentralUnitsScreen> {
+  bool _centralChoosen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -27,30 +25,25 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
         onLeadingTap: () {
           Navigator.pop(context);
         },
-        title: MyStrings.manageUnits,
+        title: widget.group.name,
       ),
       body: BlurredTopWidget(
         height: 20,
         child: ListView.builder(
-          itemCount: _appData.centralUnits.length + 1,
+          itemCount: widget.group.centralUnits.length + 1,
           itemBuilder: (context, index) {
             if (index == 0) {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: AddUnitButton(
-                  onBack: () => setState(() {}),
-                ),
-              );
+              return const SizedBox(height: 12);
             }
 
-            final central = _appData.centralUnits[index - 1];
+            final central = widget.group.centralUnits[index - 1];
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               child: CentralUnitWidget(
                 central: central,
                 onPressed: () async {
-                  if (_centralChosen) return;
-                  _centralChosen = true;
+                  if (_centralChoosen) return;
+                  _centralChoosen = true;
                   await central.refreshConfig();
 
                   Navigator.pushNamed(
@@ -61,7 +54,7 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
                     ),
                   ).then((_) {
                     setState(() {
-                      _centralChosen = false;
+                      _centralChoosen = false;
                     });
                   });
                 },

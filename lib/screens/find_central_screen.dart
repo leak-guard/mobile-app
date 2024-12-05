@@ -1,10 +1,10 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
-import 'package:leak_guard/services/api_service.dart';
+import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
+import 'package:leak_guard/widgets/central_unit_widget.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
-import 'package:nsd/nsd.dart';
 import 'package:leak_guard/services/network_service.dart';
 
 // TODO: Check if Central is already in database
@@ -18,7 +18,7 @@ class FindCentralScreen extends StatefulWidget {
 
 class _FindCentralScreenState extends State<FindCentralScreen> {
   final _networkService = NetworkService();
-  final _api = CustomApi();
+  bool _centralChosen = false;
 
   @override
   void initState() {
@@ -36,13 +36,13 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
       ),
       body: BlurredTopWidget(
         height: 20,
-        child: StreamBuilder<List<Service>>(
-          stream: _networkService.servicesStream,
+        child: StreamBuilder<List<CentralUnit>>(
+          stream: _networkService.centralUnitsStream,
           builder: (context, snapshot) {
-            final services = snapshot.data ?? [];
+            final centralUnits = snapshot.data ?? [];
 
             return ListView.builder(
-                itemCount: services.length + 2,
+                itemCount: centralUnits.length + 2,
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     return Padding(
@@ -94,10 +94,11 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   if (_networkService.isSearchingServices)
-                                    const SizedBox(
+                                    SizedBox(
                                       width: 20,
                                       height: 20,
                                       child: CircularProgressIndicator(
+                                          color: MyColors.lightThemeFont,
                                           strokeWidth: 2),
                                     ),
                                   if (!_networkService.isSearchingServices)
@@ -119,67 +120,35 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                     );
                   }
 
-                  final service = services[index - 2];
+                  final centralUnit = centralUnits[index - 2];
                   return Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: NeumorphicButton(
-                      onPressed: () async {
-                        Map<String, dynamic>? config = await _api
-                            .getConfig(service.addresses!.first.address);
-                        String? macAddress = await _api.getCentralMacAddress(
-                            service.addresses!.first.address);
-                        print(config);
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: CentralUnitWidget(
+                        central: centralUnit,
+                        onPressed: () async {
+                          if (_centralChosen) return;
+                          _centralChosen = true;
 
-                        CentralUnit mdnsCentral = CentralUnit(
-                          name: "",
-                          addressIP: service.addresses!.first.address,
-                          addressMAC: macAddress ?? '',
-                          password: 'admin1',
-                          isValveNO: (config!['valve_type'] as String) == "no",
-                          impulsesPerLiter:
-                              config['flow_meter_impulses'] as int,
-                          timezoneId: config['timezone_id'] as int,
-                          wifiSSID: config['ssid'] as String,
-                          wifiPassword: config['passphrase'] as String,
-                        );
+                          centralUnit.name = "";
 
-                        Navigator.pushNamed(
-                          context,
-                          Routes.createCentralUnit,
-                          arguments: CreateCentralScreenArguments(mdnsCentral),
-                        );
-                      },
-                      style: NeumorphicStyle(
-                        depth: 5,
-                        intensity: 0.8,
-                        boxShape: NeumorphicBoxShape.roundRect(
-                          BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Name: ${service.name}',
-                              style: Theme.of(context).textTheme.titleLarge,
+                          Navigator.pushNamed(
+                            context,
+                            Routes.createCentralUnit,
+                            arguments: CreateCentralScreenArguments(
+                              centralUnit,
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Hostname: ${service.host}',
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                            Text(
-                              'IPv4: ${service.addresses!.first.address}',
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
+                          ).then((success) {
+                            setState(() {
+                              print("Success: $success");
+                              _centralChosen = false;
+                              if (success == true) {
+                                Navigator.pop(context);
+                              }
+                            });
+                          });
+                        },
+                      ));
                 });
           },
         ),

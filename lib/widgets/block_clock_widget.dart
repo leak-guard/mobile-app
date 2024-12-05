@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/models/block_schedule.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/utils/colors.dart';
 
@@ -47,10 +48,12 @@ class ArcPathProvider extends NeumorphicPathProvider {
 
 class BlockClockWidget extends StatefulWidget {
   final Group group;
+  final BlockDayEnum targetDay;
 
   const BlockClockWidget({
     super.key,
     required this.group,
+    required this.targetDay,
   });
 
   @override
@@ -58,46 +61,84 @@ class BlockClockWidget extends StatefulWidget {
 }
 
 class _BlockClockWidgetState extends State<BlockClockWidget> {
-  Set<int> _selectedHours = {};
-  bool _isLocked = false;
+  late BlockDay _blockDay;
+
+  void _initializeBlockDay() {
+    if (widget.targetDay == BlockDayEnum.monday) {
+      _blockDay = widget.group.blockSchedule.monday;
+    } else if (widget.targetDay == BlockDayEnum.tuesday) {
+      _blockDay = widget.group.blockSchedule.tuesday;
+    } else if (widget.targetDay == BlockDayEnum.wednesday) {
+      _blockDay = widget.group.blockSchedule.wednesday;
+    } else if (widget.targetDay == BlockDayEnum.thursday) {
+      _blockDay = widget.group.blockSchedule.thursday;
+    } else if (widget.targetDay == BlockDayEnum.friday) {
+      _blockDay = widget.group.blockSchedule.friday;
+    } else if (widget.targetDay == BlockDayEnum.saturday) {
+      _blockDay = widget.group.blockSchedule.saturday;
+    } else if (widget.targetDay == BlockDayEnum.sunday) {
+      _blockDay = widget.group.blockSchedule.sunday;
+    } else if (widget.targetDay == BlockDayEnum.all) {
+      DateTime dateTime = DateTime.now();
+      if (dateTime.weekday == DateTime.monday) {
+        _blockDay = widget.group.blockSchedule.monday;
+      } else if (dateTime.weekday == DateTime.tuesday) {
+        _blockDay = widget.group.blockSchedule.tuesday;
+      } else if (dateTime.weekday == DateTime.wednesday) {
+        _blockDay = widget.group.blockSchedule.wednesday;
+      } else if (dateTime.weekday == DateTime.thursday) {
+        _blockDay = widget.group.blockSchedule.thursday;
+      } else if (dateTime.weekday == DateTime.friday) {
+        _blockDay = widget.group.blockSchedule.friday;
+      } else if (dateTime.weekday == DateTime.saturday) {
+        _blockDay = widget.group.blockSchedule.saturday;
+      } else if (dateTime.weekday == DateTime.sunday) {
+        _blockDay = widget.group.blockSchedule.sunday;
+      }
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _selectedHours = Set.from(widget.group.blockedHours);
-    _isLocked = widget.group.isTimeBlockSetted;
+    _initializeBlockDay();
   }
 
   @override
   void didUpdateWidget(BlockClockWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.group != oldWidget.group) {
-      _selectedHours = Set.from(widget.group.blockedHours);
-      _isLocked = widget.group.isTimeBlockSetted;
+      _initializeBlockDay();
     }
+  }
+
+  void _applyChanges(bool isBlocked) {
+    if (widget.targetDay == BlockDayEnum.all) {
+      widget.group.blockSchedule.toggleBlockAll(isBlocked);
+      widget.group.blockSchedule.applyBlockScheduleToAllDays(_blockDay);
+    }
+    _blockDay.enabled = isBlocked;
+    widget.group.sendBlockSchedule();
   }
 
   void _toggleHour(int hour) {
     setState(() {
-      widget.group.isTimeBlockSetted = false;
-      _isLocked = false;
-
-      if (_selectedHours.contains(hour)) {
-        widget.group.blockedHours.remove(hour);
-        _selectedHours.remove(hour);
+      if (_blockDay.enabled) {
+        _applyChanges(false);
+      }
+      if (_blockDay.hours[hour]) {
+        _blockDay.hours[hour] = false;
       } else {
-        widget.group.blockedHours.add(hour);
-        _selectedHours.add(hour);
+        _blockDay.hours[hour] = true;
       }
     });
   }
 
   void _applyBlockedHours() {
-    if (_selectedHours.isEmpty) return;
+    if (!(_blockDay.hours.any((hour) => hour = true))) return;
 
     setState(() {
-      _isLocked = !_isLocked;
-      widget.group.isTimeBlockSetted = !widget.group.isTimeBlockSetted;
+      _applyChanges(!_blockDay.enabled);
     });
   }
 
@@ -109,7 +150,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
         depth: 6,
         surfaceIntensity: 0.5,
         intensity: 0.5,
-        color: _isLocked ? MyColors.red : MyColors.lightButtonClock,
+        color: _blockDay.enabled ? MyColors.red : MyColors.lightButtonClock,
         shape: NeumorphicShape.convex,
         boxShape: const NeumorphicBoxShape.circle(),
       ),
@@ -119,10 +160,10 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
         height: innerRadius,
         child: Center(
           child: NeumorphicIcon(
-            _isLocked ? Icons.lock_outline : Icons.lock_open,
+            _blockDay.enabled ? Icons.lock_outline : Icons.lock_open,
             size: 40,
             style: NeumorphicStyle(
-              color: _isLocked ? Colors.white : Colors.black,
+              color: _blockDay.enabled ? Colors.white : Colors.black,
               depth: 1,
             ),
           ),
@@ -136,7 +177,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
       key: ValueKey('button_content_${hour}_$isSelected'),
       child: Text(
         hour.toString(),
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.black,
           fontSize: 12,
           fontWeight: FontWeight.w800,
@@ -147,7 +188,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
 
   Widget _buildHourButton(
       int hour, double center, double radius, double buttonSize) {
-    final isOuter = hour <= 12;
+    final isOuter = hour < 12;
     final baseAngle = isOuter
         ? (hour - 3) * (2 * math.pi / 12)
         : ((hour - 15) * (2 * math.pi / 12));
@@ -156,8 +197,8 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
       radius * math.cos(baseAngle),
       radius * math.sin(baseAngle),
     );
-
-    final isSelected = _selectedHours.contains(hour);
+    bool isSelected;
+    isSelected = _blockDay.hours[hour];
 
     return Positioned(
       key: ValueKey('hour_button_position_$hour'),
@@ -237,13 +278,18 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
 
   List<Widget> _buildConnectionArcs(double size) {
     List<Widget> arcs = [];
-    List<int> selectedList = _selectedHours.toList()..sort();
+    List<int> selectedHours = [];
+    for (int i = 0; i < _blockDay.hours.length; i++) {
+      if (_blockDay.hours[i]) {
+        selectedHours.add(i);
+      }
+    }
+    List<int> selectedList = selectedHours..sort();
 
     for (int i = 0; i < selectedList.length; i++) {
       int currentHour = selectedList[i];
 
       bool isOuter = currentHour < 12;
-      if (currentHour == 24) isOuter = true;
       final radius = isOuter ? size * 0.4 : size * 0.25;
 
       double startAngle = isOuter
@@ -297,7 +343,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
               children: [
                 Positioned.fill(
                   child: Neumorphic(
-                    style: NeumorphicStyle(
+                    style: const NeumorphicStyle(
                       depth: 10,
                       intensity: 0.5,
                       shape: NeumorphicShape.flat,
@@ -311,7 +357,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
                 ...List.generate(
                   24,
                   (index) => _buildHourButton(
-                    index + 1,
+                    index,
                     center,
                     index < 12 ? outerRadius : innerRadius,
                     buttonSize,
