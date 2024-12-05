@@ -56,6 +56,13 @@ class _ManageGroupsScreenState extends State<ManageGroupsScreen> {
     );
   }
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   Widget _buildAddGroupButton() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),

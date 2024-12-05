@@ -28,6 +28,13 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
   }
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
@@ -94,7 +101,7 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                           child: Text(
                             "Find central unit manually",
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: Theme.of(context).textTheme.displayMedium,
                           ),
                         ),
                       ),
@@ -136,8 +143,9 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                                     _networkService.isSearchingServices
                                         ? 'Searching...'
                                         : 'Refresh',
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displayMedium,
                                   ),
                                 ],
                               ),

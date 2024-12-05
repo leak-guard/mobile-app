@@ -122,6 +122,13 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     );
   }
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   List<Widget> _buildCentralUnitsList() {
     return _appData.centralUnits.map((central) {
       return Padding(

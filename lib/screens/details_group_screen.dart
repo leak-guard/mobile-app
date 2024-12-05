@@ -268,6 +268,13 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
     );
   }
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   List<Widget> _buildCentralUnitsList() {
     final groupCentrals = _appData.centralUnits
         .where((c) => widget.group.centralUnits.contains(c))

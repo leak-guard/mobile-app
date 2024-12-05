@@ -96,6 +96,13 @@ class _TimeZoneDropdownState extends State<TimeZoneDropdown> {
   }
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,

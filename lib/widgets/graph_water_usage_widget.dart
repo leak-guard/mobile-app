@@ -22,6 +22,13 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
   bool _shouldAnimate = false;
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {

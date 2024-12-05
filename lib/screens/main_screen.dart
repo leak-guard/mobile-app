@@ -32,6 +32,40 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _appData = AppData();
   int groupIndex = 0;
+  late Timer timer;
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void autoRefresh() {
+    setState(() {});
+    timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) => setState(() {
+        print('Auto refresh');
+      }),
+    );
+  }
+
+  void cancelAutoRefresh() {
+    setState(() {
+      timer.cancel();
+    });
+  }
 
   void _handleGroupChange(int newIndex) {
     setState(() {
@@ -422,6 +456,8 @@ class _MainScreenState extends State<MainScreen> {
           title: MyStrings.appName,
           trailingIcon: const Icon(Icons.refresh),
           onTrailingTap: () => _refreshDataForCentrals(currentGroup),
+          onTrailingLongPress: autoRefresh,
+          onUncollapse: cancelAutoRefresh,
           bottomWidgets: [
             HorizontalListWidget(
               items: _appData.groups.map((e) => e.name).toList(),

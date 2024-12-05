@@ -25,6 +25,13 @@ class _ArcProgressWidgetState extends State<ArcProgressWidget>
   final double _strokeWidth = 16;
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     _animationProgressController = AnimationController(
       vsync: this,

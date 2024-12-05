@@ -34,6 +34,13 @@ class _WifiDropdownState extends State<WifiDropdown> {
     return networks.length >= 3 ? 150.0 : networks.length * 55.0;
   }
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   Widget _buildPermissionMessage() {
     return SizedBox(
       height: 150,

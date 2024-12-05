@@ -64,6 +64,13 @@ class _BlockScheduleScreenState extends State<BlockScheduleScreen> {
   }
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     BlockDayEnum targetDay = BlockDayEnum.values[scheduleDayIndex];
 

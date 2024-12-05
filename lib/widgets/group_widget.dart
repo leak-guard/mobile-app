@@ -65,7 +65,7 @@ class _GroupWidgetState extends State<GroupWidget> {
                   textAlign: TextAlign.start,
                   overflow: TextOverflow.ellipsis,
                   widget.group.name,
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  style: Theme.of(context).textTheme.displayMedium!.copyWith(
                         color: _color,
                       ),
                 ),

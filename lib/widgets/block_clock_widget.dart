@@ -121,6 +121,13 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
     widget.group.sendBlockSchedule();
   }
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   void _toggleHour(int hour) {
     setState(() {
       if (_blockDay.enabled) {

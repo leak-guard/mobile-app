@@ -38,8 +38,11 @@ class AddGroupButton extends StatelessWidget {
           });
         },
         child: Center(
-          child: Text('Add new group',
-              style: Theme.of(context).textTheme.titleLarge),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text('Add new group',
+                style: Theme.of(context).textTheme.displayMedium),
+          ),
         ),
       ),
     );

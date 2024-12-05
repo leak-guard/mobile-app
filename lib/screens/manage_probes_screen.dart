@@ -17,6 +17,13 @@ class _ManageLeakProbesScreenState extends State<ManageLeakProbesScreen> {
   final _appData = AppData();
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(

@@ -169,6 +169,13 @@ class _DetailsLeakProbeScreenState extends State<DetailsLeakProbeScreen> {
     );
   }
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   Widget _buildInfoSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

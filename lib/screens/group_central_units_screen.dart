@@ -16,6 +16,12 @@ class GroupCentralUnitsScreen extends StatefulWidget {
 
 class _GroupCentralUnitsScreenState extends State<GroupCentralUnitsScreen> {
   bool _centralChoosen = false;
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

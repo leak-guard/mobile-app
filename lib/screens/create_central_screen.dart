@@ -98,6 +98,13 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     }
   }
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   Widget _buildWifiSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
