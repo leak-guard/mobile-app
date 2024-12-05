@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/wifi_network.dart';
+import 'package:leak_guard/services/app_data.dart';
+import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/services/permissions_service.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:nsd/nsd.dart';
-import 'package:permission_handler/permission_handler.dart' as ph;
 import 'package:wifi_scan/wifi_scan.dart';
+
+import 'package:permission_handler/permission_handler.dart' as ph;
 
 class NetworkService {
   static final NetworkService _instance = NetworkService._internal();
@@ -17,18 +21,23 @@ class NetworkService {
   final _networkInfo = NetworkInfo();
   Discovery? _discovery;
 
+  AppData _appData = AppData();
+  final _db = DatabaseService.instance;
+
   List<WifiNetwork> availableWifiNetworks = [];
-  List<Service> discoveredServices = [];
+  List<CentralUnit> discoveredCentralUnits = [];
   String? currentWifiName;
   bool isSearchingWifi = false;
   bool isSearchingServices = false;
   bool permissionGranted = true;
 
   final _wifiStreamController = StreamController<List<WifiNetwork>>.broadcast();
-  final _servicesStreamController = StreamController<List<Service>>.broadcast();
+  final _centralUnitsStreamController =
+      StreamController<List<CentralUnit>>.broadcast();
 
   Stream<List<WifiNetwork>> get wifiStream => _wifiStreamController.stream;
-  Stream<List<Service>> get servicesStream => _servicesStreamController.stream;
+  Stream<List<CentralUnit>> get centralUnitsStream =>
+      _centralUnitsStreamController.stream;
 
   Future<void> _initializeNetworkInfo() async {
     await scanWifiNetworks();
@@ -44,9 +53,6 @@ class NetworkService {
   Future<void> scanWifiNetworks() async {
     isSearchingWifi = true;
     _wifiStreamController.add(availableWifiNetworks);
-    //TODO: Remove this delay
-    await Future.delayed(const Duration(seconds: 1));
-
     try {
       permissionGranted =
           await PermissionsService().requestPermission(ph.Permission.location);
@@ -101,8 +107,8 @@ class NetworkService {
     }
 
     isSearchingServices = true;
-    discoveredServices.clear();
-    _servicesStreamController.add(discoveredServices);
+    discoveredCentralUnits.clear();
+    _centralUnitsStreamController.add(discoveredCentralUnits);
 
     try {
       _discovery = await startDiscovery(
@@ -143,27 +149,43 @@ class NetworkService {
   }
 
   void _handleFoundService(Service service) {
-    // TODO:
-    // CONTINUE HERE - dodaj refresh button dla manage central units, który będzie odświeżał odpowiednie dane oraz sprawdzał mdnsem czy jakieś centrale są dostępne
-    // 1. Sprawdzić czy centrala nie jest już w bazie danych (po MAC adresie)
-    // 2. Jeśli jest w bazie, ale ma inne IP, zaktualizować IP
-    // 3. Dodać do listy tylko unikalne centrale
-    // 4. Wyświetlić popup z informacją o zaaktualizowaniu IP
+    CentralUnit foundCentralUnit = CentralUnit.fromService(service);
 
-    if (!discoveredServices.any((s) => _isSameService(s, service))) {
-      discoveredServices.add(service);
-      _servicesStreamController.add(discoveredServices);
+    if (!discoveredCentralUnits
+        .any((cu) => _isSameCentralUnit(cu, foundCentralUnit))) {
+      bool centralAlreadyInDatabase = false;
+
+      for (CentralUnit cu in _appData.centralUnits) {
+        if (cu.addressMAC == foundCentralUnit.addressMAC) {
+          centralAlreadyInDatabase = true;
+          if (cu.addressIP != foundCentralUnit.addressIP) {
+            cu.addressIP = foundCentralUnit.addressIP;
+            cu.isOnline = true;
+            _db.updateCentralUnit(cu);
+          }
+          break;
+        }
+      }
+      if (!centralAlreadyInDatabase) {
+        foundCentralUnit.refreshData().then((_) {
+          if (!centralAlreadyInDatabase) {
+            discoveredCentralUnits.add(foundCentralUnit);
+            _centralUnitsStreamController.add(discoveredCentralUnits);
+          }
+        });
+      }
     }
-    isSearchingServices = false;
   }
 
   void _handleLostService(Service service) {
-    discoveredServices.removeWhere((s) => _isSameService(s, service));
-    _servicesStreamController.add(discoveredServices);
+    CentralUnit foundCentralUnit = CentralUnit.fromService(service);
+    discoveredCentralUnits
+        .removeWhere((s) => _isSameCentralUnit(s, foundCentralUnit));
+    _centralUnitsStreamController.add(discoveredCentralUnits);
   }
 
-  bool _isSameService(Service a, Service b) =>
-      a.name == b.name && a.type == b.type;
+  bool _isSameCentralUnit(CentralUnit a, CentralUnit b) =>
+      a.addressMAC == b.addressMAC;
 
   Future<void> stopServiceDiscovery() async {
     if (_discovery != null) {
@@ -186,6 +208,6 @@ class NetworkService {
   Future<void> dispose() async {
     await stopServiceDiscovery();
     await _wifiStreamController.close();
-    await _servicesStreamController.close();
+    await _centralUnitsStreamController.close();
   }
 }

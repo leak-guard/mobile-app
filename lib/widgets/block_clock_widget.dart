@@ -65,35 +65,35 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
 
   void _initializeBlockDay() {
     if (widget.targetDay == BlockDayEnum.monday) {
-      _blockDay = widget.group.blockSchedule!.monday;
+      _blockDay = widget.group.blockSchedule.monday;
     } else if (widget.targetDay == BlockDayEnum.tuesday) {
-      _blockDay = widget.group.blockSchedule!.tuesday;
+      _blockDay = widget.group.blockSchedule.tuesday;
     } else if (widget.targetDay == BlockDayEnum.wednesday) {
-      _blockDay = widget.group.blockSchedule!.wednesday;
+      _blockDay = widget.group.blockSchedule.wednesday;
     } else if (widget.targetDay == BlockDayEnum.thursday) {
-      _blockDay = widget.group.blockSchedule!.thursday;
+      _blockDay = widget.group.blockSchedule.thursday;
     } else if (widget.targetDay == BlockDayEnum.friday) {
-      _blockDay = widget.group.blockSchedule!.friday;
+      _blockDay = widget.group.blockSchedule.friday;
     } else if (widget.targetDay == BlockDayEnum.saturday) {
-      _blockDay = widget.group.blockSchedule!.saturday;
+      _blockDay = widget.group.blockSchedule.saturday;
     } else if (widget.targetDay == BlockDayEnum.sunday) {
-      _blockDay = widget.group.blockSchedule!.sunday;
+      _blockDay = widget.group.blockSchedule.sunday;
     } else if (widget.targetDay == BlockDayEnum.all) {
       DateTime dateTime = DateTime.now();
       if (dateTime.weekday == DateTime.monday) {
-        _blockDay = widget.group.blockSchedule!.monday;
+        _blockDay = widget.group.blockSchedule.monday;
       } else if (dateTime.weekday == DateTime.tuesday) {
-        _blockDay = widget.group.blockSchedule!.tuesday;
+        _blockDay = widget.group.blockSchedule.tuesday;
       } else if (dateTime.weekday == DateTime.wednesday) {
-        _blockDay = widget.group.blockSchedule!.wednesday;
+        _blockDay = widget.group.blockSchedule.wednesday;
       } else if (dateTime.weekday == DateTime.thursday) {
-        _blockDay = widget.group.blockSchedule!.thursday;
+        _blockDay = widget.group.blockSchedule.thursday;
       } else if (dateTime.weekday == DateTime.friday) {
-        _blockDay = widget.group.blockSchedule!.friday;
+        _blockDay = widget.group.blockSchedule.friday;
       } else if (dateTime.weekday == DateTime.saturday) {
-        _blockDay = widget.group.blockSchedule!.saturday;
+        _blockDay = widget.group.blockSchedule.saturday;
       } else if (dateTime.weekday == DateTime.sunday) {
-        _blockDay = widget.group.blockSchedule!.sunday;
+        _blockDay = widget.group.blockSchedule.sunday;
       }
     }
   }
@@ -101,7 +101,6 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
   @override
   void initState() {
     super.initState();
-    widget.group.blockSchedule ??= BlockSchedule.defaultSchedule();
     _initializeBlockDay();
   }
 
@@ -109,21 +108,14 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
   void didUpdateWidget(BlockClockWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.group != oldWidget.group) {
-      widget.group.blockSchedule ??= BlockSchedule.defaultSchedule();
-
       _initializeBlockDay();
     }
   }
 
   void _applyChanges(bool isBlocked) {
     if (widget.targetDay == BlockDayEnum.all) {
-      widget.group.blockSchedule!.monday.enabled = isBlocked;
-      widget.group.blockSchedule!.tuesday.enabled = isBlocked;
-      widget.group.blockSchedule!.wednesday.enabled = isBlocked;
-      widget.group.blockSchedule!.thursday.enabled = isBlocked;
-      widget.group.blockSchedule!.friday.enabled = isBlocked;
-      widget.group.blockSchedule!.saturday.enabled = isBlocked;
-      widget.group.blockSchedule!.sunday.enabled = isBlocked;
+      widget.group.blockSchedule.toggleBlockAll(isBlocked);
+      widget.group.blockSchedule.applyBlockScheduleToAllDays(_blockDay);
     }
     _blockDay.enabled = isBlocked;
     widget.group.sendBlockSchedule();
@@ -134,17 +126,10 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
       if (_blockDay.enabled) {
         _applyChanges(false);
       }
-      int index;
-      if (hour == 24) {
-        index = 0;
+      if (_blockDay.hours[hour]) {
+        _blockDay.hours[hour] = false;
       } else {
-        index = hour;
-      }
-
-      if (_blockDay.hours[index]) {
-        _blockDay.hours[index] = false;
-      } else {
-        _blockDay.hours[index] = true;
+        _blockDay.hours[hour] = true;
       }
     });
   }
@@ -203,7 +188,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
 
   Widget _buildHourButton(
       int hour, double center, double radius, double buttonSize) {
-    final isOuter = hour <= 12;
+    final isOuter = hour < 12;
     final baseAngle = isOuter
         ? (hour - 3) * (2 * math.pi / 12)
         : ((hour - 15) * (2 * math.pi / 12));
@@ -213,11 +198,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
       radius * math.sin(baseAngle),
     );
     bool isSelected;
-    if (hour == 24) {
-      isSelected = _blockDay.hours[0];
-    } else {
-      isSelected = _blockDay.hours[hour];
-    }
+    isSelected = _blockDay.hours[hour];
 
     return Positioned(
       key: ValueKey('hour_button_position_$hour'),
@@ -297,23 +278,18 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
 
   List<Widget> _buildConnectionArcs(double size) {
     List<Widget> arcs = [];
-    List<int> _selectedHours = [];
+    List<int> selectedHours = [];
     for (int i = 0; i < _blockDay.hours.length; i++) {
       if (_blockDay.hours[i]) {
-        if (i == 0) {
-          _selectedHours.add(24);
-        } else {
-          _selectedHours.add(i);
-        }
+        selectedHours.add(i);
       }
     }
-    List<int> selectedList = _selectedHours..sort();
+    List<int> selectedList = selectedHours..sort();
 
     for (int i = 0; i < selectedList.length; i++) {
       int currentHour = selectedList[i];
 
       bool isOuter = currentHour < 12;
-      if (currentHour == 24) isOuter = true;
       final radius = isOuter ? size * 0.4 : size * 0.25;
 
       double startAngle = isOuter
@@ -381,7 +357,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
                 ...List.generate(
                   24,
                   (index) => _buildHourButton(
-                    index + 1,
+                    index,
                     center,
                     index < 12 ? outerRadius : innerRadius,
                     buttonSize,

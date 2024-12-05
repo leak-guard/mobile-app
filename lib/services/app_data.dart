@@ -22,7 +22,6 @@ class AppData {
   //TODO: Optimise loading data from the database via group transaction
 
   Future<void> loadData() async {
-    // await Future.delayed(const Duration(seconds: 2));
     final futures = await Future.wait([
       _db.getGroups(),
       _db.getCentralUnitsAndIDs(),
@@ -59,7 +58,6 @@ class AppData {
         group.blockSchedule = group.centralUnits.first.blockSchedule;
       }
     }
-
     isLoaded = true;
   }
 

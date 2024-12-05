@@ -286,6 +286,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                 if (_centralChoosen) return;
                 _centralChoosen = true;
                 await central.refreshConfig();
+
                 Navigator.pushNamed(
                   context,
                   Routes.detailsCentralUnit,
@@ -308,7 +309,8 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
               onLongPress: () async {
                 if (_centralChoosen) return;
                 _centralChoosen = true;
-                await central.refreshConfig();
+                central.refreshConfig();
+
                 Navigator.pushNamed(
                   context,
                   Routes.detailsCentralUnit,

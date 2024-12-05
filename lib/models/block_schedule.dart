@@ -26,6 +26,26 @@ class BlockSchedule {
         friday = BlockDay.defaultDay(),
         saturday = BlockDay.defaultDay();
 
+  void toggleBlockAll(bool value) {
+    sunday.enabled = value;
+    monday.enabled = value;
+    tuesday.enabled = value;
+    wednesday.enabled = value;
+    thursday.enabled = value;
+    friday.enabled = value;
+    saturday.enabled = value;
+  }
+
+  void applyBlockScheduleToAllDays(BlockDay day) {
+    sunday.hours = day.hours;
+    monday.hours = day.hours;
+    tuesday.hours = day.hours;
+    wednesday.hours = day.hours;
+    thursday.hours = day.hours;
+    friday.hours = day.hours;
+    saturday.hours = day.hours;
+  }
+
   @override
   String toString() {
     String result = "Sunday:\n$sunday\n";

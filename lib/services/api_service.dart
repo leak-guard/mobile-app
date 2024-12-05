@@ -211,14 +211,14 @@ class CustomApi {
   }
 
   // TODO:
-  Future<bool> postWaterBlockSchedule(
+  Future<bool> putWaterBlockSchedule(
     String ip,
     Map<String, dynamic> scheduleData,
   ) async {
     final response = await _makeRequest(
       ip,
       '/water-block/schedule',
-      method: 'POST',
+      method: 'PUT',
       body: scheduleData,
     );
     print(response);

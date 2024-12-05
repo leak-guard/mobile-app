@@ -5,8 +5,8 @@ import 'package:leak_guard/models/photographable.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/database_service.dart';
-import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/utils/strings.dart';
+import 'package:nsd/nsd.dart';
 
 class CentralUnit implements Photographable {
   int? centralUnitID;
@@ -45,6 +45,18 @@ class CentralUnit implements Photographable {
       this.imagePath,
       this.wifiSSID,
       this.wifiPassword});
+
+  CentralUnit.fromService(Service service)
+      : name = service.addresses == null
+            ? "no_ip_addresses"
+            : service.addresses!.first.address,
+        password = "admin",
+        addressIP = service.addresses == null
+            ? "no_ip_addresses"
+            : service.addresses!.first.address,
+        addressMAC = service.host == null
+            ? "no_host_name"
+            : service.host!.replaceAll("leakguard-", '');
 
   List<LeakProbe> leakProbes = [];
   final _db = DatabaseService.instance;
@@ -313,8 +325,10 @@ class CentralUnit implements Photographable {
       timezoneId = data['timezone_id'] as int;
       wifiSSID = data['ssid'] as String;
       wifiPassword = data['passphrase'] as String;
+      isOnline = true;
       return true;
     } else {
+      isOnline = false;
       return false;
     }
   }
@@ -324,11 +338,13 @@ class CentralUnit implements Photographable {
 
     String? resultMacAddress = await _api.getCentralMacAddress(addressIP);
     if (resultMacAddress == null) {
+      isOnline = false;
       return false;
     }
     if (addressMAC != resultMacAddress) {
       return false;
     }
+    isOnline = true;
     return true;
   }
 
@@ -361,7 +377,6 @@ class CentralUnit implements Photographable {
   //TODO: probably many request will kill the server
   Future<bool> refreshData() async {
     await refreshMacAddress();
-    isOnline = true;
 
     await refreshConfig();
 
@@ -373,6 +388,6 @@ class CentralUnit implements Photographable {
   }
 
   Future<bool> sendBlockSchedule(BlockSchedule blockSchedule) async {
-    return _api.postWaterBlockSchedule(addressIP, blockSchedule.toJson());
+    return _api.putWaterBlockSchedule(addressIP, blockSchedule.toJson());
   }
 }

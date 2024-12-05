@@ -119,8 +119,8 @@ class _GroupWidgetState extends State<GroupWidget> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const SizedBox(width: 3),
-                          _createIcon(Icons.signal_cellular_alt,
-                              widget.group.connectedCentralUnits()),
+                          _createIcon(
+                              Icons.wifi, widget.group.connectedCentralUnits()),
                           const SizedBox(width: 7),
                           _createIcon(CustomIcons.battery_low,
                               widget.group.leakProbeLowBatteryNumber())
