@@ -64,7 +64,9 @@ class AppData {
   Future<void> fetchDataFromApi() async {
     List<Future<bool>> futures = [];
     for (var central in centralUnits) {
-      futures.add(central.refreshData());
+      for (var future in central.refreshData()) {
+        futures.add(future);
+      }
     }
     await Future.wait(futures);
   }

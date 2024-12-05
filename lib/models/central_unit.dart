@@ -54,9 +54,7 @@ class CentralUnit implements Photographable {
         addressIP = service.addresses == null
             ? "no_ip_addresses"
             : service.addresses!.first.address,
-        addressMAC = service.host == null
-            ? "no_host_name"
-            : service.host!.replaceAll("leakguard-", '');
+        addressMAC = MyStrings.noHost;
 
   List<LeakProbe> leakProbes = [];
   final _db = DatabaseService.instance;
@@ -99,7 +97,6 @@ class CentralUnit implements Photographable {
   }
 
   Future<double> getCurrentFlowRate() async {
-    print('Getting flow rate for unit ${name}');
     return await _api.getWaterUsage(addressIP) ?? 0.0;
   }
 
@@ -334,16 +331,21 @@ class CentralUnit implements Photographable {
   }
 
   Future<bool> refreshMacAddress() async {
-    if (addressIP != MyStrings.mockIp) return true;
-
     String? resultMacAddress = await _api.getCentralMacAddress(addressIP);
     if (resultMacAddress == null) {
       isOnline = false;
       return false;
     }
-    if (addressMAC != resultMacAddress) {
+    if (addressMAC != resultMacAddress &&
+        addressMAC != MyStrings.noHost &&
+        addressIP != MyStrings.mockIp) {
       return false;
     }
+
+    if (addressMAC == MyStrings.noHost) {
+      addressMAC = resultMacAddress;
+    }
+
     isOnline = true;
     return true;
   }
@@ -375,16 +377,23 @@ class CentralUnit implements Photographable {
   // - Fetch Probes data for each central unit
 
   //TODO: probably many request will kill the server
-  Future<bool> refreshData() async {
-    await refreshMacAddress();
+  List<Future<bool>> refreshData() {
+    List<Future<bool>> futures = [];
+    futures.add(refreshMacAddress());
+    futures.add(refreshConfig());
+    futures.add(refreshBlockSchedule());
+    futures.add(refreshBlockStatus());
 
-    await refreshConfig();
+    return futures;
+  }
 
-    await refreshBlockSchedule();
+  List<Future<bool>> refreshStatus() {
+    List<Future<bool>> futures = [];
+    futures.add(refreshMacAddress());
+    futures.add(refreshConfig());
+    futures.add(refreshBlockStatus());
 
-    await refreshBlockStatus();
-
-    return true;
+    return futures;
   }
 
   Future<bool> sendBlockSchedule(BlockSchedule blockSchedule) async {

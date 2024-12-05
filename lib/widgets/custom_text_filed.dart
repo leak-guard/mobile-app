@@ -12,6 +12,7 @@ class CustomTextField extends StatelessWidget {
     this.maxLines = 1,
     this.enabled = true,
     this.readOnly = false,
+    this.obscureText = false,
     this.style,
   });
 
@@ -23,6 +24,7 @@ class CustomTextField extends StatelessWidget {
   final int maxLines;
   final bool enabled;
   final bool readOnly;
+  final bool obscureText;
   final TextStyle? style;
 
   @override
@@ -56,6 +58,7 @@ class CustomTextField extends StatelessWidget {
           color: Colors.transparent,
           child: TextFormField(
             controller: controller,
+            obscureText: obscureText,
             enabled: enabled,
             readOnly: readOnly,
             maxLines: maxLines,

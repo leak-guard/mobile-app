@@ -8,6 +8,7 @@ import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/widgets/password_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
 import 'package:leak_guard/widgets/timezone_dropdown_widget.dart';
 import 'package:leak_guard/widgets/wifi_dropdown_widget.dart';
@@ -156,8 +157,8 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
           style: Theme.of(context).textTheme.displaySmall,
         ),
         const SizedBox(height: 8),
-        CustomTextField(
-          hintText: 'Enter password...',
+        PasswordWidget(
+          controller: _wifiPasswordController,
           validator: (value) {
             String? errorMessage;
             if (!(_selectedNetwork?.isSecure ?? true)) {
@@ -178,7 +179,6 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
             }
             return null;
           },
-          controller: _wifiPasswordController,
         ),
       ],
     );
@@ -432,8 +432,6 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
       "timezone_id": centralUnit.timezoneId,
     };
 
-    print(config);
-
     if (!(await _api.putConfig(centralUnit.addressIP, config))) return false;
 
     return true;
@@ -479,7 +477,12 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         height: 80,
-        onLeadingTap: () => Navigator.pop(context),
+        onLeadingTap: () {
+          if (widget.chosenCentral != null) {
+            widget.chosenCentral!.name = widget.chosenCentral!.addressIP;
+          }
+          Navigator.pop(context);
+        },
         title: 'Create Central Unit',
         trailingIcon: const Icon(Icons.check),
         onTrailingTap: () {

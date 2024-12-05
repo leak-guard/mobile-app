@@ -78,7 +78,7 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void _refreshDataForCentrals(Group group) async {
+  Future<void> _refreshDataForCentrals(Group group) async {
     if (mounted) {
       if (await group.refreshData()) {
         setState(() {
@@ -432,31 +432,36 @@ class _MainScreenState extends State<MainScreen> {
           height: 120,
         ),
         backgroundColor: MyColors.background,
-        body: FutureBuilder<Map<String, dynamic>>(
-          future: Future.wait([
-            currentGroup.todaysWaterUsage(),
-            currentGroup.yesterdayWaterUsage(),
-            currentGroup.flowRate(),
-            currentGroup.getWaterUsageData(12),
-          ]).then((results) => {
-                'todaysUsage': results[0],
-                'maxUsage': results[1],
-                'flowRate': results[2],
-                'waterUsageData': results[3],
-              }),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: MyColors.lightThemeFont,
-                ),
-              );
-            }
+        body: RefreshIndicator(
+          color: MyColors.lightThemeFont,
+          backgroundColor: MyColors.background,
+          onRefresh: () => _refreshDataForCentrals(currentGroup),
+          child: FutureBuilder<Map<String, dynamic>>(
+            future: Future.wait([
+              currentGroup.todaysWaterUsage(),
+              currentGroup.yesterdayWaterUsage(),
+              currentGroup.flowRate(),
+              currentGroup.getWaterUsageData(12),
+            ]).then((results) => {
+                  'todaysUsage': results[0],
+                  'maxUsage': results[1],
+                  'flowRate': results[2],
+                  'waterUsageData': results[3],
+                }),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: MyColors.lightThemeFont,
+                  ),
+                );
+              }
 
-            Map<String, dynamic> data = snapshot.data!;
+              Map<String, dynamic> data = snapshot.data!;
 
-            return _buildScreen(data, currentGroup);
-          },
+              return _buildScreen(data, currentGroup);
+            },
+          ),
         ),
       ),
     );

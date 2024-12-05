@@ -1,6 +1,7 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/widgets/central_unit_widget.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
@@ -55,7 +56,34 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                             BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
+                          await _networkService.getCurrentWifiName();
+                          print(
+                              "Current wifi name: ${_networkService.currentWifiName}");
+                          if ((_networkService.currentWifiName ?? "") ==
+                              "LeakGuardConfig") {
+                            CentralUnit newCentral = CentralUnit(
+                              name: "",
+                              addressIP: "192.168.4.1",
+                              addressMAC: '',
+                              password: '',
+                              isValveNO: true,
+                              impulsesPerLiter: 477,
+                              timezoneId: 37,
+                            );
+                            Navigator.pushNamed(
+                              context,
+                              Routes.createCentralUnit,
+                              arguments:
+                                  CreateCentralScreenArguments(newCentral),
+                            ).then((_) {
+                              setState(() {
+                                _networkService.startServiceDiscovery();
+                              });
+                            });
+                            CustomToast.toast("Connected to LeakGuardConfig!");
+                            return;
+                          }
                           Navigator.pushNamed(
                             context,
                             Routes.createCentralUnit,
@@ -140,10 +168,9 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                             ),
                           ).then((success) {
                             setState(() {
-                              print("Success: $success");
                               _centralChosen = false;
                               if (success == true) {
-                                Navigator.pop(context);
+                                _networkService.startServiceDiscovery();
                               }
                             });
                           });

@@ -14,6 +14,7 @@ import 'package:leak_guard/utils/time_zone_helper.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
+import 'package:leak_guard/widgets/password_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
 import 'package:leak_guard/widgets/probe_widget.dart';
 import 'package:leak_guard/widgets/timezone_dropdown_widget.dart';
@@ -85,15 +86,11 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
 
   bool _hasUnsavedChanges() {
     bool imagePathDif = widget.central.imagePath != _initialImagePath;
-    print("imagePathDif: $imagePathDif");
     bool nameDif = widget.central.name != _nameController.text.trim();
-    print("nameDif: $nameDif");
     bool descriptionDif =
         _initialDescription != _descriptionController.text.trim();
-    print("descriptionDif: $descriptionDif");
 
     bool ipDif = widget.central.addressIP != _ipController.text;
-    print("ipDif: $ipDif");
 
     bool wifiSsidDif;
     if (widget.central.wifiSSID == null) {
@@ -101,7 +98,6 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     } else {
       wifiSsidDif = widget.central.wifiSSID != _wifiSsidController.text;
     }
-    print("wifiSsidDif: $wifiSsidDif");
 
     bool wifiPasswordDif;
     if (widget.central.wifiPassword == null) {
@@ -110,11 +106,9 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
       wifiPasswordDif =
           widget.central.wifiPassword != _wifiPasswordController.text;
     }
-    print("wifiPasswordDif: $wifiPasswordDif");
 
     bool impulsesDif = widget.central.impulsesPerLiter !=
         int.tryParse(_impulsesController.text);
-    print("impulsesDif: $impulsesDif");
 
     bool timeZoneDif;
     if (widget.central.timezoneId == null) {
@@ -122,10 +116,8 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     } else {
       timeZoneDif = widget.central.timezoneId != _selectedTimeZone.timeZoneId;
     }
-    print("timeZoneDif: $timeZoneDif");
 
     bool isValveNoDif = _isValveNO != widget.central.isValveNO;
-    print("isValveNoDif: $isValveNoDif");
 
     return imagePathDif ||
         nameDif ||
@@ -303,9 +295,8 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
           style: Theme.of(context).textTheme.displaySmall,
         ),
         const SizedBox(height: 8),
-        CustomTextField(
-          hintText: 'Enter password...',
-          onChanged: (_) => setState(() => _isConfigurationChanged = true),
+        PasswordWidget(
+          controller: _wifiPasswordController,
           validator: (value) {
             if (!widget.central.isOnline) {
               return null;
@@ -329,8 +320,10 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
             }
             return null;
           },
-          controller: _wifiPasswordController,
-        ),
+          onTextFieldChanged: () {
+            setState(() => _isConfigurationChanged = true);
+          },
+        )
       ],
     );
   }

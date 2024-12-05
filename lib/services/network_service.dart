@@ -149,31 +149,29 @@ class NetworkService {
   }
 
   void _handleFoundService(Service service) {
+    print(service);
     CentralUnit foundCentralUnit = CentralUnit.fromService(service);
 
     if (!discoveredCentralUnits
         .any((cu) => _isSameCentralUnit(cu, foundCentralUnit))) {
       bool centralAlreadyInDatabase = false;
-
-      for (CentralUnit cu in _appData.centralUnits) {
-        if (cu.addressMAC == foundCentralUnit.addressMAC) {
-          centralAlreadyInDatabase = true;
-          if (cu.addressIP != foundCentralUnit.addressIP) {
-            cu.addressIP = foundCentralUnit.addressIP;
-            cu.isOnline = true;
-            _db.updateCentralUnit(cu);
+      Future.wait(foundCentralUnit.refreshStatus()).then((success) {
+        for (CentralUnit cu in _appData.centralUnits) {
+          if (cu.addressMAC == foundCentralUnit.addressMAC) {
+            centralAlreadyInDatabase = true;
+            if (cu.addressIP != foundCentralUnit.addressIP) {
+              cu.addressIP = foundCentralUnit.addressIP;
+              cu.isOnline = true;
+              _db.updateCentralUnit(cu);
+            }
+            break;
           }
-          break;
         }
-      }
-      if (!centralAlreadyInDatabase) {
-        foundCentralUnit.refreshData().then((_) {
-          if (!centralAlreadyInDatabase) {
-            discoveredCentralUnits.add(foundCentralUnit);
-            _centralUnitsStreamController.add(discoveredCentralUnits);
-          }
-        });
-      }
+        if (!centralAlreadyInDatabase) {
+          discoveredCentralUnits.add(foundCentralUnit);
+          _centralUnitsStreamController.add(discoveredCentralUnits);
+        }
+      });
     }
   }
 
@@ -185,7 +183,7 @@ class NetworkService {
   }
 
   bool _isSameCentralUnit(CentralUnit a, CentralUnit b) =>
-      a.addressMAC == b.addressMAC;
+      a.addressIP == b.addressIP;
 
   Future<void> stopServiceDiscovery() async {
     if (_discovery != null) {
