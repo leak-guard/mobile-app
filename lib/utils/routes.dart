@@ -2,6 +2,7 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/leak_probe.dart';
+import 'package:leak_guard/screens/block_schedule_screen.dart';
 import 'package:leak_guard/screens/create_central_screen.dart';
 import 'package:leak_guard/screens/details_central_unit_screen.dart';
 import 'package:leak_guard/screens/details_group_screen.dart';
@@ -23,6 +24,7 @@ class Routes {
 
   static const String groupLeakProbes = '/groupLeakProbes';
   static const String groupCentralUnits = '/groupCentralUnits';
+  static const String blockSchedule = '/blockSchedule';
 
   static const String manageGroups = '/manageGroups';
   static const String createGroup = '/createGroup';
@@ -151,6 +153,19 @@ class Routes {
           builder: (_) => const ErrorScreen(),
         );
 
+      case blockSchedule:
+        if (settings.arguments is BlockScheduleScreenArguments) {
+          final args = settings.arguments as BlockScheduleScreenArguments;
+          return MaterialPageRoute(
+            builder: (_) => BlockScheduleScreen(
+              group: args.group,
+            ),
+          );
+        }
+        return MaterialPageRoute(
+          builder: (_) => const ErrorScreen(),
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) => const ErrorScreen(),
@@ -193,4 +208,10 @@ class DetailsCentralUnitScreenArguments {
   final CentralUnit central;
 
   DetailsCentralUnitScreenArguments(this.central);
+}
+
+class BlockScheduleScreenArguments {
+  final Group group;
+
+  BlockScheduleScreenArguments(this.group);
 }

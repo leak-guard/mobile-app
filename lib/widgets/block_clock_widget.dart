@@ -64,6 +64,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
   late BlockDay _blockDay;
 
   void _initializeBlockDay() {
+    print("targetDay: ${widget.targetDay}");
     if (widget.targetDay == BlockDayEnum.monday) {
       _blockDay = widget.group.blockSchedule.monday;
     } else if (widget.targetDay == BlockDayEnum.tuesday) {
@@ -96,6 +97,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
         _blockDay = widget.group.blockSchedule.sunday;
       }
     }
+    print("blockday: $_blockDay");
   }
 
   @override
@@ -107,9 +109,7 @@ class _BlockClockWidgetState extends State<BlockClockWidget> {
   @override
   void didUpdateWidget(BlockClockWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.group != oldWidget.group) {
-      _initializeBlockDay();
-    }
+    _initializeBlockDay();
   }
 
   void _applyChanges(bool isBlocked) {

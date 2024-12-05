@@ -4,12 +4,12 @@ import 'package:leak_guard/utils/colors.dart';
 class HorizontalListWidget extends StatefulWidget {
   const HorizontalListWidget({
     super.key,
-    required this.groups,
+    required this.items,
     required this.selectedIndex,
     required this.onIndexChanged,
   });
 
-  final List<String> groups;
+  final List<String> items;
   final int selectedIndex;
   final Function(int) onIndexChanged;
 
@@ -39,7 +39,7 @@ class _HorizontalListWidgetState extends State<HorizontalListWidget> {
   @override
   void didUpdateWidget(HorizontalListWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.groups.length != oldWidget.groups.length) {
+    if (widget.items.length != oldWidget.items.length) {
       _initializeKeys();
     }
     if (widget.selectedIndex != oldWidget.selectedIndex) {
@@ -55,7 +55,7 @@ class _HorizontalListWidgetState extends State<HorizontalListWidget> {
 
   void _initializeKeys() {
     _keys.clear();
-    for (int i = 0; i < widget.groups.length; i++) {
+    for (int i = 0; i < widget.items.length; i++) {
       _keys.add(GlobalKey());
     }
   }
@@ -113,7 +113,7 @@ class _HorizontalListWidgetState extends State<HorizontalListWidget> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: List.generate(
-                      widget.groups.length,
+                      widget.items.length,
                       (index) => Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: ITEM_HORIZONTAL_PADDING,
@@ -138,7 +138,7 @@ class _HorizontalListWidgetState extends State<HorizontalListWidget> {
                             vertical: BUTTON_VERTICAL_PADDING,
                           ),
                           child: Text(
-                            widget.groups[index],
+                            widget.items[index],
                             style: TextStyle(
                               color: widget.selectedIndex == index
                                   ? MyColors.lightThemeFont

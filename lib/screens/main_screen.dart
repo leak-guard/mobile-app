@@ -87,7 +87,7 @@ class _MainScreenState extends State<MainScreen> {
           }
         });
       } else {
-        CustomToast.toast("Data refreshed failed");
+        CustomToast.toast("Failed to refresh data");
       }
     }
   }
@@ -97,6 +97,24 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildScreen(Map<String, dynamic> data, Group currentGroup) {
+    BlockDayEnum currentDay;
+    DateTime now = DateTime.now();
+    if (now.weekday == DateTime.sunday) {
+      currentDay = BlockDayEnum.sunday;
+    } else if (now.weekday == DateTime.monday) {
+      currentDay = BlockDayEnum.monday;
+    } else if (now.weekday == DateTime.tuesday) {
+      currentDay = BlockDayEnum.tuesday;
+    } else if (now.weekday == DateTime.wednesday) {
+      currentDay = BlockDayEnum.wednesday;
+    } else if (now.weekday == DateTime.thursday) {
+      currentDay = BlockDayEnum.thursday;
+    } else if (now.weekday == DateTime.friday) {
+      currentDay = BlockDayEnum.friday;
+    } else {
+      currentDay = BlockDayEnum.saturday;
+    }
+
     return BlurredTopWidget(
       height: 20,
       child: ListView(
@@ -131,7 +149,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ],
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           PanelWidget(
             name: "Water usage",
             child: GraphWaterUsageWidget(
@@ -146,10 +164,16 @@ class _MainScreenState extends State<MainScreen> {
               padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
               child: BlockClockWidget(
                 group: currentGroup,
-                targetDay: BlockDayEnum.all,
+                targetDay: currentDay,
               ),
             ),
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, Routes.blockSchedule,
+                      arguments: BlockScheduleScreenArguments(currentGroup))
+                  .then((_) {
+                setState(() {});
+              });
+            },
           ),
           PanelWidget(
             name: "Leak probes",
@@ -181,9 +205,6 @@ class _MainScreenState extends State<MainScreen> {
                         style: NeumorphicStyle(
                           color: MyColors.lightThemeFont,
                         ),
-                      ),
-                      SizedBox(
-                        width: 1,
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -403,7 +424,7 @@ class _MainScreenState extends State<MainScreen> {
           onTrailingTap: () => _refreshDataForCentrals(currentGroup),
           bottomWidgets: [
             HorizontalListWidget(
-              groups: _appData.groups.map((e) => e.name).toList(),
+              items: _appData.groups.map((e) => e.name).toList(),
               selectedIndex: groupIndex,
               onIndexChanged: _handleGroupChange,
             ),
