@@ -55,6 +55,9 @@ class AppData {
 
     for (var group in groups) {
       group.updateBlockStatus();
+      if (group.centralUnits.isNotEmpty) {
+        group.blockSchedule = group.centralUnits.first.blockSchedule;
+      }
     }
 
     isLoaded = true;

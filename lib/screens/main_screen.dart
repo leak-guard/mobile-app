@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
+import 'package:leak_guard/models/block_schedule.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/utils/colors.dart';
@@ -145,6 +146,7 @@ class _MainScreenState extends State<MainScreen> {
               padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
               child: BlockClockWidget(
                 group: currentGroup,
+                targetDay: BlockDayEnum.all,
               ),
             ),
             onTap: () {},

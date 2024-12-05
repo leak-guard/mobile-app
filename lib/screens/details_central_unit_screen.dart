@@ -9,6 +9,7 @@ import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/utils/routes.dart';
+import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/utils/time_zone_helper.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
@@ -329,7 +330,8 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
       return false;
     }
 
-    if (macAddress != widget.central.addressMAC) {
+    if (macAddress != widget.central.addressMAC &&
+        widget.central.addressIP != MyStrings.mockIp) {
       CustomToast.toast('MAC address does not match\nConfiguration not sent');
       return false;
     }

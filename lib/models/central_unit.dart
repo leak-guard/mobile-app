@@ -15,7 +15,7 @@ class CentralUnit implements Photographable {
   String? imagePath;
   String password = "admin";
 
-  BlockSchedule? blockSchedule;
+  BlockSchedule blockSchedule = BlockSchedule.defaultSchedule();
   bool isBlocked = false;
 
   String addressIP;
@@ -333,10 +333,11 @@ class CentralUnit implements Photographable {
   }
 
   Future<bool> refreshBlockSchedule() async {
-    blockSchedule = await _api.getWaterBlockSchedule(addressIP);
-    if (blockSchedule == null) {
+    final result = await _api.getWaterBlockSchedule(addressIP);
+    if (result == null) {
       return false;
     }
+    blockSchedule = result;
     return true;
   }
 
@@ -369,5 +370,9 @@ class CentralUnit implements Photographable {
     await refreshBlockStatus();
 
     return true;
+  }
+
+  Future<bool> sendBlockSchedule(BlockSchedule blockSchedule) async {
+    return _api.postWaterBlockSchedule(addressIP, blockSchedule.toJson());
   }
 }

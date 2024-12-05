@@ -112,6 +112,7 @@ class NetworkService {
       );
 
       _discovery?.addServiceListener((service, status) {
+        print("found service: $service");
         if (status == ServiceStatus.found) {
           _handleFoundService(service);
         } else {
@@ -143,6 +144,7 @@ class NetworkService {
 
   void _handleFoundService(Service service) {
     // TODO:
+    // CONTINUE HERE - dodaj refresh button dla manage central units, który będzie odświeżał odpowiednie dane oraz sprawdzał mdnsem czy jakieś centrale są dostępne
     // 1. Sprawdzić czy centrala nie jest już w bazie danych (po MAC adresie)
     // 2. Jeśli jest w bazie, ale ma inne IP, zaktualizować IP
     // 3. Dodać do listy tylko unikalne centrale

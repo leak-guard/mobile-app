@@ -1,3 +1,4 @@
+import 'package:leak_guard/models/block_schedule.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/photographable.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
@@ -18,9 +19,8 @@ class Group implements Photographable {
   String? imagePath;
   String? description;
   BlockStatus status = BlockStatus.noBlocked;
-  bool isTimeBlockSetted = false;
-  List<int> blockedHours = [];
   List<CentralUnit> centralUnits = [];
+  BlockSchedule blockSchedule = BlockSchedule.defaultSchedule();
 
   Group({required this.name});
 
@@ -80,11 +80,6 @@ class Group implements Photographable {
     status = BlockStatus.noBlocked;
   }
 
-  void blockHours(List<int> hours) {
-    blockedHours = hours;
-    isTimeBlockSetted = hours.isNotEmpty;
-  }
-
   Future<double> flowRate() async {
     double total = 0.0;
     List<Future<double>> futures = [];
@@ -92,7 +87,6 @@ class Group implements Photographable {
       futures.add(unit.getCurrentFlowRate());
     }
     return Future.wait(futures).then((value) {
-      print("zebrałem");
       for (var usage in value) {
         total += usage;
       }
@@ -195,5 +189,15 @@ class Group implements Photographable {
       return false;
     }
     return true;
+  }
+
+  Future<bool> sendBlockSchedule() {
+    List<Future<void>> futures = [];
+    for (var central in centralUnits) {
+      futures.add(central.sendBlockSchedule(blockSchedule));
+    }
+    return Future.wait(futures).then((value) {
+      return !value.contains(false);
+    });
   }
 }
