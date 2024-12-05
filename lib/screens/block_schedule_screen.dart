@@ -1,9 +1,9 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/block_schedule.dart';
 import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/widgets/block_clock_widget.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
-import 'package:leak_guard/widgets/horizontal_list_widget.dart';
 
 class BlockScheduleScreen extends StatefulWidget {
   const BlockScheduleScreen({super.key, required this.group});
@@ -57,12 +57,6 @@ class _BlockScheduleScreenState extends State<BlockScheduleScreen> {
     super.initState();
   }
 
-  void _handleDayChange(int newIndex) {
-    setState(() {
-      scheduleDayIndex = newIndex;
-    });
-  }
-
   @override
   void setState(fn) {
     if (mounted) {
@@ -93,6 +87,9 @@ class _BlockScheduleScreenState extends State<BlockScheduleScreen> {
         onPressed: () {
           setState(() {
             scheduleDayIndex = _blockSchedule.keys.toList().indexOf(entry);
+            if (scheduleDayIndex == 7) {
+              CustomToast.toast('Changes will be applied to all days');
+            }
           });
         },
       );
@@ -100,21 +97,14 @@ class _BlockScheduleScreenState extends State<BlockScheduleScreen> {
 
     return Scaffold(
       appBar: CustomAppBar(
+        height: 80,
         onLeadingTap: () {
           Navigator.pop(context);
         },
         title: widget.group.name,
-        bottomWidgets: [
-          HorizontalListWidget(
-            items: _blockSchedule.keys.toList(),
-            selectedIndex: scheduleDayIndex,
-            onIndexChanged: _handleDayChange,
-          ),
-        ],
       ),
       body: Column(
         children: [
-          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: buttons.sublist(0, 4),

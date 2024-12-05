@@ -3,6 +3,7 @@ import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/group_central_relation.dart';
 import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/services/database_service.dart';
+import 'package:leak_guard/utils/custom_toast.dart';
 
 class AppData {
   static final AppData _instance = AppData._internal();
@@ -50,7 +51,16 @@ class AppData {
           .toList();
     }
 
-    await fetchDataFromApi();
+    List<bool> fetchResults = await fetchDataFromApi();
+    int successCount = fetchResults.fold(0, (previousValue, element) {
+      if (element) {
+        return previousValue + 1;
+      }
+      return previousValue;
+    });
+
+    CustomToast.toast(
+        '$successCount of ${fetchResults.length} central units loaded');
 
     for (var group in groups) {
       group.updateBlockStatus();
@@ -61,14 +71,14 @@ class AppData {
     isLoaded = true;
   }
 
-  Future<void> fetchDataFromApi() async {
+  Future<List<bool>> fetchDataFromApi() {
     List<Future<bool>> futures = [];
     for (var central in centralUnits) {
-      for (var future in central.refreshData()) {
-        futures.add(future);
-      }
+      futures.add(central.refreshData());
     }
-    await Future.wait(futures);
+    return Future.wait(futures).then((results) {
+      return results;
+    });
   }
 
   void clearData() {

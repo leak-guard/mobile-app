@@ -376,15 +376,17 @@ class CentralUnit implements Photographable {
   // - Fetch block schedule for each central unit
   // - Fetch Probes data for each central unit
 
-  //TODO: probably many request will kill the server
-  List<Future<bool>> refreshData() {
-    List<Future<bool>> futures = [];
-    futures.add(refreshMacAddress());
-    futures.add(refreshConfig());
-    futures.add(refreshBlockSchedule());
-    futures.add(refreshBlockStatus());
-
-    return futures;
+  //TODO: probably many request will kill the server - yes :)
+  Future<bool> refreshData() async {
+    bool result = true;
+    if (!await refreshMacAddress()) result = false;
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!await refreshConfig()) result = false;
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!await refreshBlockSchedule()) result = false;
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!await refreshBlockStatus()) result = false;
+    return result;
   }
 
   List<Future<bool>> refreshStatus() {
