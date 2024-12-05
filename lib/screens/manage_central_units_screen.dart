@@ -48,13 +48,9 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               child: CentralUnitWidget(
                 central: central,
-                onLongPress: () {
-                  print(central);
-                },
                 onPressed: () async {
                   if (_centralChosen) return;
                   _centralChosen = true;
-
                   await central.refreshConfig();
 
                   Navigator.pushNamed(

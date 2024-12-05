@@ -45,6 +45,7 @@ class _GroupCentralUnitsScreenState extends State<GroupCentralUnitsScreen> {
                   if (_centralChoosen) return;
                   _centralChoosen = true;
                   await central.refreshConfig();
+
                   Navigator.pushNamed(
                     context,
                     Routes.detailsCentralUnit,

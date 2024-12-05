@@ -174,7 +174,7 @@ class CustomApi {
     final response = await _makeRequest(ip, '/water-block/schedule');
     if (response == null) return null;
 
-    print(response);
+    if (ip != MyStrings.mockIp) print(response);
 
     final schedule = BlockSchedule(
       sunday: BlockDay(
@@ -211,16 +211,17 @@ class CustomApi {
   }
 
   // TODO:
-  Future<bool> postWaterBlockSchedule(
+  Future<bool> putWaterBlockSchedule(
     String ip,
     Map<String, dynamic> scheduleData,
   ) async {
     final response = await _makeRequest(
       ip,
       '/water-block/schedule',
-      method: 'POST',
+      method: 'PUT',
       body: scheduleData,
     );
+    print(response);
     return response != null;
   }
 
@@ -247,11 +248,13 @@ class CustomApi {
   // MAC Address endpoint (already implemented)
   Future<String?> getCentralMacAddress(String ip) async {
     int port = ip == MyStrings.mockIp ? 8000 : 80;
+    ip = ip == MyStrings.mockIp ? MyStrings.myIp : ip;
 
     try {
       final request = await _client.get(ip, port, '/me');
       final response = await request.close();
       final content = await response.transform(utf8.decoder).join();
+      print(content);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(content);

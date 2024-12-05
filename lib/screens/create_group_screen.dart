@@ -135,6 +135,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           },
           onLongPress: () async {
             await central.refreshConfig();
+
             Navigator.pushNamed(
               context,
               Routes.detailsCentralUnit,
