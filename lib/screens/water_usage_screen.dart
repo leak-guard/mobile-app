@@ -15,8 +15,8 @@ class WaterUsageScreen extends StatefulWidget {
 
 class _WaterUsageScreenState extends State<WaterUsageScreen> {
   final List<String> _options = [
-    "last\nhour",
-    "last\nday",
+    "This\nhour",
+    "This\nday",
     "last\ndays",
     "last\nmonths"
   ];
@@ -101,8 +101,8 @@ class _WaterUsageScreenState extends State<WaterUsageScreen> {
 
     if (_option == _options[0]) {
       labels = [
-        "0",
-        "5",
+        "00",
+        "05",
         "10",
         "15",
         "20",
@@ -114,7 +114,23 @@ class _WaterUsageScreenState extends State<WaterUsageScreen> {
         "50",
         "55",
       ];
-      return (await widget.group.getWaterUsageDataLastHour(12), labels);
+      return (await widget.group.getWaterUsageDataThisHour(12), labels);
+    } else if (_option == _options[1]) {
+      labels = [
+        "00",
+        "02"
+            "04",
+        "06",
+        "08",
+        "10",
+        "12",
+        "14",
+        "16",
+        "18",
+        "20",
+        "22",
+      ];
+      return (await widget.group.getWaterUsageDataThisDay(12), labels);
     } else {
       return (data, labels);
     }
