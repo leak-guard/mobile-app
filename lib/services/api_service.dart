@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:leak_guard/credentials.dart';
 import 'package:leak_guard/models/block_schedule.dart';
 import 'package:leak_guard/models/flow.dart';
+import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/utils/strings.dart';
 
 // TODO: Make all endpoints return type, message if the request was successful or not
@@ -60,7 +61,6 @@ class CustomApi {
         String bodyString = jsonEncode(body);
         request.headers.contentLength = utf8.encode(bodyString).length;
         request.write(bodyString);
-        print('Request body: $bodyString');
       }
 
       final response = await request.close();
@@ -80,8 +80,6 @@ class CustomApi {
     }
   }
 
-  // Config endpoints
-  //TODO: Implement all the config endpoints
   Future<Map<String, dynamic>?> getConfig(String ip) async {
     return await _makeRequest(ip, '/config');
   }
@@ -92,18 +90,9 @@ class CustomApi {
     return response != null;
   }
 
-  //TODO: Make it return List<Flow>
-  Future<Map<String, dynamic>?> getWaterUsageRange(
-    String ip,
-    DateTime fromTimestamp,
-    DateTime toTimestamp,
-  ) async {
-    final path =
-        '/water-usage/${fromTimestamp.millisecondsSinceEpoch}/${toTimestamp.millisecondsSinceEpoch}';
-    return await _makeRequest(ip, path);
-  }
-
   Future<List<Flow>?> getRecentFlows(String ip, DateTime lastFlowDate) async {
+    //TODO: If implemented remove next line
+    ip = MyStrings.myIp;
     final fromTimestamp = lastFlowDate.millisecondsSinceEpoch ~/ 1000;
     final toTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
@@ -135,7 +124,26 @@ class CustomApi {
   }
   // TODO: Probe endpoints, GET, PUT and DELETE
 
-  // Probe pairing endpoints
+  Future<List<LeakProbe>?> getLeakProbes(String ip) async {
+    final result = await _makeRequest(ip, '/probe');
+    if (result == null) return null;
+
+    List<LeakProbe> probes = [];
+
+    (result).forEach((address, data) {
+      probes.add(LeakProbe(
+        name: 'Probe $address',
+        centralUnitID: null,
+        stmId: (data['id'] as List).cast<int>(),
+        address: int.parse(address),
+        batteryLevel: data['battery_level'],
+        blocked: data['blocked'],
+      ));
+    });
+
+    return probes;
+  }
+
   Future<bool> enterPairingMode(String ip) async {
     final response = await _makeRequest(
       ip,
@@ -143,17 +151,6 @@ class CustomApi {
       method: 'POST',
     );
     return response != null;
-  }
-
-  Future<bool?> getParingMode(String ip) async {
-    final response = await _makeRequest(
-      ip,
-      '/probe/pair',
-      method: 'GET',
-    );
-    if (response == null) return null;
-
-    return response['pairing'] as bool;
   }
 
   Future<bool> exitPairingMode(String ip) async {
@@ -177,6 +174,9 @@ class CustomApi {
 
   //TODO:
   Future<bool> postWaterBlock(String ip, Map<String, dynamic> blockData) async {
+    //TODO: If implemented remove next line
+    ip = MyStrings.myIp;
+
     final response = await _makeRequest(
       ip,
       '/water-block',
@@ -237,7 +237,6 @@ class CustomApi {
       method: 'PUT',
       body: scheduleData,
     );
-    print(response);
     return response != null;
   }
 
@@ -261,25 +260,12 @@ class CustomApi {
     return await _makeRequest(ip, '/criteria/$id');
   }
 
-  // MAC Address endpoint (already implemented)
-  Future<String?> getCentralMacAddress(String ip) async {
-    int port = ip == MyStrings.mockIp ? 8000 : 80;
-    ip = ip == MyStrings.mockIp ? MyStrings.myIp : ip;
+  Future<(String, String)?> getCentralIdAndMac(String ip) async {
+    final result = await _makeRequest(ip, '/me');
+    if (result == null) return null;
+    String id = result['id'] ?? '';
+    String mac = result['mac'] ?? '';
 
-    try {
-      final request = await _client.get(ip, port, '/me');
-      final response = await request.close();
-      final content = await response.transform(utf8.decoder).join();
-      print(content);
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(content);
-        return data['mac'] as String;
-      }
-      return null;
-    } catch (e) {
-      print("Error: $e");
-      return null;
-    }
+    return (id, mac);
   }
 }

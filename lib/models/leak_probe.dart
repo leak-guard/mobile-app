@@ -6,14 +6,8 @@ class LeakProbe implements Photographable {
   String name;
   List<int> stmId;
   int address;
-  int batteryLevel = 100;
-  bool _blocked = false;
-
-  bool get blocked => !_blocked;
-
-  set blocked(bool value) {
-    _blocked = value;
-  }
+  int batteryLevel;
+  bool blocked;
 
   String? description;
   String? imagePath;
@@ -23,6 +17,8 @@ class LeakProbe implements Photographable {
     required this.centralUnitID,
     required this.stmId,
     required this.address,
+    this.batteryLevel = 100,
+    this.blocked = false,
     this.description,
     this.imagePath,
   }) {

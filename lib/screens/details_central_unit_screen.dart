@@ -130,8 +130,7 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   }
 
   Future<void> _checkCentralUnit(String ip) async {
-    final macAddress = await _api.getCentralMacAddress(ip);
-
+    final macAddress = await _api.getCentralIdAndMac(ip);
     if (mounted) {
       if (macAddress != null) {
         _showDialog(
@@ -369,13 +368,14 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   }
 
   Future<bool> _sendConfiguration() async {
-    String? macAddress =
-        await _api.getCentralMacAddress(widget.central.addressIP);
-    if (macAddress == null) {
+    final result = await _api.getCentralIdAndMac(widget.central.addressIP);
+
+    if (result == null) {
       CustomToast.toast(
           'Could not connect to central unit\nConfiguration not sent');
       return false;
     }
+    final macAddress = result.$2;
 
     if (macAddress != widget.central.addressMAC &&
         widget.central.addressIP != MyStrings.mockIp) {
