@@ -7,6 +7,7 @@ import 'package:leak_guard/widgets/central_unit_widget.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/services/network_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class FindCentralScreen extends StatefulWidget {
   const FindCentralScreen({super.key});
@@ -65,6 +66,14 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                           await _networkService.getCurrentWifiName();
                           print(
                               "Current wifi name: ${_networkService.currentWifiName}");
+                          Permission.locationWhenInUse.serviceStatus.isEnabled
+                              .then((isEnable) {
+                            if (!isEnable) {
+                              CustomToast.toast(
+                                  'Please turn on location on your device');
+                            }
+                          });
+
                           if ((_networkService.currentWifiName ?? "") ==
                               "LeakGuardConfig") {
                             CentralUnit newCentral = CentralUnit(
@@ -93,12 +102,13 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                                   "Connected to LeakGuardConfig!");
                               return;
                             }
-                            Navigator.pushNamed(
-                              // ignore: use_build_context_synchronously
-                              context,
-                              Routes.createCentralUnit,
-                            );
                           }
+
+                          Navigator.pushNamed(
+                            // ignore: use_build_context_synchronously
+                            context,
+                            Routes.createCentralUnit,
+                          );
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(16),

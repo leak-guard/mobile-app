@@ -13,4 +13,8 @@ class Flow {
   int unixTime() {
     return date.millisecondsSinceEpoch ~/ 1000;
   }
+
+  String toString() {
+    return 'Flow {volume: $volume, date: $date}';
+  }
 }

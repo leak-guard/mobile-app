@@ -4,6 +4,7 @@ import 'package:leak_guard/utils/colors.dart';
 
 class GraphWaterUsageWidget extends StatefulWidget {
   final List<WaterUsageData> data;
+  final List<String> labels;
   final double maxHeight;
   final Duration animationDuration;
 
@@ -12,6 +13,7 @@ class GraphWaterUsageWidget extends StatefulWidget {
     required this.data,
     this.maxHeight = 200,
     this.animationDuration = const Duration(milliseconds: 500),
+    required this.labels,
   });
 
   @override
@@ -39,20 +41,29 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
   }
 
   double getFontSize(double waterUsage) {
-    if (waterUsage < 100) {
+    final waterUsageTmp = waterUsage.round();
+    if (waterUsageTmp < 10) {
       return 9;
-    } else if (waterUsage < 1000) {
+    } else if (waterUsageTmp < 100) {
       return 8;
-    } else if (waterUsage < 10000) {
+    } else if (waterUsageTmp < 1000) {
       return 7;
+    } else if (waterUsageTmp < 10000) {
+      return 5;
     } else {
-      return 6;
+      return 4;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.data.isEmpty) return const SizedBox();
+
+    print(widget.data.length);
+    print(widget.labels.length);
+    for (int i = 0; i < widget.labels.length; i++) {
+      print(widget.labels[i]);
+    }
 
     double maxValue =
         widget.data.map((d) => d.usage).reduce((a, b) => a > b ? a : b);
@@ -67,10 +78,12 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Max usage: ${(maxValue * 100).roundToDouble() / 100}l",
+              "Max: ${(maxValue * 100).roundToDouble() / 100}l",
               textAlign: TextAlign.start,
               style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                    fontSize: 14,
+                    color: MyColors.lightThemeFont.withOpacity(0.3),
+                    fontWeight: FontWeight.normal,
+                    fontSize: 16,
                   ),
             ),
             const SizedBox(height: 8),
@@ -79,6 +92,7 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: widget.data.map((item) {
+                  final index = widget.data.indexOf(item);
                   final targetHeight =
                       (item.usage / boxHeighs) * widget.maxHeight;
                   final currentHeight = _shouldAnimate ? targetHeight : 0.0;
@@ -100,26 +114,29 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        AnimatedContainer(
-                          duration: widget.animationDuration,
-                          curve: Curves.easeInOut,
-                          child: Neumorphic(
-                            style: NeumorphicStyle(
-                              depth: 1,
-                              intensity: 0.7,
-                              surfaceIntensity: 0.5,
-                              shadowLightColorEmboss: Colors.white,
-                              color: MyColors.blue,
-                              shape: NeumorphicShape.convex,
-                              boxShape: NeumorphicBoxShape.roundRect(
-                                BorderRadius.circular(16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: AnimatedContainer(
+                            duration: widget.animationDuration,
+                            curve: Curves.easeInOut,
+                            child: Neumorphic(
+                              style: NeumorphicStyle(
+                                depth: 1,
+                                intensity: 0.7,
+                                surfaceIntensity: 0.5,
+                                shadowLightColorEmboss: Colors.white,
+                                color: MyColors.blue,
+                                shape: NeumorphicShape.convex,
+                                boxShape: NeumorphicBoxShape.roundRect(
+                                  BorderRadius.circular(16),
+                                ),
                               ),
-                            ),
-                            child: AnimatedContainer(
-                              duration: widget.animationDuration,
-                              curve: Curves.easeInOut,
-                              width: barWidth,
-                              height: currentHeight,
+                              child: AnimatedContainer(
+                                duration: widget.animationDuration,
+                                curve: Curves.easeInOut,
+                                width: barWidth,
+                                height: currentHeight,
+                              ),
                             ),
                           ),
                         ),
@@ -128,11 +145,11 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
                           duration: widget.animationDuration,
                           opacity: _shouldAnimate ? 1.0 : 0.0,
                           child: Text(
-                            item.hour.toString(),
+                            widget.labels.elementAt(index),
                             style: TextStyle(
                               color: MyColors.darkShadow,
                               fontWeight: FontWeight.normal,
-                              fontSize: 12,
+                              fontSize: 10,
                             ),
                           ),
                         ),

@@ -186,11 +186,7 @@ class CentralUnit implements Photographable {
             : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
 
         result.add(WaterUsageData(
-          time.year,
-          time.month,
-          time.day,
-          time.hour,
-          time.minute,
+          time,
           usage,
         ));
       }
@@ -199,13 +195,8 @@ class CentralUnit implements Photographable {
       return result;
     }
 
-    if (_cachedWaterUsageData!.last.hour != currentHour.hour) {
-      final lastCachedHour = DateTime(
-        _cachedWaterUsageData!.last.year,
-        _cachedWaterUsageData!.last.month,
-        _cachedWaterUsageData!.last.day,
-        _cachedWaterUsageData!.last.hour,
-      );
+    if (_cachedWaterUsageData!.last.date.hour != currentHour.hour) {
+      final lastCachedHour = _cachedWaterUsageData!.last.date;
 
       final startTime = lastCachedHour;
       final flows = await _getFlowData(startTime, now);
@@ -222,11 +213,7 @@ class CentralUnit implements Photographable {
         final lastHourUsage = lastHourFlows.fold(
             0.0, (sum, flow) => sum + flow.volume.toDouble());
         _cachedWaterUsageData!.last = WaterUsageData(
-          lastCachedHour.year,
-          lastCachedHour.month,
-          lastCachedHour.day,
-          lastCachedHour.hour,
-          now.minute,
+          lastCachedHour,
           lastHourUsage,
         );
       }
@@ -247,11 +234,7 @@ class CentralUnit implements Photographable {
             : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
 
         _cachedWaterUsageData!.add(WaterUsageData(
-          time.year,
-          time.month,
-          time.day,
-          time.hour,
-          time.minute,
+          time,
           usage,
         ));
       }
@@ -270,11 +253,7 @@ class CentralUnit implements Photographable {
             0.0, (sum, flow) => sum + flow.volume.toDouble());
 
     _cachedWaterUsageData!.last = WaterUsageData(
-      currentHour.year,
-      currentHour.month,
-      currentHour.day,
-      currentHour.hour,
-      now.minute,
+      currentHour,
       usage,
     );
 
@@ -406,5 +385,121 @@ class CentralUnit implements Photographable {
       flowRate = 0.0;
       return false;
     }
+  }
+
+  Future<List<WaterUsageData>> getWaterUsageDataThisHour(int portions) async {
+    final now = DateTime.now();
+    final hourBegining = DateTime(now.year, now.month, now.day, now.hour);
+
+    final flows = await _getFlowData(hourBegining, now);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < portions; i++) {
+      final time = hourBegining.add(Duration(minutes: 60 * i ~/ portions));
+      final hourFlows = flows
+          .where((flow) =>
+              flow.date.year == time.year &&
+              flow.date.month == time.month &&
+              flow.date.day == time.day &&
+              flow.date.hour == time.hour &&
+              (time.minute <= flow.date.minute &&
+                  flow.date.minute < time.minute + 60 ~/ portions))
+          .toList();
+
+      final usage = hourFlows.isEmpty
+          ? 0.0
+          : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
+
+      result.add(WaterUsageData(
+        time,
+        usage,
+      ));
+    }
+    return result;
+  }
+
+  Future<List<WaterUsageData>> getWaterUsageDataThisDay(int portions) async {
+    final now = DateTime.now();
+    final dayBegining = DateTime(now.year, now.month, now.day);
+
+    final flows = await _getFlowData(dayBegining, now);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < portions; i++) {
+      final time = dayBegining.add(Duration(hours: 24 * i ~/ portions));
+      final hourFlows = flows
+          .where((flow) =>
+              flow.date.year == time.year &&
+              flow.date.month == time.month &&
+              flow.date.day == time.day &&
+              (time.hour <= flow.date.hour &&
+                  flow.date.hour < time.hour + 24 ~/ portions))
+          .toList();
+
+      final usage = hourFlows.isEmpty
+          ? 0.0
+          : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
+
+      result.add(WaterUsageData(
+        time,
+        usage,
+      ));
+    }
+    return result;
+  }
+
+  Future<List<WaterUsageData>> getWaterUsageDataLastDays(int daysCount) async {
+    final now = DateTime.now();
+    final firstDay = DateTime(now.year, now.month, now.day - daysCount + 1);
+
+    final flows = await _getFlowData(firstDay, now);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < daysCount; i++) {
+      final time = firstDay.add(Duration(days: i));
+      final hourFlows = flows
+          .where((flow) =>
+              flow.date.year == time.year &&
+              flow.date.month == time.month &&
+              flow.date.day == time.day)
+          .toList();
+
+      final usage = hourFlows.isEmpty
+          ? 0.0
+          : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
+
+      result.add(WaterUsageData(
+        time,
+        usage,
+      ));
+    }
+    return result;
+  }
+
+  Future<List<WaterUsageData>> getWaterUsageDataLastMonths(
+      int monthsCount) async {
+    final now = DateTime.now();
+    final firstMonth = DateTime(now.year, now.month - monthsCount + 1);
+
+    final flows = await _getFlowData(firstMonth, now);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < monthsCount; i++) {
+      final time = DateTime(firstMonth.year, firstMonth.month + i);
+      final hourFlows = flows
+          .where((flow) =>
+              flow.date.year == time.year && flow.date.month == time.month)
+          .toList();
+
+      final usage = hourFlows.isEmpty
+          ? 0.0
+          : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
+
+      result.add(WaterUsageData(
+        time,
+        usage,
+      ));
+    }
+    return result;
   }
 }

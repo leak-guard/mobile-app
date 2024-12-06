@@ -156,8 +156,14 @@ class DataGenerator {
   static Future<void> _generateFlowData(int centralUnitId, String groupName,
       String unitName, void Function(String, double) onProgress) async {
     final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day - 1);
-    final endDate = DateTime(now.year, now.month + 1, now.day);
+    final startDate = DateTime(
+      now.year,
+      now.month - 11,
+    );
+    final endDate = DateTime(
+      now.year,
+      now.month + 1,
+    );
 
     final totalDays = endDate.difference(startDate).inDays;
     int currentRecord = 0;
@@ -260,8 +266,8 @@ class DataGenerator {
 
       final groupNames = [
         'Group 1',
-        'Group 2',
-        'Group 3',
+        // 'Group 2',
+        // 'Group 3',
         // 'Duży salon',
         // 'Mały salon',
         // 'Kuchnia',

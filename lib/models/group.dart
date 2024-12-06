@@ -120,6 +120,119 @@ class Group implements Photographable {
     });
   }
 
+  Future<List<WaterUsageData>> getWaterUsageDataThisHour(int portions) async {
+    final now = DateTime.now();
+    final currentHour = DateTime(now.year, now.month, now.day, now.hour);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < portions; i++) {
+      final time = currentHour.add(Duration(minutes: 60 * i ~/ portions));
+      result.add(WaterUsageData(
+        time,
+        0.0,
+      ));
+    }
+
+    List<Future<List<WaterUsageData>>> futures = [];
+    for (var unit in centralUnits) {
+      futures.add(unit.getWaterUsageDataThisHour(portions));
+    }
+
+    return Future.wait(futures).then((value) {
+      for (var data in value) {
+        for (int i = 0; i < portions; i++) {
+          result[i].usage += data[i].usage;
+        }
+      }
+      return result;
+    });
+  }
+
+  Future<List<WaterUsageData>> getWaterUsageDataThisDay(int portions) async {
+    final now = DateTime.now();
+    final currentDay = DateTime(now.year, now.month, now.day);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < portions; i++) {
+      final time = currentDay.add(Duration(hours: 24 * i ~/ portions));
+      result.add(WaterUsageData(
+        time,
+        0.0,
+      ));
+    }
+
+    List<Future<List<WaterUsageData>>> futures = [];
+    for (var unit in centralUnits) {
+      futures.add(unit.getWaterUsageDataThisDay(portions));
+    }
+
+    return Future.wait(futures).then((value) {
+      for (var data in value) {
+        for (int i = 0; i < portions; i++) {
+          result[i].usage += data[i].usage;
+        }
+      }
+      return result;
+    });
+  }
+
+  Future<List<WaterUsageData>> getWaterUsageDataLastDays(int daysCount) async {
+    final now = DateTime.now();
+    final firstDay = DateTime(now.year, now.month, now.day - daysCount + 1);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < daysCount; i++) {
+      final time = firstDay.add(Duration(days: i));
+      result.add(WaterUsageData(
+        time,
+        0.0,
+      ));
+    }
+
+    List<Future<List<WaterUsageData>>> futures = [];
+    for (var unit in centralUnits) {
+      futures.add(unit.getWaterUsageDataLastDays(daysCount));
+    }
+
+    return Future.wait(futures).then((value) {
+      for (var data in value) {
+        for (int i = 0; i < daysCount; i++) {
+          result[i].usage += data[i].usage;
+        }
+      }
+      return result;
+    });
+  }
+
+  Future<List<WaterUsageData>> getWaterUsageDataLastMonths(
+      int monthsCount) async {
+    final now = DateTime.now();
+    final firstMonth = DateTime(now.year, now.month - monthsCount + 1);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < monthsCount; i++) {
+      final time = DateTime(firstMonth.year, firstMonth.month + i);
+      result.add(WaterUsageData(
+        time,
+        0.0,
+      ));
+    }
+
+    List<Future<List<WaterUsageData>>> futures = [];
+    for (var unit in centralUnits) {
+      futures.add(unit.getWaterUsageDataLastMonths(monthsCount));
+    }
+
+    return Future.wait(futures).then((value) {
+      for (var data in value) {
+        for (int i = 0; i < monthsCount; i++) {
+          result[i].usage += data[i].usage;
+        }
+      }
+      return result;
+    });
+  }
+
   Future<List<WaterUsageData>> getWaterUsageData(int hoursToFetch) async {
     final now = DateTime.now();
     final currentHour = DateTime(now.year, now.month, now.day, now.hour);
@@ -128,11 +241,7 @@ class Group implements Photographable {
     for (int i = hoursToFetch - 1; i >= 0; i--) {
       final time = currentHour.subtract(Duration(hours: i));
       result.add(WaterUsageData(
-        time.year,
-        time.month,
-        time.day,
-        time.hour,
-        time.minute,
+        time,
         0.0,
       ));
     }

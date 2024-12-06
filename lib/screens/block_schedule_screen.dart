@@ -104,7 +104,12 @@ class _BlockScheduleScreenState extends State<BlockScheduleScreen> {
         title: widget.group.name,
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: BlockClockWidget(group: widget.group, targetDay: targetDay),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: buttons.sublist(0, 4),
@@ -114,10 +119,6 @@ class _BlockScheduleScreenState extends State<BlockScheduleScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: buttons.sublist(4),
           ),
-          Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: BlockClockWidget(group: widget.group, targetDay: targetDay),
-          )
         ],
       ),
     );

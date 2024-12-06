@@ -1,15 +1,11 @@
 class WaterUsageData {
-  final int year;
-  final int month;
-  final int day;
-  final int hour;
-  final int minute;
+  final DateTime date;
   double usage;
 
-  WaterUsageData(
-      this.year, this.month, this.day, this.hour, this.minute, this.usage);
+  WaterUsageData(this.date, this.usage);
 
-  String getHourKey() {
-    return '$year-$month-$day-$hour';
+  @override
+  String toString() {
+    return "Date: $date, Usage: $usage";
   }
 }

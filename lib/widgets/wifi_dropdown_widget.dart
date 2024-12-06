@@ -3,6 +3,7 @@ import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/services/permissions_service.dart';
 import 'package:leak_guard/models/wifi_network.dart';
+import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -240,6 +241,18 @@ class _WifiDropdownState extends State<WifiDropdown> {
                   }
 
                   final networks = snapshot.data ?? [];
+
+                  if (_isExpanded) {
+                    if (networks.isEmpty) {
+                      Permission.locationWhenInUse.serviceStatus.isEnabled
+                          .then((isEnable) {
+                        if (!isEnable) {
+                          CustomToast.toast(
+                              'Please turn on location on your device');
+                        }
+                      });
+                    }
+                  }
                   if (networks.isEmpty) {
                     return SizedBox(
                       height: 150,

@@ -5,6 +5,7 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/block_schedule.dart';
 import 'package:leak_guard/models/group.dart';
+import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/custom_toast.dart';
@@ -147,6 +148,9 @@ class _MainScreenState extends State<MainScreen> {
       currentDay = BlockDayEnum.saturday;
     }
 
+    List<WaterUsageData> waterUsageData =
+        data['waterUsageData'] as List<WaterUsageData>;
+
     return BlurredTopWidget(
       height: 20,
       child: ListView(
@@ -185,10 +189,18 @@ class _MainScreenState extends State<MainScreen> {
           PanelWidget(
             name: "Water usage",
             child: GraphWaterUsageWidget(
-              data: data['waterUsageData'],
+              labels:
+                  waterUsageData.map((e) => e.date.hour.toString()).toList(),
+              data: waterUsageData,
               maxHeight: 150,
             ),
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, Routes.waterUsage,
+                      arguments: WaterUsageScreenArguments(currentGroup))
+                  .then((_) {
+                setState(() {});
+              });
+            },
           ),
           PanelWidget(
             name: "Block time",
@@ -475,7 +487,7 @@ class _MainScreenState extends State<MainScreen> {
               currentGroup.todaysWaterUsage(),
               currentGroup.yesterdayWaterUsage(),
               currentGroup.refreshFlowAndTodaysUsage().then((_) {
-                return currentGroup.getWaterUsageData(12);
+                return currentGroup.getWaterUsageData(11);
               }),
             ]).then((results) => {
                   'todaysUsage': results[0],
