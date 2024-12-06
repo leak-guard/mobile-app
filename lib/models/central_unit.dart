@@ -447,4 +447,59 @@ class CentralUnit implements Photographable {
     }
     return result;
   }
+
+  Future<List<WaterUsageData>> getWaterUsageDataLastDays(int daysCount) async {
+    final now = DateTime.now();
+    final firstDay = DateTime(now.year, now.month, now.day - daysCount + 1);
+
+    final flows = await _getFlowData(firstDay, now);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < daysCount; i++) {
+      final time = firstDay.add(Duration(days: i));
+      final hourFlows = flows
+          .where((flow) =>
+              flow.date.year == time.year &&
+              flow.date.month == time.month &&
+              flow.date.day == time.day)
+          .toList();
+
+      final usage = hourFlows.isEmpty
+          ? 0.0
+          : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
+
+      result.add(WaterUsageData(
+        time,
+        usage,
+      ));
+    }
+    return result;
+  }
+
+  Future<List<WaterUsageData>> getWaterUsageDataLastMonths(
+      int monthsCount) async {
+    final now = DateTime.now();
+    final firstMonth = DateTime(now.year, now.month - monthsCount + 1);
+
+    final flows = await _getFlowData(firstMonth, now);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < monthsCount; i++) {
+      final time = DateTime(firstMonth.year, firstMonth.month + i);
+      final hourFlows = flows
+          .where((flow) =>
+              flow.date.year == time.year && flow.date.month == time.month)
+          .toList();
+
+      final usage = hourFlows.isEmpty
+          ? 0.0
+          : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
+
+      result.add(WaterUsageData(
+        time,
+        usage,
+      ));
+    }
+    return result;
+  }
 }

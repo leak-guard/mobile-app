@@ -59,6 +59,12 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
   Widget build(BuildContext context) {
     if (widget.data.isEmpty) return const SizedBox();
 
+    print(widget.data.length);
+    print(widget.labels.length);
+    for (int i = 0; i < widget.labels.length; i++) {
+      print(widget.labels[i]);
+    }
+
     double maxValue =
         widget.data.map((d) => d.usage).reduce((a, b) => a > b ? a : b);
     double boxHeighs = maxValue;
@@ -72,10 +78,12 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Max usage: ${(maxValue * 100).roundToDouble() / 100}l",
+              "Max: ${(maxValue * 100).roundToDouble() / 100}l",
               textAlign: TextAlign.start,
               style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                    fontSize: 14,
+                    color: MyColors.lightThemeFont.withOpacity(0.3),
+                    fontWeight: FontWeight.normal,
+                    fontSize: 16,
                   ),
             ),
             const SizedBox(height: 8),
@@ -84,6 +92,7 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: widget.data.map((item) {
+                  final index = widget.data.indexOf(item);
                   final targetHeight =
                       (item.usage / boxHeighs) * widget.maxHeight;
                   final currentHeight = _shouldAnimate ? targetHeight : 0.0;
@@ -136,9 +145,7 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
                           duration: widget.animationDuration,
                           opacity: _shouldAnimate ? 1.0 : 0.0,
                           child: Text(
-                            widget.labels.elementAt(!widget.data.contains(item)
-                                ? 0
-                                : widget.data.indexOf(item)),
+                            widget.labels.elementAt(index),
                             style: TextStyle(
                               color: MyColors.darkShadow,
                               fontWeight: FontWeight.normal,

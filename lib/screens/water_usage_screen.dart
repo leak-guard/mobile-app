@@ -118,8 +118,8 @@ class _WaterUsageScreenState extends State<WaterUsageScreen> {
     } else if (_option == _options[1]) {
       labels = [
         "00",
-        "02"
-            "04",
+        "02",
+        "04",
         "06",
         "08",
         "10",
@@ -131,7 +131,21 @@ class _WaterUsageScreenState extends State<WaterUsageScreen> {
         "22",
       ];
       return (await widget.group.getWaterUsageDataThisDay(12), labels);
+    } else if (_option == _options[2]) {
+      data = await widget.group.getWaterUsageDataLastDays(12);
+
+      labels = [];
+      for (var i = 0; i < data.length; i++) {
+        labels.add((data[i].date.day).toString());
+      }
+      return (data, labels);
     } else {
+      data = await widget.group.getWaterUsageDataLastMonths(12);
+
+      labels = [];
+      for (var i = 0; i < data.length; i++) {
+        labels.add((data[i].date.month).toString());
+      }
       return (data, labels);
     }
   }
@@ -161,6 +175,11 @@ class _WaterUsageScreenState extends State<WaterUsageScreen> {
           }
 
           Map<String, dynamic> data = snapshot.data!;
+          for (var i = 0; i < data['data'].length; i++) {
+            print(data['data'][i]);
+            print(data['data'][i]);
+          }
+          print(data['data'].length);
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
