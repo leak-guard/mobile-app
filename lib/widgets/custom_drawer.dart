@@ -42,7 +42,7 @@ class CustomDrawer extends StatelessWidget {
           ),
           NeumorphicListTile(
             leading:
-                Icon(CustomIcons.central_unit, color: MyColors.lightThemeFont),
+                Icon(CustomIcons.centralUnit, color: MyColors.lightThemeFont),
             title: Text('Manage central units',
                 style: Theme.of(context).textTheme.displaySmall),
             onTap: () {

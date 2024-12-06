@@ -25,7 +25,7 @@ Future<void> main() async {
       await FirebaseMessaging.instance.requestPermission(provisional: true);
   final fncToken = await FirebaseMessaging.instance.getToken();
   if (fncToken != null) {
-    print("FNC token: ${fncToken}");
+    print("FNC token: $fncToken");
   } else {
     print('There is no FNC token');
   }

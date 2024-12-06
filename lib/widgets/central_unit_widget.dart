@@ -68,7 +68,7 @@ class _CentralUnitWidgetState extends State<CentralUnitWidget> {
         const SizedBox(width: 10),
         Icon(
           icon,
-          size: 35,
+          size: 25,
           color: color,
         ),
         const SizedBox(
@@ -81,7 +81,6 @@ class _CentralUnitWidgetState extends State<CentralUnitWidget> {
               number.toString(),
               style: Theme.of(context).textTheme.displayMedium!.copyWith(
                     color: color,
-                    fontSize: 25,
                   )),
         ),
       ],
@@ -130,7 +129,7 @@ class _CentralUnitWidgetState extends State<CentralUnitWidget> {
                             )
                           : const Center(
                               child: Icon(
-                                CustomIcons.central_unit,
+                                CustomIcons.centralUnit,
                                 color: Colors.white,
                                 size: 70,
                               ),
@@ -144,8 +143,14 @@ class _CentralUnitWidgetState extends State<CentralUnitWidget> {
                     children: [
                       _createIcon(CustomIcons.probe,
                           widget.central.leakProbesCount(), _color),
-                      _createIcon(CustomIcons.battery_low,
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      _createIcon(CustomIcons.betteryLow,
                           widget.central.leakProbeLowBatteryCount(), _color),
+                      const SizedBox(
+                        height: 10,
+                      ),
                       _createIcon(CustomIcons.leak,
                           widget.central.detectedLeaksCount(), _color),
                     ],

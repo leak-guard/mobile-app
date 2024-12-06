@@ -294,17 +294,19 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                 _centralChoosen = true;
                 await central.refreshConfig();
 
-                Navigator.pushNamed(
-                  context,
-                  Routes.detailsCentralUnit,
-                  arguments: DetailsCentralUnitScreenArguments(
-                    central,
-                  ),
-                ).then((_) {
-                  setState(() {
-                    _centralChoosen = false;
+                if (mounted) {
+                  Navigator.pushNamed(
+                    context,
+                    Routes.detailsCentralUnit,
+                    arguments: DetailsCentralUnitScreenArguments(
+                      central,
+                    ),
+                  ).then((_) {
+                    setState(() {
+                      _centralChoosen = false;
+                    });
                   });
-                });
+                }
               },
             ),
           )),
@@ -343,9 +345,8 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
         onLeadingTap: () {
           _onWillPop().then((onValue) {
             if (onValue) {
-              if (mounted) {
-                Navigator.pop(context);
-              }
+              // ignore: use_build_context_synchronously
+              if (mounted) Navigator.pop(context);
             }
           });
         },
@@ -353,9 +354,8 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
         trailingIcon: const Icon(Icons.check),
         onTrailingTap: () {
           _saveChanges().then((_) {
-            if (mounted) {
-              Navigator.pop(context);
-            }
+            // ignore: use_build_context_synchronously
+            if (mounted) Navigator.pop(context);
           });
         },
       ),

@@ -294,7 +294,7 @@ class CentralUnit implements Photographable {
     String result = "CentralUnit: $name, $addressIP, $addressMAC\n";
     String probes = "Probes:\n";
     for (var probe in leakProbes) {
-      probes += "\t" + probe.toString() + "\n";
+      probes += "\t$probe\n";
     }
 
     result += probes;

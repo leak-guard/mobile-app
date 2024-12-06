@@ -243,14 +243,16 @@ class _DetailsLeakProbeScreenState extends State<DetailsLeakProbeScreen> {
         height: 80,
         onLeadingTap: () async {
           if (await _onWillPop()) {
-            Navigator.pop(context);
+            // ignore: use_build_context_synchronously
+            if (mounted) Navigator.pop(context);
           }
         },
         title: 'Edit ${widget.leakProbe.name}',
         trailingIcon: const Icon(Icons.check),
         onTrailingTap: () async {
           await _saveChanges();
-          Navigator.pop(context);
+          // ignore: use_build_context_synchronously
+          if (mounted) Navigator.pop(context);
         },
       ),
       body: BlurredTopWidget(

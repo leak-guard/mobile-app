@@ -142,16 +142,17 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           },
           onLongPress: () async {
             await central.refreshConfig();
-
-            Navigator.pushNamed(
-              context,
-              Routes.detailsCentralUnit,
-              arguments: DetailsCentralUnitScreenArguments(
-                central,
-              ),
-            ).then((_) {
-              setState(() {});
-            });
+            if (mounted) {
+              Navigator.pushNamed(
+                context,
+                Routes.detailsCentralUnit,
+                arguments: DetailsCentralUnitScreenArguments(
+                  central,
+                ),
+              ).then((_) {
+                setState(() {});
+              });
+            }
           },
         ),
       );

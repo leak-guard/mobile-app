@@ -8,8 +8,6 @@ import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/services/network_service.dart';
 
-// TODO: Check if Central is already in database
-
 class FindCentralScreen extends StatefulWidget {
   const FindCentralScreen({super.key});
 

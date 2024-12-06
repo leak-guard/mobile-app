@@ -40,7 +40,7 @@ class TimeZone {
       );
     }
 
-    throw FormatException('Invalid timezone string format');
+    throw const FormatException('Invalid timezone string format');
   }
 
   compareTo(TimeZone b) {

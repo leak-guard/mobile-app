@@ -27,7 +27,7 @@ class _GroupWidgetState extends State<GroupWidget> {
       children: [
         Icon(
           icon,
-          size: 30,
+          size: 25,
         ),
         const SizedBox(
           width: 5,
@@ -107,7 +107,7 @@ class _GroupWidgetState extends State<GroupWidget> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const SizedBox(width: 3),
-                          _createIcon(CustomIcons.central_unit,
+                          _createIcon(CustomIcons.centralUnit,
                               widget.group.centralUnitsNumber()),
                           const SizedBox(width: 7),
                           _createIcon(
@@ -122,7 +122,7 @@ class _GroupWidgetState extends State<GroupWidget> {
                           _createIcon(
                               Icons.wifi, widget.group.connectedCentralUnits()),
                           const SizedBox(width: 7),
-                          _createIcon(CustomIcons.battery_low,
+                          _createIcon(CustomIcons.betteryLow,
                               widget.group.leakProbeLowBatteryNumber())
                         ],
                       ),

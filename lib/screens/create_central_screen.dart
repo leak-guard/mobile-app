@@ -245,7 +245,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     );
   }
 
-  void _showDialog(String title, String message) {
+  Future _showDialog(String title, String message) async {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -460,12 +460,16 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     _central.impulsesPerLiter = int.tryParse(_impulsesController.text) ?? 0;
     String? adresMac = await _api.getCentralMacAddress(_central.addressIP);
     if (adresMac == null) {
-      _showDialog(
+      await _showDialog(
           'Error', 'Could not find central unit at IP:\n${_central.addressIP}');
       return false;
     }
-    // TODO: Check if nullable safe is needed
     _central.addressMAC = adresMac;
+
+    if (_appData.centralUnits.any((c) => c.addressMAC == _central.addressMAC)) {
+      await _showDialog('Error', 'Central unit already added');
+      return false;
+    }
 
     if (await _sendConfiguration(_central)) {
       int centralID = await _db.addCentralUnit(_central);
@@ -474,7 +478,8 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
       _appData.centralUnits.add(_central);
       return true;
     } else {
-      _showDialog('Error', 'Errors occurred while connecting to central unit');
+      await _showDialog(
+          'Error', 'Errors occurred while connecting to central unit');
       return false;
     }
   }
@@ -495,7 +500,8 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
         onTrailingTap: () {
           _createCentralUnit().then((success) {
             if (success) {
-              Navigator.pop(context, success);
+              // ignore: use_build_context_synchronously
+              if (mounted) Navigator.pop(context, success);
             }
           });
         },

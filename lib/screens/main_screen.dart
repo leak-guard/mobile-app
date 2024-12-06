@@ -235,7 +235,7 @@ class _MainScreenState extends State<MainScreen> {
                     children: [
                       NeumorphicIcon(
                         size: 30,
-                        CustomIcons.battery_low,
+                        CustomIcons.betteryLow,
                         style: NeumorphicStyle(
                           color: MyColors.lightThemeFont,
                         ),
@@ -286,7 +286,7 @@ class _MainScreenState extends State<MainScreen> {
                   Row(
                     children: [
                       NeumorphicIcon(
-                        CustomIcons.central_unit,
+                        CustomIcons.centralUnit,
                         size: 30,
                         style: NeumorphicStyle(
                           color: MyColors.lightThemeFont,

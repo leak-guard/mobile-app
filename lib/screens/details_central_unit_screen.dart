@@ -28,7 +28,6 @@ class DetailsCentralUnitScreen extends StatefulWidget {
   State<DetailsCentralUnitScreen> createState() =>
       _DetailsCentralUnitScreenState();
 }
-//TODO: add updating configuration via API
 
 class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -761,14 +760,16 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
         height: 80,
         onLeadingTap: () async {
           if (await _onWillPop()) {
-            Navigator.pop(context);
+            // ignore: use_build_context_synchronously
+            if (mounted) Navigator.pop(context);
           }
         },
         title: 'Edit ${widget.central.name}',
         trailingIcon: const Icon(Icons.check),
         onTrailingTap: () async {
           await _saveChanges();
-          Navigator.pop(context);
+          // ignore: use_build_context_synchronously
+          if (mounted) Navigator.pop(context);
         },
       ),
       body: BlurredTopWidget(

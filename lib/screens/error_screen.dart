@@ -19,7 +19,7 @@ class _ErrorScreenState extends State<ErrorScreen> {
         },
         title: "Error",
       ),
-      body: Center(
+      body: const Center(
         child: Text("Something went wrong. Go back and try again."),
       ),
     );
