@@ -196,7 +196,7 @@ class Group implements Photographable {
   }
 
   Future refreshFlowAndTodaysUsage() async {
-    List<Future<void>> futures = [];
+    List<Future<bool>> futures = [];
     for (var unit in centralUnits) {
       futures.add(unit.refreshFlowAndTodaysUsage());
     }

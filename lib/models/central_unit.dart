@@ -370,15 +370,16 @@ class CentralUnit implements Photographable {
 
   //TODO: probably many request will kill the server - yes :)
   Future<bool> refreshData() async {
-    bool result = true;
-    if (!await refreshMacAddress()) result = false;
+    if (!await refreshMacAddress()) return false;
     await Future.delayed(const Duration(milliseconds: 500));
-    if (!await refreshConfig()) result = false;
+    if (!await refreshConfig()) return false;
     await Future.delayed(const Duration(milliseconds: 500));
-    if (!await refreshBlockSchedule()) result = false;
+    if (!await refreshBlockSchedule()) return false;
     await Future.delayed(const Duration(milliseconds: 500));
-    if (!await refreshBlockStatus()) result = false;
-    return result;
+    if (!await refreshBlockStatus()) return false;
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!await refreshFlowAndTodaysUsage()) return false;
+    return true;
   }
 
   List<Future<bool>> refreshStatus() {
@@ -394,14 +395,16 @@ class CentralUnit implements Photographable {
     return _api.putWaterBlockSchedule(addressIP, blockSchedule.toJson());
   }
 
-  Future refreshFlowAndTodaysUsage() async {
+  Future<bool> refreshFlowAndTodaysUsage() async {
     final result = await _api.getWaterUsage(addressIP);
     if (result != null) {
       flowRate = result.$1;
       _cachedTodaysUsage = result.$2;
       _lastTodaysUsageUpdate = DateTime.now();
+      return true;
     } else {
       flowRate = 0.0;
+      return false;
     }
   }
 }

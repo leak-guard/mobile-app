@@ -76,23 +76,29 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                               impulsesPerLiter: 477,
                               timezoneId: 37,
                             );
+                            if (mounted) {
+                              Navigator.pushNamed(
+                                // ignore: use_build_context_synchronously
+                                context,
+                                Routes.createCentralUnit,
+                                arguments:
+                                    CreateCentralScreenArguments(newCentral),
+                              ).then((_) {
+                                setState(() {
+                                  _networkService.startServiceDiscovery();
+                                });
+                              });
+
+                              CustomToast.toast(
+                                  "Connected to LeakGuardConfig!");
+                              return;
+                            }
                             Navigator.pushNamed(
+                              // ignore: use_build_context_synchronously
                               context,
                               Routes.createCentralUnit,
-                              arguments:
-                                  CreateCentralScreenArguments(newCentral),
-                            ).then((_) {
-                              setState(() {
-                                _networkService.startServiceDiscovery();
-                              });
-                            });
-                            CustomToast.toast("Connected to LeakGuardConfig!");
-                            return;
+                            );
                           }
-                          Navigator.pushNamed(
-                            context,
-                            Routes.createCentralUnit,
-                          );
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(16),
