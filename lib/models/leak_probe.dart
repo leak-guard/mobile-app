@@ -7,7 +7,13 @@ class LeakProbe implements Photographable {
   List<int> stmId;
   int address;
   int batteryLevel = 100;
-  bool blocked = false;
+  bool _blocked = false;
+
+  bool get blocked => !_blocked;
+
+  set blocked(bool value) {
+    _blocked = value;
+  }
 
   String? description;
   String? imagePath;

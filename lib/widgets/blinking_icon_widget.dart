@@ -7,12 +7,12 @@ class BlinkingIconWidget extends StatefulWidget {
   final Color color;
 
   const BlinkingIconWidget({
-    Key? key,
+    super.key,
     required this.icon,
     required this.size,
     this.color = Colors.red,
     this.duration = const Duration(milliseconds: 1000),
-  }) : super(key: key);
+  });
 
   @override
   State<BlinkingIconWidget> createState() => _BlinkingIconWidgetState();
@@ -33,8 +33,8 @@ class _BlinkingIconWidgetState extends State<BlinkingIconWidget>
     );
 
     _colorAnimation = ColorTween(
-      begin: widget.color.withOpacity(0.8),
-      end: widget.color,
+      begin: widget.color,
+      end: widget.color.withRed(255),
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,

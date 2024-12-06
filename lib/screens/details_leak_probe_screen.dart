@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/widgets/blinking_icon_widget.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
@@ -232,12 +236,67 @@ class _DetailsLeakProbeScreenState extends State<DetailsLeakProbeScreen> {
             }
           },
         ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _buildHardwareSection() {
+    String stmId = "";
+    for (var id in widget.leakProbe.stmId) {
+      stmId += id.toRadixString(16).toUpperCase();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Leak probe number',
+          style: Theme.of(context).textTheme.displayMedium,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          widget.leakProbe.address.toString(),
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Hardware unic ID',
+          style: Theme.of(context).textTheme.displayMedium,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          stmId,
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
+        const SizedBox(height: 16),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.leakProbe.blocked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+            context: context,
+            builder: (context) {
+              Timer(const Duration(seconds: 2), () {
+                Navigator.of(context).pop();
+              });
+              return const Scaffold(
+                backgroundColor: Colors.transparent,
+                body: Center(
+                  child: BlinkingIconWidget(
+                    icon: CustomIcons.leak,
+                    size: 120,
+                    duration: Duration(milliseconds: 500),
+                  ),
+                ),
+              );
+            });
+      });
+    }
     return Scaffold(
       appBar: CustomAppBar(
         height: 80,
@@ -263,6 +322,7 @@ class _DetailsLeakProbeScreenState extends State<DetailsLeakProbeScreen> {
             padding: const EdgeInsets.all(16),
             children: [
               _buildInfoSection(),
+              _buildHardwareSection(),
             ],
           ),
         ),

@@ -377,11 +377,13 @@ class CentralUnit implements Photographable {
   Future<bool> refreshFlowAndTodaysUsage() async {
     final result = await _api.getWaterUsage(addressIP);
     if (result != null) {
+      isOnline = true;
       flowRate = result.$1;
       _cachedTodaysUsage = result.$2;
       _lastTodaysUsageUpdate = DateTime.now();
       return true;
     } else {
+      isOnline = false;
       flowRate = 0.0;
       return false;
     }

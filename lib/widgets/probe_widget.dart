@@ -27,7 +27,7 @@ class _ProbeWidgetState extends State<ProbeWidget> {
   }
 
   Widget _batteryInfo() {
-    const double size = 60;
+    const double size = 40;
     Icon icon = const Icon(
       Icons.battery_full,
       size: size,
@@ -70,7 +70,7 @@ class _ProbeWidgetState extends State<ProbeWidget> {
       );
     }
 
-    return Column(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(width: 10),
@@ -86,10 +86,30 @@ class _ProbeWidgetState extends State<ProbeWidget> {
           child: Text(
               textAlign: TextAlign.center,
               "${widget.probe.batteryLevel}%",
-              style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                    color: _color,
-                    fontSize: 25,
-                  )),
+              style: Theme.of(context).textTheme.displaySmall),
+        ),
+      ],
+    );
+  }
+
+  Widget _numberInfo() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(width: 10),
+        const Icon(
+          Icons.numbers,
+          size: 30,
+        ),
+        const SizedBox(
+          width: 5,
+        ),
+        SizedBox(
+          width: 80,
+          child: Text(
+              textAlign: TextAlign.center,
+              widget.probe.address.toString(),
+              style: Theme.of(context).textTheme.displaySmall),
         ),
       ],
     );
@@ -101,16 +121,13 @@ class _ProbeWidgetState extends State<ProbeWidget> {
       children: [
         Expanded(
           child: Text(
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            widget.probe.name,
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: _color,
-                ),
-          ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              widget.probe.name,
+              style: Theme.of(context).textTheme.displayMedium),
         ),
         if (widget.probe.blocked)
-          BlinkingIconWidget(
+          const BlinkingIconWidget(
             icon: CustomIcons.leak,
             size: 30,
             duration: Duration(milliseconds: 500),
@@ -165,7 +182,12 @@ class _ProbeWidgetState extends State<ProbeWidget> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: _batteryInfo(),
+                  child: Column(
+                    children: [
+                      _numberInfo(),
+                      _batteryInfo(),
+                    ],
+                  ),
                 ),
               ],
             ),
