@@ -764,13 +764,12 @@ class DatabaseService {
     );
   }
 
-  Future<Flow?> getLatestFlow(int centralUnitID, int timestamp) async {
+  Future<Flow?> getLatestFlow(int centralUnitID) async {
     final db = await database;
     final data = await db.query(
       _flowsTableName,
-      where:
-          '$_flowsCentralUnitIDColumnName = ? AND $_flowsDateColumnName <= ?',
-      whereArgs: [centralUnitID, timestamp],
+      where: '$_flowsCentralUnitIDColumnName = ?',
+      whereArgs: [centralUnitID],
       orderBy: '$_flowsDateColumnName DESC',
       limit: 1,
     );
@@ -783,6 +782,36 @@ class DatabaseService {
       date: DateTime.fromMillisecondsSinceEpoch(
           (data[0][_flowsDateColumnName] as int) * 1000),
     )..flowID = data[0][_flowsFlowIDColumnName] as int;
+  }
+
+  Future deleteFlowsFromDate(int centralUnitID, DateTime fromDate) async {
+    final db = await database;
+    await db.delete(
+      _flowsTableName,
+      where:
+          '$_flowsCentralUnitIDColumnName = ? AND $_flowsDateColumnName >= ?',
+      whereArgs: [centralUnitID, fromDate.millisecondsSinceEpoch ~/ 1000],
+    );
+  }
+
+  Future addCentralUnitsFlows(int centralUnitID, List<Flow> flows) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      final batch = txn.batch();
+
+      for (final flow in flows) {
+        batch.insert(
+          _flowsTableName,
+          {
+            _flowsCentralUnitIDColumnName: centralUnitID,
+            _flowsVolumeColumnName: flow.volume,
+            _flowsDateColumnName: flow.unixTime(),
+          },
+        );
+      }
+
+      await batch.commit(noResult: true);
+    });
   }
 
   // Additional utility methods

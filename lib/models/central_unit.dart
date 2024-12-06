@@ -349,15 +349,19 @@ class CentralUnit implements Photographable {
 
   //TODO: probably many request will kill the server - yes :)
   Future<bool> refreshData() async {
+    final Duration delay = const Duration(milliseconds: 500);
+
     if (!await refreshMacAddress()) return false;
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(delay);
     if (!await refreshConfig()) return false;
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(delay);
     if (!await refreshBlockSchedule()) return false;
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(delay);
     if (!await refreshBlockStatus()) return false;
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(delay);
     if (!await refreshFlowAndTodaysUsage()) return false;
+    await Future.delayed(delay);
+    if (!await getRecentFlows()) return false;
     return true;
   }
 
@@ -372,6 +376,27 @@ class CentralUnit implements Photographable {
 
   Future<bool> sendBlockSchedule(BlockSchedule blockSchedule) async {
     return _api.putWaterBlockSchedule(addressIP, blockSchedule.toJson());
+  }
+
+  Future<bool> getRecentFlows() async {
+    Flow? recentFlow = await _db.getLatestFlow(centralUnitID!);
+    DateTime lastFlowDate =
+        recentFlow?.date ?? DateTime.now().subtract(Duration(days: 365));
+
+    List<Flow>? flows = await _api.getRecentFlows(addressIP, lastFlowDate);
+    if (flows == null) {
+      return false;
+    }
+    if (flows.isEmpty) {
+      return true;
+    }
+
+    for (var flow in flows) {
+      flow.centralUnitID = centralUnitID;
+    }
+    await _db.addCentralUnitsFlows(centralUnitID!, flows);
+
+    return true;
   }
 
   Future<bool> refreshFlowAndTodaysUsage() async {

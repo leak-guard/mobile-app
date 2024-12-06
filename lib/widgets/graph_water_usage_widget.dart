@@ -58,13 +58,6 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.data.isEmpty) return const SizedBox();
-
-    print(widget.data.length);
-    print(widget.labels.length);
-    for (int i = 0; i < widget.labels.length; i++) {
-      print(widget.labels[i]);
-    }
-
     double maxValue =
         widget.data.map((d) => d.usage).reduce((a, b) => a > b ? a : b);
     double boxHeighs = maxValue;

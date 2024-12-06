@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:leak_guard/credentials.dart';
 import 'package:leak_guard/models/block_schedule.dart';
+import 'package:leak_guard/models/flow.dart';
 import 'package:leak_guard/utils/strings.dart';
 
 // TODO: Make all endpoints return type, message if the request was successful or not
@@ -17,8 +19,8 @@ class CustomApi {
     _client.connectionTimeout = const Duration(seconds: 2);
   }
 
-  String _user = "root";
-  String _password = "admin1";
+  final String _user = Credentials.apiUser;
+  final String _password = Credentials.apiPass;
 
   Future<Map<String, dynamic>?> _makeRequest(
     String ip,
@@ -99,6 +101,28 @@ class CustomApi {
     final path =
         '/water-usage/${fromTimestamp.millisecondsSinceEpoch}/${toTimestamp.millisecondsSinceEpoch}';
     return await _makeRequest(ip, path);
+  }
+
+  Future<List<Flow>?> getRecentFlows(String ip, DateTime lastFlowDate) async {
+    final fromTimestamp = lastFlowDate.millisecondsSinceEpoch ~/ 1000;
+    final toTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    final result =
+        await _makeRequest(ip, '/water-usage/$fromTimestamp/$toTimestamp');
+    if (result == null) return null;
+
+    final Map<String, double> usages =
+        Map<String, double>.from(result['usages']);
+    if (usages.isEmpty) return [];
+
+    return usages.entries
+        .map((entry) => Flow(
+              centralUnitID: null,
+              volume: entry.value,
+              date: DateTime.fromMillisecondsSinceEpoch(
+                  int.parse(entry.key) * 1000),
+            ))
+        .toList();
   }
 
   Future<(double, double)?> getWaterUsage(String ip) async {

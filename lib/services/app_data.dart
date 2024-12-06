@@ -20,8 +20,6 @@ class AppData {
 
   AppData._internal();
 
-  //TODO: Optimise loading data from the database via group transaction
-
   Future<void> loadData() async {
     final futures = await Future.wait([
       _db.getGroups(),
