@@ -65,6 +65,18 @@ class CustomDrawer extends StatelessWidget {
               ).then((_) => onBack());
             },
           ),
+          NeumorphicListTile(
+            leading: Icon(Icons.adb, color: MyColors.lightThemeFont),
+            title:
+                Text('Tests', style: Theme.of(context).textTheme.displaySmall),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(
+                context,
+                Routes.tests,
+              ).then((_) => onBack());
+            },
+          ),
         ],
       ),
     );

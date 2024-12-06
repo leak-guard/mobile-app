@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:leak_guard/services/app_data.dart';
@@ -12,23 +13,76 @@ import 'package:leak_guard/utils/strings.dart';
 import 'package:network_tools/network_tools.dart';
 import 'package:path_provider/path_provider.dart';
 
+late AndroidNotificationChannel channel;
+late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("wchodze do firebaseMessagingBackgroundHandler");
+  await Firebase.initializeApp();
+  await setupFlutterNotifications();
+  print("adasfaad z firebaseMessagingBackgroundHandler");
+  showFlutterNotification(message);
+}
+
+Future<void> setupFlutterNotifications() async {
+  flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  channel = const AndroidNotificationChannel(
+    'high_importance_channel',
+    'High Importance Notifications',
+    importance: Importance.high,
+  );
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+}
+
+void showFlutterNotification(RemoteMessage message) {
+  print("wchodze do showFlutterNotification");
+  if (message.notification != null && message.notification?.android != null) {
+    print("wchodze ifa");
+    flutterLocalNotificationsPlugin.show(
+      message.notification.hashCode,
+      message.notification?.title,
+      message.notification?.body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          channel.id,
+          channel.name,
+        ),
+      ),
+    );
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDocDirectory = await getApplicationDocumentsDirectory();
   await configureNetworkTools(appDocDirectory.path, enableDebugging: true);
 
-  PermissionsService();
-  NetworkService();
-
   await Firebase.initializeApp();
-  final notificationSettings =
-      await FirebaseMessaging.instance.requestPermission(provisional: true);
-  final fncToken = await FirebaseMessaging.instance.getToken();
-  if (fncToken != null) {
-    print("FNC token: $fncToken");
+  final notificationSettings = await FirebaseMessaging.instance
+      .requestPermission(alert: true, badge: true, sound: true);
+
+  final messaging = FirebaseMessaging.instance;
+
+  await messaging.requestPermission();
+  final token = await messaging.getToken();
+
+  PermissionsService();
+  final networkService = NetworkService();
+  networkService.fcmToken = await FirebaseMessaging.instance.getToken();
+  if (networkService.fcmToken != null) {
+    print("FNC token: ${networkService.fcmToken}");
   } else {
     print('There is no FNC token');
   }
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await setupFlutterNotifications();
+  FirebaseMessaging.onMessage.listen(showFlutterNotification);
 
   runApp(const MyApp());
 }
