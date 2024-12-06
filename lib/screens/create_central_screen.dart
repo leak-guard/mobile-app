@@ -84,11 +84,11 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     setState(() {
       _isCentralFound = true;
     });
-    final macAddress = await _api.getCentralMacAddress(ip);
+    final idAndMac = await _api.getCentralIdAndMac(ip);
 
     if (mounted) {
-      if (macAddress != null) {
-        _showDialog('Success', 'Found central unit with MAC:\n$macAddress');
+      if (idAndMac != null) {
+        _showDialog('Success', 'Found central unit with MAC:\n${idAndMac.$2}');
       } else {
         _showDialog('Error', 'Could not find central unit at IP:\n$ip');
         setState(() {
@@ -458,13 +458,14 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     _central.addressIP = _ipController.text;
     _central.isValveNO = _isValveNO;
     _central.impulsesPerLiter = int.tryParse(_impulsesController.text) ?? 0;
-    String? adresMac = await _api.getCentralMacAddress(_central.addressIP);
-    if (adresMac == null) {
+    final idAndMac = await _api.getCentralIdAndMac(_central.addressIP);
+
+    if (idAndMac == null) {
       await _showDialog(
           'Error', 'Could not find central unit at IP:\n${_central.addressIP}');
       return false;
     }
-    _central.addressMAC = adresMac;
+    _central.addressMAC = idAndMac.$2;
 
     if (_appData.centralUnits.any((c) => c.addressMAC == _central.addressMAC)) {
       await _showDialog('Error', 'Central unit already added');

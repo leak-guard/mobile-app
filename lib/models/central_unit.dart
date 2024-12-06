@@ -302,26 +302,27 @@ class CentralUnit implements Photographable {
   }
 
   Future<bool> refreshMacAddress() async {
-    String? resultMacAddress = await _api.getCentralMacAddress(addressIP);
-    if (resultMacAddress == null) {
+    final idAndMac = await _api.getCentralIdAndMac(addressIP);
+    if (idAndMac == null) {
       isOnline = false;
       return false;
     }
-    if (addressMAC != resultMacAddress &&
+    if (addressMAC != idAndMac.$2 &&
         addressMAC != MyStrings.noHost &&
         addressIP != MyStrings.mockIp) {
+      print("XD");
       return false;
     }
 
     if (addressMAC == MyStrings.noHost) {
-      addressMAC = resultMacAddress;
+      addressMAC = idAndMac.$2;
     }
 
     isOnline = true;
     return true;
   }
 
-  Future<bool> refreshBlockSchedule() async {
+  Future<bool> getBlockSchedule() async {
     final result = await _api.getWaterBlockSchedule(addressIP);
     if (result == null) {
       return false;
@@ -340,28 +341,25 @@ class CentralUnit implements Photographable {
   }
 
   //TODO: Implement fetching data from API:
-  // - Fetch MAC address for each central unit - check if it's online
-  // - Fetch leak probe data for each central unit
-  // - Fetch water usage data for each central unit
-  // - Fetch blockStatus for each central unit
-  // - Fetch block schedule for each central unit
   // - Fetch Probes data for each central unit
+  // - Get criteria
 
   //TODO: probably many request will kill the server - yes :)
   Future<bool> refreshData() async {
-    final Duration delay = const Duration(milliseconds: 500);
-
+    const Duration delay = Duration(milliseconds: 400);
     if (!await refreshMacAddress()) return false;
     await Future.delayed(delay);
     if (!await refreshConfig()) return false;
     await Future.delayed(delay);
-    if (!await refreshBlockSchedule()) return false;
+    if (!await getBlockSchedule()) return false;
     await Future.delayed(delay);
     if (!await refreshBlockStatus()) return false;
     await Future.delayed(delay);
     if (!await refreshFlowAndTodaysUsage()) return false;
     await Future.delayed(delay);
     if (!await getRecentFlows()) return false;
+    await Future.delayed(delay);
+    if (!await refreshProbes()) return false;
     return true;
   }
 
@@ -376,6 +374,19 @@ class CentralUnit implements Photographable {
 
   Future<bool> sendBlockSchedule(BlockSchedule blockSchedule) async {
     return _api.putWaterBlockSchedule(addressIP, blockSchedule.toJson());
+  }
+
+  Future<bool> refreshProbes() async {
+    List<LeakProbe>? probes = await _api.getLeakProbes(addressIP);
+    if (probes == null) {
+      return false;
+    }
+    for (LeakProbe probe in probes) {
+      probe.centralUnitID = centralUnitID;
+      print(probe);
+    } // TODO: CONTINUE HERE
+
+    return true;
   }
 
   Future<bool> getRecentFlows() async {
