@@ -90,13 +90,6 @@ class CustomApi {
     return response != null;
   }
 
-  Future<double?> getWaterUsage(String ip) async {
-    final result = await _makeRequest(ip, '/water-usage');
-    print(result);
-    if (result == null) return null;
-    return (result['flow_rate'] as int) / 1000.0;
-  }
-
   //TODO: Make it return List<Flow>
   Future<Map<String, dynamic>?> getWaterUsageRange(
     String ip,
@@ -108,15 +101,14 @@ class CustomApi {
     return await _makeRequest(ip, path);
   }
 
-  Future<double?> getWaterUsageToday(String ip) async {
-    //TODO: If implemented remove next line
-    ip = MyStrings.myIp;
+  Future<(double, double)?> getWaterUsage(String ip) async {
     final result = await _makeRequest(ip, '/water-usage');
     print(result);
     if (result == null) return null;
-    return (result['today_volume'] as int) / 1000.0;
+    double flowRate = (result['flow_rate'] as int) / 1000.0;
+    double todayVolume = (result['today_volume'] as int) / 1000.0;
+    return (flowRate, todayVolume);
   }
-
   // TODO: Probe endpoints, GET, PUT and DELETE
 
   // Probe pairing endpoints

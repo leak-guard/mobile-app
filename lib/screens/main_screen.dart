@@ -55,9 +55,7 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {});
     timer = Timer.periodic(
       const Duration(seconds: 1),
-      (timer) => setState(() {
-        print('Auto refresh');
-      }),
+      (timer) => setState(() {}),
     );
   }
 
@@ -476,13 +474,14 @@ class _MainScreenState extends State<MainScreen> {
             future: Future.wait([
               currentGroup.todaysWaterUsage(),
               currentGroup.yesterdayWaterUsage(),
-              currentGroup.flowRate(),
-              currentGroup.getWaterUsageData(12),
+              currentGroup.refreshFlowAndTodaysUsage().then((_) {
+                return currentGroup.getWaterUsageData(12);
+              }),
             ]).then((results) => {
                   'todaysUsage': results[0],
                   'maxUsage': results[1],
-                  'flowRate': results[2],
-                  'waterUsageData': results[3],
+                  'waterUsageData': results[2],
+                  'flowRate': currentGroup.flowRate(),
                 }),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {

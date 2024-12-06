@@ -29,6 +29,8 @@ class CentralUnit implements Photographable {
   bool isValveNO = true;
   int impulsesPerLiter = 1000;
 
+  double flowRate = 0.0;
+
   bool chosen = false;
 
   final CustomApi _api = CustomApi();
@@ -96,10 +98,6 @@ class CentralUnit implements Photographable {
     return allFlows;
   }
 
-  Future<double> getCurrentFlowRate() async {
-    return await _api.getWaterUsage(addressIP) ?? 0.0;
-  }
-
   Future<double?> getTodaysWaterUsage() async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -113,12 +111,6 @@ class CentralUnit implements Photographable {
         _lastTodaysUsageUpdate != null &&
         now.difference(_lastTodaysUsageUpdate!) < _flowRateCacheDuration) {
       return _cachedTodaysUsage!;
-    }
-
-    final todysWaterUsage = await _api.getWaterUsageToday(addressIP);
-    if (todysWaterUsage != null) {
-      _cachedTodaysUsage = todysWaterUsage;
-      return todysWaterUsage;
     }
 
     final flows = await _db.getCentralUnitFlowsBetweenDates(
@@ -400,5 +392,16 @@ class CentralUnit implements Photographable {
 
   Future<bool> sendBlockSchedule(BlockSchedule blockSchedule) async {
     return _api.putWaterBlockSchedule(addressIP, blockSchedule.toJson());
+  }
+
+  Future refreshFlowAndTodaysUsage() async {
+    final result = await _api.getWaterUsage(addressIP);
+    if (result != null) {
+      flowRate = result.$1;
+      _cachedTodaysUsage = result.$2;
+      _lastTodaysUsageUpdate = DateTime.now();
+    } else {
+      flowRate = 0.0;
+    }
   }
 }

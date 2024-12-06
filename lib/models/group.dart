@@ -80,18 +80,12 @@ class Group implements Photographable {
     status = BlockStatus.noBlocked;
   }
 
-  Future<double> flowRate() async {
+  double flowRate() {
     double total = 0.0;
-    List<Future<double>> futures = [];
     for (var unit in centralUnits) {
-      futures.add(unit.getCurrentFlowRate());
+      total += unit.flowRate;
     }
-    return Future.wait(futures).then((value) {
-      for (var usage in value) {
-        total += usage;
-      }
-      return total;
-    });
+    return total;
   }
 
   Future<double> todaysWaterUsage() async {
@@ -199,5 +193,13 @@ class Group implements Photographable {
     return Future.wait(futures).then((value) {
       return !value.contains(false);
     });
+  }
+
+  Future refreshFlowAndTodaysUsage() async {
+    List<Future<void>> futures = [];
+    for (var unit in centralUnits) {
+      futures.add(unit.refreshFlowAndTodaysUsage());
+    }
+    return Future.wait(futures);
   }
 }
