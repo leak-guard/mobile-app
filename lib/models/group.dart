@@ -128,11 +128,7 @@ class Group implements Photographable {
     for (int i = hoursToFetch - 1; i >= 0; i--) {
       final time = currentHour.subtract(Duration(hours: i));
       result.add(WaterUsageData(
-        time.year,
-        time.month,
-        time.day,
-        time.hour,
-        time.minute,
+        time,
         0.0,
       ));
     }

@@ -186,11 +186,7 @@ class CentralUnit implements Photographable {
             : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
 
         result.add(WaterUsageData(
-          time.year,
-          time.month,
-          time.day,
-          time.hour,
-          time.minute,
+          time,
           usage,
         ));
       }
@@ -199,13 +195,8 @@ class CentralUnit implements Photographable {
       return result;
     }
 
-    if (_cachedWaterUsageData!.last.hour != currentHour.hour) {
-      final lastCachedHour = DateTime(
-        _cachedWaterUsageData!.last.year,
-        _cachedWaterUsageData!.last.month,
-        _cachedWaterUsageData!.last.day,
-        _cachedWaterUsageData!.last.hour,
-      );
+    if (_cachedWaterUsageData!.last.date.hour != currentHour.hour) {
+      final lastCachedHour = _cachedWaterUsageData!.last.date;
 
       final startTime = lastCachedHour;
       final flows = await _getFlowData(startTime, now);
@@ -222,11 +213,7 @@ class CentralUnit implements Photographable {
         final lastHourUsage = lastHourFlows.fold(
             0.0, (sum, flow) => sum + flow.volume.toDouble());
         _cachedWaterUsageData!.last = WaterUsageData(
-          lastCachedHour.year,
-          lastCachedHour.month,
-          lastCachedHour.day,
-          lastCachedHour.hour,
-          now.minute,
+          lastCachedHour,
           lastHourUsage,
         );
       }
@@ -247,11 +234,7 @@ class CentralUnit implements Photographable {
             : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
 
         _cachedWaterUsageData!.add(WaterUsageData(
-          time.year,
-          time.month,
-          time.day,
-          time.hour,
-          time.minute,
+          time,
           usage,
         ));
       }
@@ -270,11 +253,7 @@ class CentralUnit implements Photographable {
             0.0, (sum, flow) => sum + flow.volume.toDouble());
 
     _cachedWaterUsageData!.last = WaterUsageData(
-      currentHour.year,
-      currentHour.month,
-      currentHour.day,
-      currentHour.hour,
-      now.minute,
+      currentHour,
       usage,
     );
 

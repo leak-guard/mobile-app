@@ -4,6 +4,7 @@ import 'package:leak_guard/utils/colors.dart';
 
 class GraphWaterUsageWidget extends StatefulWidget {
   final List<WaterUsageData> data;
+  final List<String> labels;
   final double maxHeight;
   final Duration animationDuration;
 
@@ -12,6 +13,7 @@ class GraphWaterUsageWidget extends StatefulWidget {
     required this.data,
     this.maxHeight = 200,
     this.animationDuration = const Duration(milliseconds: 500),
+    required this.labels,
   });
 
   @override
@@ -61,8 +63,6 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final barWidth = (constraints.maxWidth - 32) / widget.data.length - 8;
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -118,7 +118,7 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
                             child: AnimatedContainer(
                               duration: widget.animationDuration,
                               curve: Curves.easeInOut,
-                              width: barWidth,
+                              width: 14,
                               height: currentHeight,
                             ),
                           ),
@@ -128,7 +128,9 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
                           duration: widget.animationDuration,
                           opacity: _shouldAnimate ? 1.0 : 0.0,
                           child: Text(
-                            item.hour.toString(),
+                            widget.labels.elementAt(!widget.data.contains(item)
+                                ? 0
+                                : widget.data.indexOf(item)),
                             style: TextStyle(
                               color: MyColors.darkShadow,
                               fontWeight: FontWeight.normal,
