@@ -43,8 +43,9 @@ class PanelWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(name, style: Theme.of(context).textTheme.titleLarge!),
-                Icon(
+                Text(name, style: Theme.of(context).textTheme.displayMedium),
+                const Icon(
+                  size: 20,
                   Icons.arrow_forward_ios,
                 ),
               ],

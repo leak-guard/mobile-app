@@ -120,6 +120,34 @@ class Group implements Photographable {
     });
   }
 
+  Future<List<WaterUsageData>> getWaterUsageDataLastHour(int portions) async {
+    final now = DateTime.now();
+    final currentHour = DateTime(now.year, now.month, now.day, now.hour);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < portions; i++) {
+      final time = currentHour.add(Duration(minutes: 60 * i ~/ portions));
+      result.add(WaterUsageData(
+        time,
+        0.0,
+      ));
+    }
+
+    List<Future<List<WaterUsageData>>> futures = [];
+    for (var unit in centralUnits) {
+      futures.add(unit.getWaterUsageDataLastHour(portions));
+    }
+
+    return Future.wait(futures).then((value) {
+      for (var data in value) {
+        for (int i = 0; i < portions; i++) {
+          result[i].usage += data[i].usage;
+        }
+      }
+      return result;
+    });
+  }
+
   Future<List<WaterUsageData>> getWaterUsageData(int hoursToFetch) async {
     final now = DateTime.now();
     final currentHour = DateTime(now.year, now.month, now.day, now.hour);

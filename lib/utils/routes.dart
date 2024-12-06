@@ -17,6 +17,7 @@ import 'package:leak_guard/screens/manage_groups_screen.dart';
 import 'package:leak_guard/screens/main_screen.dart';
 import 'package:leak_guard/screens/manage_probes_screen.dart';
 import 'package:leak_guard/screens/test_screen.dart';
+import 'package:leak_guard/screens/water_usage_screen.dart';
 
 class Routes {
   static const String main = '/';
@@ -25,6 +26,7 @@ class Routes {
   static const String groupLeakProbes = '/groupLeakProbes';
   static const String groupCentralUnits = '/groupCentralUnits';
   static const String blockSchedule = '/blockSchedule';
+  static const String waterUsage = '/waterUsage';
 
   static const String manageGroups = '/manageGroups';
   static const String createGroup = '/createGroup';
@@ -166,12 +168,31 @@ class Routes {
           builder: (_) => const ErrorScreen(),
         );
 
+      case waterUsage:
+        if (settings.arguments is WaterUsageScreenArguments) {
+          final args = settings.arguments as WaterUsageScreenArguments;
+          return MaterialPageRoute(
+            builder: (_) => WaterUsageScreen(
+              group: args.group,
+            ),
+          );
+        }
+        return MaterialPageRoute(
+          builder: (_) => const ErrorScreen(),
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) => const ErrorScreen(),
         );
     }
   }
+}
+
+class WaterUsageScreenArguments {
+  final Group group;
+
+  WaterUsageScreenArguments(this.group);
 }
 
 class GroupCentralUnitsScreenArguments {

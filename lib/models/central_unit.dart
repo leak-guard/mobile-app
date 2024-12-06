@@ -386,4 +386,36 @@ class CentralUnit implements Photographable {
       return false;
     }
   }
+
+  Future<List<WaterUsageData>> getWaterUsageDataLastHour(int portions) async {
+    final now = DateTime.now();
+    final hourBegining = DateTime(now.year, now.month, now.day, now.hour);
+
+    final flows = await _getFlowData(hourBegining, now);
+
+    List<WaterUsageData> result = [];
+    for (int i = 0; i < portions; i++) {
+      final time = hourBegining.add(Duration(minutes: 60 * i ~/ portions));
+      print("flows: $flows");
+      final hourFlows = flows
+          .where((flow) =>
+              flow.date.year == time.year &&
+              flow.date.month == time.month &&
+              flow.date.day == time.day &&
+              flow.date.hour == time.hour &&
+              (time.minute <= flow.date.minute &&
+                  flow.date.minute < time.minute + 60 ~/ portions))
+          .toList();
+
+      final usage = hourFlows.isEmpty
+          ? 0.0
+          : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
+
+      result.add(WaterUsageData(
+        time,
+        usage,
+      ));
+    }
+    return result;
+  }
 }

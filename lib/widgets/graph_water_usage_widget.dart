@@ -41,14 +41,17 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
   }
 
   double getFontSize(double waterUsage) {
-    if (waterUsage < 100) {
+    final waterUsageTmp = waterUsage.round();
+    if (waterUsageTmp < 10) {
       return 9;
-    } else if (waterUsage < 1000) {
+    } else if (waterUsageTmp < 100) {
       return 8;
-    } else if (waterUsage < 10000) {
+    } else if (waterUsageTmp < 1000) {
       return 7;
+    } else if (waterUsageTmp < 10000) {
+      return 5;
     } else {
-      return 6;
+      return 4;
     }
   }
 
@@ -63,6 +66,8 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final barWidth = (constraints.maxWidth - 32) / widget.data.length - 8;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -100,26 +105,29 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        AnimatedContainer(
-                          duration: widget.animationDuration,
-                          curve: Curves.easeInOut,
-                          child: Neumorphic(
-                            style: NeumorphicStyle(
-                              depth: 1,
-                              intensity: 0.7,
-                              surfaceIntensity: 0.5,
-                              shadowLightColorEmboss: Colors.white,
-                              color: MyColors.blue,
-                              shape: NeumorphicShape.convex,
-                              boxShape: NeumorphicBoxShape.roundRect(
-                                BorderRadius.circular(16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: AnimatedContainer(
+                            duration: widget.animationDuration,
+                            curve: Curves.easeInOut,
+                            child: Neumorphic(
+                              style: NeumorphicStyle(
+                                depth: 1,
+                                intensity: 0.7,
+                                surfaceIntensity: 0.5,
+                                shadowLightColorEmboss: Colors.white,
+                                color: MyColors.blue,
+                                shape: NeumorphicShape.convex,
+                                boxShape: NeumorphicBoxShape.roundRect(
+                                  BorderRadius.circular(16),
+                                ),
                               ),
-                            ),
-                            child: AnimatedContainer(
-                              duration: widget.animationDuration,
-                              curve: Curves.easeInOut,
-                              width: 14,
-                              height: currentHeight,
+                              child: AnimatedContainer(
+                                duration: widget.animationDuration,
+                                curve: Curves.easeInOut,
+                                width: barWidth,
+                                height: currentHeight,
+                              ),
                             ),
                           ),
                         ),
@@ -134,7 +142,7 @@ class _GraphWaterUsageWidgetState extends State<GraphWaterUsageWidget> {
                             style: TextStyle(
                               color: MyColors.darkShadow,
                               fontWeight: FontWeight.normal,
-                              fontSize: 12,
+                              fontSize: 10,
                             ),
                           ),
                         ),

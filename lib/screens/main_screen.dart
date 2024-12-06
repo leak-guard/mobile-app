@@ -194,7 +194,13 @@ class _MainScreenState extends State<MainScreen> {
               data: waterUsageData,
               maxHeight: 150,
             ),
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, Routes.waterUsage,
+                      arguments: WaterUsageScreenArguments(currentGroup))
+                  .then((_) {
+                setState(() {});
+              });
+            },
           ),
           PanelWidget(
             name: "Block time",
@@ -481,7 +487,7 @@ class _MainScreenState extends State<MainScreen> {
               currentGroup.todaysWaterUsage(),
               currentGroup.yesterdayWaterUsage(),
               currentGroup.refreshFlowAndTodaysUsage().then((_) {
-                return currentGroup.getWaterUsageData(12);
+                return currentGroup.getWaterUsageData(11);
               }),
             ]).then((results) => {
                   'todaysUsage': results[0],
