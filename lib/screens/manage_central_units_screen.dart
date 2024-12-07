@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:leak_guard/services/app_data.dart';
+import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
@@ -21,6 +22,7 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
   final _appData = AppData();
   bool _centralChosen = false;
   final _networkService = NetworkService();
+  final _db = DatabaseService.instance;
 
   Future<void> _refresh() async {
     _networkService.startServiceDiscovery();
@@ -74,6 +76,8 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
                     if (_centralChosen) return;
                     _centralChosen = true;
                     await central.refreshConfig();
+
+                    await _db.updateCentralUnit(central);
 
                     Navigator.pushNamed(
                       context,

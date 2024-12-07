@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/services/permissions_service.dart';
+import 'package:leak_guard/services/shared_preferences.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
@@ -63,13 +64,8 @@ Future<void> main() async {
   await configureNetworkTools(appDocDirectory.path, enableDebugging: true);
 
   await Firebase.initializeApp();
-  final notificationSettings = await FirebaseMessaging.instance
+  await FirebaseMessaging.instance
       .requestPermission(alert: true, badge: true, sound: true);
-
-  final messaging = FirebaseMessaging.instance;
-
-  await messaging.requestPermission();
-  final token = await messaging.getToken();
 
   PermissionsService();
   final networkService = NetworkService();
@@ -83,6 +79,7 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await setupFlutterNotifications();
   FirebaseMessaging.onMessage.listen(showFlutterNotification);
+  await PreferencesService.instance;
 
   runApp(const MyApp());
 }

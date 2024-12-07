@@ -248,7 +248,7 @@ class _WifiDropdownState extends State<WifiDropdown> {
                           .then((isEnable) {
                         if (!isEnable) {
                           CustomToast.toast(
-                              'Please turn on location on your device');
+                              'Please turn on location on your phone');
                         }
                       });
                     }

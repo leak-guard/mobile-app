@@ -49,6 +49,7 @@ class AppData {
           .toList();
     }
 
+    // TODO: CONTINUE HERE trzeba będzie ogarnac baze danych (wyczyscic) oraz dodac warunek przy tworzeniu że jeżeli jest to localhost to wywalone że już jest takie samo MAC
     List<bool> fetchResults = await fetchDataFromApi();
     int successCount = fetchResults.fold(0, (previousValue, element) {
       if (element) {
@@ -57,8 +58,10 @@ class AppData {
       return previousValue;
     });
 
-    CustomToast.toast(
-        '$successCount of ${fetchResults.length} central units loaded');
+    if (centralUnits.isNotEmpty) {
+      CustomToast.toast(
+          '$successCount of ${fetchResults.length} central units loaded');
+    }
 
     for (var group in groups) {
       group.updateBlockStatus();

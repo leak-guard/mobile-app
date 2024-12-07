@@ -71,7 +71,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             await _db.getCentralUnitLeakProbes(central.centralUnitID!);
         newGroup.centralUnits.add(central);
       }
-
+      newGroup.blockSchedule = chosenCentrals.first.blockSchedule;
       _appData.groups.add(newGroup);
       newGroup.updateBlockStatus();
       if (mounted) {

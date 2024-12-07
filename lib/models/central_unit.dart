@@ -391,8 +391,9 @@ class CentralUnit implements Photographable {
 
   Future<bool> getRecentFlows() async {
     Flow? recentFlow = await _db.getLatestFlow(centralUnitID!);
+    // TODO: Change here - ask whats the best history to fetch
     DateTime lastFlowDate =
-        recentFlow?.date ?? DateTime.now().subtract(Duration(days: 365));
+        recentFlow?.date ?? DateTime.now().subtract(const Duration(days: 1));
 
     List<Flow>? flows = await _api.getRecentFlows(addressIP, lastFlowDate);
     if (flows == null) {
@@ -405,7 +406,9 @@ class CentralUnit implements Photographable {
     for (var flow in flows) {
       flow.centralUnitID = centralUnitID;
     }
+    print("zwieszam sie");
     await _db.addCentralUnitsFlows(centralUnitID!, flows);
+    print("odwieszam sie");
 
     return true;
   }

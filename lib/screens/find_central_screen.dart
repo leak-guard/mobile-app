@@ -63,6 +63,8 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                           ),
                         ),
                         onPressed: () async {
+                          if (_centralChosen) return;
+                          _centralChosen = true;
                           await _networkService.getCurrentWifiName();
                           print(
                               "Current wifi name: ${_networkService.currentWifiName}");
@@ -70,7 +72,7 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                               .then((isEnable) {
                             if (!isEnable) {
                               CustomToast.toast(
-                                  'Please turn on location on your device');
+                                  'Please turn on location on your phone');
                             }
                           });
 
@@ -93,8 +95,9 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                                 arguments:
                                     CreateCentralScreenArguments(newCentral),
                               ).then((_) {
+                                _networkService.startServiceDiscovery();
                                 setState(() {
-                                  _networkService.startServiceDiscovery();
+                                  _centralChosen = false;
                                 });
                               });
 
@@ -108,7 +111,12 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                             // ignore: use_build_context_synchronously
                             context,
                             Routes.createCentralUnit,
-                          );
+                          ).then((success) {
+                            _networkService.startServiceDiscovery();
+                            setState(() {
+                              _centralChosen = false;
+                            });
+                          });
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -189,11 +197,9 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                               centralUnit,
                             ),
                           ).then((success) {
+                            _networkService.startServiceDiscovery();
                             setState(() {
                               _centralChosen = false;
-                              if (success == true) {
-                                _networkService.startServiceDiscovery();
-                              }
                             });
                           });
                         },
