@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:leak_guard/services/app_data.dart';
+import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/services/permissions_service.dart';
 import 'package:leak_guard/services/shared_preferences.dart';
@@ -51,26 +52,29 @@ Future<void> setupFlutterNotifications() async {
 void showFlutterNotification(RemoteMessage message) {
   if (message.data.containsKey('device_id')) {
     String notificationMessage = "We have detected a leak in your system!";
+    final db = DatabaseService.instance;
     final data = message.data;
     final deviceID = data['device_id'];
-    for (var cu in AppData().centralUnits) {
-      if (cu.hardwareID == deviceID) {
-        notificationMessage = "Leak detected in ${cu.name}";
-        break;
+    db.getCentralUnits().then((value) {
+      for (var cu in value) {
+        if (cu.hardwareID == deviceID) {
+          notificationMessage = "Leak detected in ${cu.name}";
+          break;
+        }
       }
-    }
-    flutterLocalNotificationsPlugin.show(
-      message.hashCode,
-      "Leak detected",
-      notificationMessage,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          channel.id,
-          channel.name,
-          icon: '@mipmap/leak',
+      flutterLocalNotificationsPlugin.show(
+        message.hashCode,
+        "Leak detected",
+        notificationMessage,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channel.id,
+            channel.name,
+            icon: '@mipmap/leak',
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
