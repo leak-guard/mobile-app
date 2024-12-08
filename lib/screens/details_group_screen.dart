@@ -236,21 +236,10 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
   }
 
   void _confirmDelete() async {
-    if (_appData.groups.length == 1) {
-      bool confirmLastGroupDelete = await _lastGroupDialog();
-      if (!confirmLastGroupDelete) {
-        return;
-      } else {
-        for (var central in _appData.centralUnits) {
-          await _db.deleteCentralUnit(central.centralUnitID!);
-        }
-      }
-
-      await _db.deleteGroup(widget.group.groupdID!);
-      _appData.groups.remove(widget.group);
-      if (mounted) {
-        Navigator.pop(context);
-      }
+    await _db.deleteGroup(widget.group.groupdID!);
+    _appData.groups.remove(widget.group);
+    if (mounted) {
+      Navigator.pop(context);
     }
   }
 
@@ -370,9 +359,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                     ),
                   ).then((isTheOnlyCentralDeleted) {
                     if (!_appData.groups.contains(widget.group)) {
-                      print("no nie ma");
                       if (mounted) {
-                        // Navigator.pop(context);
                         return;
                       }
                     }
@@ -403,9 +390,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                   ),
                 ).then((isTheOnlyCentralDeleted) {
                   if (!_appData.groups.contains(widget.group)) {
-                    // print("no nie ma");
                     if (mounted) {
-                      // Navigator.pop(context);
                       return;
                     }
                   }

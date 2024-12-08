@@ -63,6 +63,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       newGroup.name = _nameController.text.trim();
       newGroup.description = _descriptionController.text.trim();
       final groupId = await _db.addGroup(newGroup);
+      _appData.groups.add(newGroup);
       newGroup.groupdID = groupId;
 
       for (var central in chosenCentrals) {
@@ -72,7 +73,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         newGroup.centralUnits.add(central);
       }
       newGroup.blockSchedule = chosenCentrals.first.blockSchedule;
-      _appData.groups.add(newGroup);
       newGroup.updateBlockStatus();
       if (mounted) {
         Navigator.pop(context);
