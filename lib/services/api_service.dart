@@ -4,6 +4,7 @@ import 'package:leak_guard/credentials.dart';
 import 'package:leak_guard/models/block_schedule.dart';
 import 'package:leak_guard/models/flow.dart';
 import 'package:leak_guard/models/leak_probe.dart';
+import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/utils/strings.dart';
 
 // TODO: Make all endpoints return type, message if the request was successful or not
@@ -11,6 +12,7 @@ import 'package:leak_guard/utils/strings.dart';
 class CustomApi {
   static final CustomApi _instance = CustomApi._internal();
   final HttpClient _client;
+  final _networkService = NetworkService();
 
   factory CustomApi() {
     return _instance;
@@ -20,14 +22,13 @@ class CustomApi {
     _client.connectionTimeout = const Duration(seconds: 2);
   }
 
-  final String _user = Credentials.apiUser;
-  final String _password = Credentials.apiPass;
-
   Future<Map<String, dynamic>?> _makeRequest(
     String ip,
     String path, {
     String method = 'GET',
     Map<String, dynamic>? body,
+    String user = Credentials.apiUser,
+    String password = Credentials.apiPass,
   }) async {
     if (ip == MyStrings.mockIp) ip = MyStrings.myIp;
 
@@ -54,7 +55,7 @@ class CustomApi {
       }
 
       request.headers.set('Authorization',
-          'Basic ${base64Encode(utf8.encode('$_user:$_password'))}');
+          'Basic ${base64Encode(utf8.encode('$user:$password'))}');
 
       if (body != null) {
         request.headers.contentType = ContentType.json;
@@ -267,5 +268,45 @@ class CustomApi {
     String mac = result['mac'] ?? '';
 
     return (id, mac);
+  }
+
+  Future<bool> registerCentralUnit(String centralUnitID) async {
+    String? fcmToken = _networkService.fcmToken;
+    print(fcmToken);
+    if (fcmToken == null) return false;
+
+    final result = await _makeRequest(
+      Credentials.elaticIP,
+      "/register",
+      method: 'POST',
+      body: {
+        "device_id": centralUnitID,
+        "fcm_token": fcmToken,
+      },
+      user: Credentials.elasticUser,
+      password: Credentials.elasticPass,
+    );
+    print(result);
+    return result != null;
+  }
+
+  Future<bool> unRegisterCentralUnit(String centralUnitID) async {
+    String? fcmToken = _networkService.fcmToken;
+    print(fcmToken);
+    if (fcmToken == null) return false;
+
+    final result = await _makeRequest(
+      Credentials.elaticIP,
+      "/unregister",
+      method: 'POST',
+      body: {
+        "device_id": centralUnitID,
+        "fcm_token": fcmToken,
+      },
+      user: Credentials.elasticUser,
+      password: Credentials.elasticPass,
+    );
+    print(result);
+    return result != null;
   }
 }

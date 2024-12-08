@@ -158,11 +158,16 @@ class DataGenerator {
     final now = DateTime.now();
     final startDate = DateTime(
       now.year,
-      now.month - 11,
+      now.month,
+      now.day,
     );
     final endDate = DateTime(
       now.year,
-      now.month + 1,
+      now.month,
+      now.day,
+      now.hour,
+      now.minute,
+      now.second,
     );
 
     final totalDays = endDate.difference(startDate).inDays;
@@ -240,6 +245,9 @@ class DataGenerator {
         description: 'Test unit ${i + 1} description',
         imagePath: null,
         timezoneId: 37,
+        isRegistered: false,
+        isDeleted: false,
+        hardwareID: '',
       );
 
       final centralUnitId = await _db.addCentralUnit(unit);
@@ -266,8 +274,8 @@ class DataGenerator {
 
       final groupNames = [
         'Group 1',
-        // 'Group 2',
-        // 'Group 3',
+        'Group 2',
+        'Group 3',
         // 'Duży salon',
         // 'Mały salon',
         // 'Kuchnia',

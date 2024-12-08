@@ -1,9 +1,11 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/models/central_unit.dart';
+import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/wifi_network.dart';
 import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
+import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
@@ -30,6 +32,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
   final _appData = AppData();
   final _api = CustomApi();
   final _db = DatabaseService.instance;
+  bool _isCreating = false;
 
   WifiNetwork? _selectedNetwork;
 
@@ -53,6 +56,9 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     password: "admin1",
     addressMAC: '',
     timezoneId: 37,
+    isRegistered: false,
+    isDeleted: false,
+    hardwareID: "",
   );
 
   @override
@@ -465,18 +471,36 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
           'Error', 'Could not find central unit at IP:\n${_central.addressIP}');
       return false;
     }
+    _central.hardwareID = idAndMac.$1;
     _central.addressMAC = idAndMac.$2;
-
-    if (_appData.centralUnits.any((c) => c.addressMAC == _central.addressMAC)) {
-      await _showDialog('Error', 'Central unit already added');
-      return false;
+    if (_central.addressIP != MyStrings.mockIp) {
+      if (_appData.centralUnits
+          .any((c) => c.addressMAC == _central.addressMAC)) {
+        await _showDialog('Error', 'Central unit already added');
+        return false;
+      }
     }
 
     if (await _sendConfiguration(_central)) {
+      _central.isRegistered =
+          await _api.registerCentralUnit(_central.hardwareID);
+      _central.isDeleted = false;
       int centralID = await _db.addCentralUnit(_central);
       _central.centralUnitID = centralID;
       _central.isOnline = true;
+      await _central.refreshData();
       _appData.centralUnits.add(_central);
+      if (_appData.groups.isEmpty) {
+        Group defaultGroup = Group(
+          name: 'Default',
+        );
+        defaultGroup.centralUnits.add(_central);
+        defaultGroup.groupdID = await _db.addGroup(defaultGroup);
+        await _db.addCentralUnitToGroup(
+            defaultGroup.groupdID!, _central.centralUnitID!);
+        defaultGroup.blockSchedule = _central.blockSchedule;
+        _appData.groups.add(defaultGroup);
+      }
       return true;
     } else {
       await _showDialog(
@@ -491,6 +515,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
       appBar: CustomAppBar(
         height: 80,
         onLeadingTap: () {
+          if (_isCreating) return;
           if (widget.chosenCentral != null) {
             widget.chosenCentral!.name = widget.chosenCentral!.addressIP;
           }
@@ -499,7 +524,11 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
         title: 'Create Central Unit',
         trailingIcon: const Icon(Icons.check),
         onTrailingTap: () {
+          if (_isCreating) return;
+          _isCreating = true;
+
           _createCentralUnit().then((success) {
+            _isCreating = false;
             if (success) {
               // ignore: use_build_context_synchronously
               if (mounted) Navigator.pop(context, success);

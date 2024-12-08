@@ -1,12 +1,13 @@
 import 'dart:async';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/block_schedule.dart';
+import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/services/app_data.dart';
+import 'package:leak_guard/services/network_service.dart';
+import 'package:leak_guard/services/shared_preferences.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/utils/floating_data_generator.dart';
@@ -21,6 +22,7 @@ import 'package:leak_guard/widgets/panel_widget.dart';
 import 'package:leak_guard/widgets/water_block_widget.dart';
 import 'package:leak_guard/widgets/water_usage_arc_widget.dart';
 import 'package:leak_guard/widgets/graph_water_usage_widget.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -32,7 +34,10 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _appData = AppData();
+  final _networkService = NetworkService();
+  final _prefs = PreferencesService.I;
   int groupIndex = 0;
+
   late Timer timer;
 
   @override
@@ -366,6 +371,13 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    String addLabel =
+        _prefs.isFirstTime ? 'Add your first device' : 'Add your device';
+
+    if (_appData.centralUnits.isNotEmpty) {
+      addLabel = 'Create a group';
+    }
+
     if (_appData.groups.isEmpty) {
       return Scaffold(
         backgroundColor: MyColors.background,
@@ -390,11 +402,64 @@ class _MainScreenState extends State<MainScreen> {
                     BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
+                  if (_appData.centralUnits.isNotEmpty) {
+                    Navigator.pushNamed(context, Routes.createGroup).then((_) {
+                      setState(() {});
+                    });
+                    return;
+                  }
+
+                  await _networkService.getCurrentWifiName();
+                  await _prefs.setFirstTime(false);
+                  print(
+                      "Current wifi name: ${_networkService.currentWifiName}");
+                  Permission.locationWhenInUse.serviceStatus.isEnabled
+                      .then((isEnable) {
+                    if (!isEnable) {
+                      CustomToast.toast(
+                          'Please turn on location on your phone');
+                    }
+                  });
+
+                  if ((_networkService.currentWifiName ?? "") ==
+                      "LeakGuardConfig") {
+                    CentralUnit newCentral = CentralUnit(
+                      name: "",
+                      addressIP: "192.168.4.1",
+                      addressMAC: '',
+                      password: '',
+                      isValveNO: true,
+                      impulsesPerLiter: 477,
+                      timezoneId: 37,
+                      isRegistered: false,
+                      isDeleted: false,
+                      hardwareID: "",
+                    );
+                    if (mounted) {
+                      Navigator.pushNamed(
+                        // ignore: use_build_context_synchronously
+                        context,
+                        Routes.createCentralUnit,
+                        arguments: CreateCentralScreenArguments(newCentral),
+                      ).then((_) {
+                        _networkService.startServiceDiscovery();
+                        setState(() {});
+                      });
+
+                      CustomToast.toast("Connected to LeakGuardConfig!");
+                      return;
+                    }
+                  }
+
                   Navigator.pushNamed(
+                    // ignore: use_build_context_synchronously
                     context,
-                    Routes.createGroup,
-                  ).then((_) => setState(() {}));
+                    Routes.createCentralUnit,
+                  ).then((_) {
+                    _networkService.startServiceDiscovery();
+                    setState(() {});
+                  });
                 },
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
@@ -404,14 +469,16 @@ class _MainScreenState extends State<MainScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Create your first group',
+                      addLabel,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              if (kDebugMode)
+              if (false)
+                //TODO: remove it
+                // ignore: dead_code
                 NeumorphicButton(
                   style: NeumorphicStyle(
                     depth: 5,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/wifi_dropdown_widget.dart';
@@ -14,7 +16,7 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
   final _wifiController = TextEditingController();
-
+  final _api = CustomApi();
   @override
   void initState() {
     super.initState();
@@ -36,17 +38,14 @@ class _TestScreenState extends State<TestScreen> {
         },
         title: MyStrings.manageProbes,
       ),
-      body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: WifiDropdown(
-            controller: _wifiController,
-            onNetworkSelected: (network) {
-              // Obsługa wybranej sieci
-              print('Selected network: ${network.ssid}');
-              print('Signal strength: ${network.signalStrength}');
-              print('Is secure: ${network.isSecure}');
-            },
-          )),
+      body: Center(
+        child: NeumorphicButton(
+          onPressed: () {
+            _api.registerCentralUnit("this-is-my-id");
+          },
+          child: const Text('Register central'),
+        ),
+      ),
     );
   }
 }

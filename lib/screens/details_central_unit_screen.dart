@@ -600,10 +600,25 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   }
 
   void _confirmDelete() async {
+    bool? lastCentralDeleted;
+
     for (var group in _appData.groups) {
       if (group.centralUnits.contains(widget.central) &&
           group.centralUnits.length == 1) {
-        _canNotDelete();
+        lastCentralDeleted = await _canNotDelete();
+      }
+    }
+    if (lastCentralDeleted != null) {
+      if (lastCentralDeleted) {
+        for (var i = _appData.groups.length - 1; i >= 0; i--) {
+          var group = _appData.groups[i];
+          if (group.centralUnits.contains(widget.central) &&
+              group.centralUnits.length == 1) {
+            await _db.deleteGroup(group.groupdID!);
+            _appData.groups.removeAt(i);
+          }
+        }
+      } else {
         return;
       }
     }
@@ -615,7 +630,14 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
       }
     }
 
-    await _db.deleteCentralUnit(widget.central.centralUnitID!);
+    final result = await _api.unRegisterCentralUnit(widget.central.hardwareID);
+    if (result) {
+      await _db.deleteCentralUnit(widget.central.centralUnitID!);
+    } else {
+      widget.central.isDeleted = true;
+      await _db.updateCentralUnit(widget.central);
+    }
+
     _appData.centralUnits.remove(widget.central);
 
     for (LeakProbe leakProbe in widget.central.leakProbes) {
@@ -627,8 +649,8 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     }
   }
 
-  void _canNotDelete() {
-    showDialog(
+  Future<bool> _canNotDelete() async {
+    bool result = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: MyColors.background,
@@ -636,11 +658,11 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
           borderRadius: BorderRadius.circular(12),
         ),
         title: Text(
-          'Cannot delete central unit',
+          'Warning',
           style: Theme.of(context).textTheme.titleLarge,
         ),
         content: Text(
-          'This central unit is the only one in some groups. Please delete the groups first.',
+          'This central unit is the only one in some groups. Deleting it will remove the groups.',
           style: Theme.of(context).textTheme.displaySmall,
         ),
         actions: [
@@ -651,16 +673,31 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
               boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
             ),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(context, false);
             },
             child: Text(
-              'Close',
+              'Discard',
+              style: Theme.of(context).textTheme.displaySmall,
+            ),
+          ),
+          NeumorphicButton(
+            style: NeumorphicStyle(
+              depth: 2,
+              intensity: 0.8,
+              boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+            child: Text(
+              'Confirm',
               style: Theme.of(context).textTheme.displaySmall,
             ),
           ),
         ],
       ),
     );
+    return result;
   }
 
   void _deleteCentralUnit(VoidCallback onConfirm) {

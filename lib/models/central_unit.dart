@@ -14,12 +14,17 @@ class CentralUnit implements Photographable {
   String? description;
   String? imagePath;
   String password = "admin";
+  String hardwareID;
 
   BlockSchedule blockSchedule = BlockSchedule.defaultSchedule();
   bool isBlocked = false;
 
   String addressIP;
   String addressMAC;
+
+  // helpers for registration central unit in AWS
+  bool isRegistered;
+  bool isDeleted;
 
   String? wifiSSID = "";
   String? wifiPassword = "";
@@ -42,6 +47,9 @@ class CentralUnit implements Photographable {
       required this.password,
       required this.isValveNO,
       required this.impulsesPerLiter,
+      required this.isRegistered,
+      required this.isDeleted,
+      required this.hardwareID,
       this.timezoneId,
       this.description,
       this.imagePath,
@@ -56,7 +64,10 @@ class CentralUnit implements Photographable {
         addressIP = service.addresses == null
             ? "no_ip_addresses"
             : service.addresses!.first.address,
-        addressMAC = MyStrings.noHost;
+        addressMAC = MyStrings.noHost,
+        isRegistered = false,
+        isDeleted = false,
+        hardwareID = "";
 
   List<LeakProbe> leakProbes = [];
   final _db = DatabaseService.instance;
@@ -310,11 +321,11 @@ class CentralUnit implements Photographable {
     if (addressMAC != idAndMac.$2 &&
         addressMAC != MyStrings.noHost &&
         addressIP != MyStrings.mockIp) {
-      print("XD");
       return false;
     }
 
     if (addressMAC == MyStrings.noHost) {
+      hardwareID = idAndMac.$1;
       addressMAC = idAndMac.$2;
     }
 
@@ -383,7 +394,6 @@ class CentralUnit implements Photographable {
     }
     for (LeakProbe probe in probes) {
       probe.centralUnitID = centralUnitID;
-      print(probe);
     } // TODO: CONTINUE HERE
 
     return true;
@@ -391,8 +401,9 @@ class CentralUnit implements Photographable {
 
   Future<bool> getRecentFlows() async {
     Flow? recentFlow = await _db.getLatestFlow(centralUnitID!);
+    // TODO: Change here - ask whats the best history to fetch
     DateTime lastFlowDate =
-        recentFlow?.date ?? DateTime.now().subtract(Duration(days: 365));
+        recentFlow?.date ?? DateTime.now().subtract(const Duration(days: 1));
 
     List<Flow>? flows = await _api.getRecentFlows(addressIP, lastFlowDate);
     if (flows == null) {
@@ -539,5 +550,13 @@ class CentralUnit implements Photographable {
       ));
     }
     return result;
+  }
+
+  Future<bool> register() {
+    return _api.registerCentralUnit(hardwareID);
+  }
+
+  Future<bool> unRegister() {
+    return _api.unRegisterCentralUnit(hardwareID);
   }
 }

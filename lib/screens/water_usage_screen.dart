@@ -46,7 +46,6 @@ class _WaterUsageScreenState extends State<WaterUsageScreen> {
       onPressed: () {
         setState(() {
           _option = _options[_options.indexOf(option)];
-          print(_option);
         });
       },
       style: NeumorphicStyle(

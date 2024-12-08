@@ -30,6 +30,7 @@ class NetworkService {
   bool isSearchingWifi = false;
   bool isSearchingServices = false;
   bool permissionGranted = true;
+  String? fcmToken;
 
   final _wifiStreamController = StreamController<List<WifiNetwork>>.broadcast();
   final _centralUnitsStreamController =

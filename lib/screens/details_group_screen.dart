@@ -115,7 +115,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
     );
 
     if (result == true) {
-      await _saveChanges();
+      return await _saveChanges();
     }
 
     return true;
@@ -135,13 +135,13 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
   List<CentralUnit> get chosenCentrals =>
       _appData.centralUnits.where((central) => central.chosen).toList();
 
-  Future<void> _saveChanges() async {
+  Future<bool> _saveChanges() async {
     bool? isFormValid = _formKey.currentState?.validate();
 
     await Future.microtask(() => null);
 
     if (isFormValid != true || !_isValid) {
-      return;
+      return false;
     }
 
     if (chosenCentrals.isEmpty) {
@@ -149,7 +149,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
         'No central units',
         'Please select at least one central unit for the group',
       );
-      return;
+      return false;
     }
 
     try {
@@ -171,13 +171,68 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
       }
 
       widget.group.centralUnits = chosenCentrals;
+      return true;
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error updating group: $e')),
         );
       }
+      return false;
     }
+  }
+
+  Future<bool> _lastGroupDialog() async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: MyColors.background,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        title: Text(
+          'Only one group left',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        content: Text(
+          'Deleting the last group will delete all the central units. Are you sure you want to delete this group?',
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
+        actions: [
+          NeumorphicButton(
+            style: NeumorphicStyle(
+              depth: 2,
+              intensity: 0.8,
+              boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              Navigator.pop(context, false);
+            },
+            child: Text(
+              'Cancel',
+              style: Theme.of(context).textTheme.displaySmall,
+            ),
+          ),
+          NeumorphicButton(
+            style: NeumorphicStyle(
+              depth: 2,
+              intensity: 0.8,
+              color: Colors.red[300],
+              boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              Navigator.pop(context, true);
+            },
+            child: Text(
+              'Delete',
+              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    color: Colors.white,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _confirmDelete() async {
@@ -293,6 +348,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                 if (_centralChoosen) return;
                 _centralChoosen = true;
                 await central.refreshConfig();
+                await _db.updateCentralUnit(central);
 
                 if (mounted) {
                   Navigator.pushNamed(
@@ -301,7 +357,13 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                     arguments: DetailsCentralUnitScreenArguments(
                       central,
                     ),
-                  ).then((_) {
+                  ).then((isTheOnlyCentralDeleted) {
+                    if (!_appData.groups.contains(widget.group)) {
+                      if (mounted) {
+                        Navigator.pop(context);
+                        return;
+                      }
+                    }
                     setState(() {
                       _centralChoosen = false;
                     });
@@ -318,7 +380,8 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
               onLongPress: () async {
                 if (_centralChoosen) return;
                 _centralChoosen = true;
-                central.refreshConfig();
+                await central.refreshConfig();
+                await _db.updateCentralUnit(central);
 
                 Navigator.pushNamed(
                   context,
@@ -326,7 +389,14 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                   arguments: DetailsCentralUnitScreenArguments(
                     central,
                   ),
-                ).then((_) {
+                ).then((isTheOnlyCentralDeleted) {
+                  if (!_appData.groups.contains(widget.group)) {
+                    if (mounted) {
+                      Navigator.pop(context);
+                      return;
+                    }
+                  }
+
                   setState(() {
                     _centralChoosen = false;
                   });
@@ -353,9 +423,9 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
         title: 'Edit ${widget.group.name}',
         trailingIcon: const Icon(Icons.check),
         onTrailingTap: () {
-          _saveChanges().then((_) {
+          _saveChanges().then((success) {
             // ignore: use_build_context_synchronously
-            if (mounted) Navigator.pop(context);
+            if (mounted && success) Navigator.pop(context);
           });
         },
       ),

@@ -35,6 +35,28 @@ class AppData {
 
     centralUnits = centralsMap.values.toList();
 
+    for (CentralUnit cu in centralUnits) {
+      if (cu.isDeleted) {
+        if (cu.isRegistered) {
+          cu.isRegistered = await cu.unRegister();
+          if (!cu.isRegistered) {
+            await _db.deleteCentralUnit(cu.centralUnitID!);
+          }
+        } else {
+          await _db.deleteCentralUnit(cu.centralUnitID!);
+        }
+      } else if (!cu.isRegistered) {
+        cu.isRegistered = await cu.register();
+        await _db.updateCentralUnit(cu);
+      }
+    }
+
+    for (int i = centralUnits.length - 1; i >= 0; i--) {
+      if (centralUnits[i].isDeleted) {
+        centralUnits.removeAt(i);
+      }
+    }
+
     for (var probe in leakProbes) {
       if (centralsMap.containsKey(probe.centralUnitID)) {
         centralsMap[probe.centralUnitID]!.leakProbes.add(probe);
@@ -49,6 +71,7 @@ class AppData {
           .toList();
     }
 
+    // TODO: CONTINUE HERE trzeba będzie ogarnac baze danych (wyczyscic) oraz dodac warunek przy tworzeniu że jeżeli jest to localhost to wywalone że już jest takie samo MAC
     List<bool> fetchResults = await fetchDataFromApi();
     int successCount = fetchResults.fold(0, (previousValue, element) {
       if (element) {
@@ -57,8 +80,10 @@ class AppData {
       return previousValue;
     });
 
-    CustomToast.toast(
-        '$successCount of ${fetchResults.length} central units loaded');
+    if (centralUnits.isNotEmpty) {
+      CustomToast.toast(
+          '$successCount of ${fetchResults.length} central units loaded');
+    }
 
     for (var group in groups) {
       group.updateBlockStatus();
