@@ -7,7 +7,7 @@ class LeakProbe implements Photographable {
   List<int> stmId;
   int address;
   int batteryLevel;
-  bool blocked;
+  bool isAlarmed;
 
   String? description;
   String? imagePath;
@@ -18,7 +18,7 @@ class LeakProbe implements Photographable {
     required this.stmId,
     required this.address,
     this.batteryLevel = 100,
-    this.blocked = false,
+    this.isAlarmed = false,
     this.description,
     this.imagePath,
   }) {
@@ -29,7 +29,7 @@ class LeakProbe implements Photographable {
 
   @override
   String toString() {
-    return 'LeakProbe($name, $centralUnitID, $stmId, $address, $batteryLevel, $blocked)';
+    return 'LeakProbe($name, $centralUnitID, $stmId, $address, $batteryLevel, $isAlarmed)';
   }
 
   @override
@@ -38,5 +38,17 @@ class LeakProbe implements Photographable {
   @override
   void setPhoto(String? path) {
     imagePath = path;
+  }
+
+  bool isSameStmId(LeakProbe other) {
+    if (other.stmId.length != stmId.length) {
+      return false;
+    }
+    for (int i = 0; i < stmId.length; i++) {
+      if (stmId[i] != other.stmId[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 }

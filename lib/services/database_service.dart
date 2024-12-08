@@ -646,7 +646,7 @@ class DatabaseService {
         _leakProbesSTMID3ColumnName: probe.stmId[2],
         _leakProbesAddressColumnName: probe.address,
         _leakProbesBatteryLevelColumnName: probe.batteryLevel,
-        _leakProbesBlockedColumnName: probe.blocked ? 1 : 0,
+        _leakProbesBlockedColumnName: probe.isAlarmed ? 1 : 0,
         _leakProbesDescriptionColumnName: probe.description,
         _leakProbesImagePathColumnName: probe.imagePath,
       },
@@ -668,7 +668,7 @@ class DatabaseService {
     )
       ..leakProbeID = data[_leakProbesLeakProbeIDColumnName] as int
       ..batteryLevel = data[_leakProbesBatteryLevelColumnName] as int
-      ..blocked = (data[_leakProbesBlockedColumnName] as int) == 1;
+      ..isAlarmed = (data[_leakProbesBlockedColumnName] as int) == 1;
   }
 
   Future<List<LeakProbe>> getCentralUnitLeakProbes(int centralUnitID) async {
@@ -710,7 +710,7 @@ class DatabaseService {
         _leakProbesNameColumnName: probe.name,
         _leakProbesAddressColumnName: probe.address,
         _leakProbesBatteryLevelColumnName: probe.batteryLevel,
-        _leakProbesBlockedColumnName: probe.blocked ? 1 : 0,
+        _leakProbesBlockedColumnName: probe.isAlarmed ? 1 : 0,
         _leakProbesDescriptionColumnName: probe.description,
         _leakProbesImagePathColumnName: probe.imagePath,
       },
