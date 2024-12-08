@@ -64,6 +64,9 @@ class DatabaseService {
   final String _centralUnitsNameColumnName = "name";
   final String _centralUnitsAddressIPColumnName = "addressIP";
   final String _centralUnitsAddressMACColumnName = "addressMAC";
+  final String _centralUnitsHardwareIDColumnName = "hardwareID";
+  final String _centralUnitsIsRegisteredColumnName = "isRegistered";
+  final String _centralUnitsIsDeletedColumnName = "isDeleted";
   final String _centralUnitsIsValveNOColumnName = "isValveNO";
   final String _centralUnitsImpulsesPerLiterColumnName = "impulsesPerLiter";
   final String _centralUnitsPasswordColumnName = "password";
@@ -131,7 +134,10 @@ class DatabaseService {
         $_centralUnitsDescriptionColumnName TEXT,
         $_centralUnitsImagePathColumnName TEXT,
         $_centralUnitsIsValveNOColumnName INTEGER NOT NULL DEFAULT 0,
-        $_centralUnitsImpulsesPerLiterColumnName INTEGER NOT NULL DEFAULT 1
+        $_centralUnitsImpulsesPerLiterColumnName INTEGER NOT NULL DEFAULT 1,
+        $_centralUnitsHardwareIDColumnName TEXT NOT NULL DEFAULT '',
+        $_centralUnitsIsRegisteredColumnName INTEGER NOT NULL DEFAULT 0,
+        $_centralUnitsIsDeletedColumnName INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -189,7 +195,7 @@ class DatabaseService {
     final databasePath = join(databaseDirPath, "leak_guard.db");
     final database = await openDatabase(
       databasePath,
-      version: 4,
+      version: 5,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,
@@ -269,6 +275,24 @@ class DatabaseService {
 
       await db.execute(
           'ALTER TABLE ${_leakProbesTableName}_temp RENAME TO $_leakProbesTableName');
+    }
+
+    if (oldVersion < 5) {
+      // Add new columns to central_units table
+      await db.execute('''
+      ALTER TABLE $_centralUnitsTableName 
+      ADD COLUMN $_centralUnitsHardwareIDColumnName TEXT NOT NULL DEFAULT ''
+    ''');
+
+      await db.execute('''
+      ALTER TABLE $_centralUnitsTableName 
+      ADD COLUMN $_centralUnitsIsRegisteredColumnName INTEGER NOT NULL DEFAULT 0
+    ''');
+
+      await db.execute('''
+      ALTER TABLE $_centralUnitsTableName 
+      ADD COLUMN $_centralUnitsIsDeletedColumnName INTEGER NOT NULL DEFAULT 0
+    ''');
     }
   }
 
@@ -423,6 +447,9 @@ class DatabaseService {
         _centralUnitsImagePathColumnName: unit.imagePath,
         _centralUnitsIsValveNOColumnName: unit.isValveNO ? 1 : 0,
         _centralUnitsImpulsesPerLiterColumnName: unit.impulsesPerLiter,
+        _centralUnitsHardwareIDColumnName: unit.hardwareID,
+        _centralUnitsIsRegisteredColumnName: unit.isRegistered ? 1 : 0,
+        _centralUnitsIsDeletedColumnName: unit.isDeleted ? 1 : 0,
       },
     );
   }
@@ -441,6 +468,10 @@ class DatabaseService {
                   e[_centralUnitsImpulsesPerLiterColumnName] as int,
               description: e[_centralUnitsDescriptionColumnName] as String?,
               imagePath: e[_centralUnitsImagePathColumnName] as String?,
+              hardwareID: e[_centralUnitsHardwareIDColumnName] as String,
+              isRegistered:
+                  (e[_centralUnitsIsRegisteredColumnName] as int) == 1,
+              isDeleted: (e[_centralUnitsIsDeletedColumnName] as int) == 1,
             )..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int)
         .toList();
   }
@@ -459,6 +490,9 @@ class DatabaseService {
         impulsesPerLiter: e[_centralUnitsImpulsesPerLiterColumnName] as int,
         description: e[_centralUnitsDescriptionColumnName] as String?,
         imagePath: e[_centralUnitsImagePathColumnName] as String?,
+        hardwareID: e[_centralUnitsHardwareIDColumnName] as String,
+        isRegistered: (e[_centralUnitsIsRegisteredColumnName] as int) == 1,
+        isDeleted: (e[_centralUnitsIsDeletedColumnName] as int) == 1,
       )..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int;
 
       map[unit.centralUnitID!] = unit;
@@ -481,12 +515,16 @@ class DatabaseService {
               name: e[_centralUnitsNameColumnName] as String,
               addressIP: e[_centralUnitsAddressIPColumnName] as String,
               addressMAC: e[_centralUnitsAddressMACColumnName] as String,
+              password: e[_centralUnitsPasswordColumnName] as String,
               isValveNO: (e[_centralUnitsIsValveNOColumnName] as int) == 1,
               impulsesPerLiter:
                   e[_centralUnitsImpulsesPerLiterColumnName] as int,
-              password: e[_centralUnitsPasswordColumnName] as String,
               description: e[_centralUnitsDescriptionColumnName] as String?,
               imagePath: e[_centralUnitsImagePathColumnName] as String?,
+              hardwareID: e[_centralUnitsHardwareIDColumnName] as String,
+              isRegistered:
+                  (e[_centralUnitsIsRegisteredColumnName] as int) == 1,
+              isDeleted: (e[_centralUnitsIsDeletedColumnName] as int) == 1,
             )..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int)
         .toList();
   }
@@ -524,6 +562,10 @@ class DatabaseService {
           data.first[_centralUnitsImpulsesPerLiterColumnName] as int,
       description: data.first[_centralUnitsDescriptionColumnName] as String?,
       imagePath: data.first[_centralUnitsImagePathColumnName] as String?,
+      hardwareID: data.first[_centralUnitsHardwareIDColumnName] as String,
+      isRegistered:
+          (data.first[_centralUnitsIsRegisteredColumnName] as int) == 1,
+      isDeleted: (data.first[_centralUnitsIsDeletedColumnName] as int) == 1,
     )..centralUnitID = data.first[_centralUnitsCentralUnitIDColumnName] as int;
   }
 
@@ -540,6 +582,9 @@ class DatabaseService {
         _centralUnitsImpulsesPerLiterColumnName: unit.impulsesPerLiter,
         _centralUnitsDescriptionColumnName: unit.description,
         _centralUnitsImagePathColumnName: unit.imagePath,
+        _centralUnitsHardwareIDColumnName: unit.hardwareID,
+        _centralUnitsIsRegisteredColumnName: unit.isRegistered ? 1 : 0,
+        _centralUnitsIsDeletedColumnName: unit.isDeleted ? 1 : 0,
       },
       where: '$_centralUnitsCentralUnitIDColumnName = ?',
       whereArgs: [unit.centralUnitID],

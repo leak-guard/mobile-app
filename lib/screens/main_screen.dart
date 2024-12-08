@@ -432,6 +432,9 @@ class _MainScreenState extends State<MainScreen> {
                       isValveNO: true,
                       impulsesPerLiter: 477,
                       timezoneId: 37,
+                      isRegistered: false,
+                      isDeleted: false,
+                      hardwareID: "",
                     );
                     if (mounted) {
                       Navigator.pushNamed(

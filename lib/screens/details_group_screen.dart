@@ -360,6 +360,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                   ).then((isTheOnlyCentralDeleted) {
                     if (!_appData.groups.contains(widget.group)) {
                       if (mounted) {
+                        Navigator.pop(context);
                         return;
                       }
                     }
@@ -391,6 +392,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                 ).then((isTheOnlyCentralDeleted) {
                   if (!_appData.groups.contains(widget.group)) {
                     if (mounted) {
+                      Navigator.pop(context);
                       return;
                     }
                   }

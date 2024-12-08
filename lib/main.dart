@@ -19,15 +19,23 @@ late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("wchodze do firebaseMessagingBackgroundHandler");
   await Firebase.initializeApp();
   await setupFlutterNotifications();
-  print("adasfaad z firebaseMessagingBackgroundHandler");
   showFlutterNotification(message);
 }
 
 Future<void> setupFlutterNotifications() async {
   flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/leak');
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
   channel = const AndroidNotificationChannel(
     'high_importance_channel',
     'High Importance Notifications',
@@ -41,17 +49,25 @@ Future<void> setupFlutterNotifications() async {
 }
 
 void showFlutterNotification(RemoteMessage message) {
-  print("wchodze do showFlutterNotification");
-  if (message.notification != null && message.notification?.android != null) {
-    print("wchodze ifa");
+  if (message.data.containsKey('device_id')) {
+    String notificationMessage = "We have detected a leak in your system!";
+    final data = message.data;
+    final deviceID = data['device_id'];
+    for (var cu in AppData().centralUnits) {
+      if (cu.hardwareID == deviceID) {
+        notificationMessage = "Leak detected in ${cu.name}";
+        break;
+      }
+    }
     flutterLocalNotificationsPlugin.show(
-      message.notification.hashCode,
-      message.notification?.title,
-      message.notification?.body,
+      message.hashCode,
+      "Leak detected",
+      notificationMessage,
       NotificationDetails(
         android: AndroidNotificationDetails(
           channel.id,
           channel.name,
+          icon: '@mipmap/leak',
         ),
       ),
     );

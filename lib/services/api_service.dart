@@ -289,4 +289,24 @@ class CustomApi {
     print(result);
     return result != null;
   }
+
+  Future<bool> unRegisterCentralUnit(String centralUnitID) async {
+    String? fcmToken = _networkService.fcmToken;
+    print(fcmToken);
+    if (fcmToken == null) return false;
+
+    final result = await _makeRequest(
+      Credentials.elaticIP,
+      "/unregister",
+      method: 'POST',
+      body: {
+        "device_id": centralUnitID,
+        "fcm_token": fcmToken,
+      },
+      user: Credentials.elasticUser,
+      password: Credentials.elasticPass,
+    );
+    print(result);
+    return result != null;
+  }
 }

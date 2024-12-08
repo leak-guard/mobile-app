@@ -612,14 +612,10 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
       if (lastCentralDeleted) {
         for (var i = _appData.groups.length - 1; i >= 0; i--) {
           var group = _appData.groups[i];
-          if (group.centralUnits.contains(widget.central)) {
+          if (group.centralUnits.contains(widget.central) &&
+              group.centralUnits.length == 1) {
             await _db.deleteGroup(group.groupdID!);
             _appData.groups.removeAt(i);
-            await _db.deleteCentralUnit(widget.central.centralUnitID!);
-            _appData.centralUnits.remove(widget.central);
-            if (mounted) {
-              Navigator.pop(context, true);
-            }
           }
         }
       } else {
@@ -634,7 +630,14 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
       }
     }
 
-    await _db.deleteCentralUnit(widget.central.centralUnitID!);
+    final result = await _api.unRegisterCentralUnit(widget.central.hardwareID);
+    if (result) {
+      await _db.deleteCentralUnit(widget.central.centralUnitID!);
+    } else {
+      widget.central.isDeleted = true;
+      await _db.updateCentralUnit(widget.central);
+    }
+
     _appData.centralUnits.remove(widget.central);
 
     for (LeakProbe leakProbe in widget.central.leakProbes) {

@@ -56,6 +56,9 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     password: "admin1",
     addressMAC: '',
     timezoneId: 37,
+    isRegistered: false,
+    isDeleted: false,
+    hardwareID: "",
   );
 
   @override
@@ -468,6 +471,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
           'Error', 'Could not find central unit at IP:\n${_central.addressIP}');
       return false;
     }
+    _central.hardwareID = idAndMac.$1;
     _central.addressMAC = idAndMac.$2;
     if (_central.addressIP != MyStrings.mockIp) {
       if (_appData.centralUnits
@@ -478,11 +482,14 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     }
 
     if (await _sendConfiguration(_central)) {
+      _central.isRegistered =
+          await _api.registerCentralUnit(_central.hardwareID);
+      _central.isDeleted = false;
       int centralID = await _db.addCentralUnit(_central);
       _central.centralUnitID = centralID;
       _central.isOnline = true;
-      _appData.centralUnits.add(_central);
       await _central.refreshData();
+      _appData.centralUnits.add(_central);
       if (_appData.groups.isEmpty) {
         Group defaultGroup = Group(
           name: 'Default',
@@ -524,7 +531,6 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
             _isCreating = false;
             if (success) {
               // ignore: use_build_context_synchronously
-              print("sukces, wychodze...");
               if (mounted) Navigator.pop(context, success);
             }
           });

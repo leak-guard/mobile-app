@@ -245,6 +245,9 @@ class DataGenerator {
         description: 'Test unit ${i + 1} description',
         imagePath: null,
         timezoneId: 37,
+        isRegistered: false,
+        isDeleted: false,
+        hardwareID: '',
       );
 
       final centralUnitId = await _db.addCentralUnit(unit);

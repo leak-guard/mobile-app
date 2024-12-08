@@ -41,7 +41,7 @@ class _TestScreenState extends State<TestScreen> {
       body: Center(
         child: NeumorphicButton(
           onPressed: () {
-            _api.registerCentralUnit("MyCentralUnit");
+            _api.registerCentralUnit("this-is-my-id");
           },
           child: const Text('Register central'),
         ),
