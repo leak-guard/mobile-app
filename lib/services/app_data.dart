@@ -57,12 +57,6 @@ class AppData {
       }
     }
 
-    for (var probe in leakProbes) {
-      if (centralsMap.containsKey(probe.centralUnitID)) {
-        centralsMap[probe.centralUnitID]!.leakProbes.add(probe);
-      }
-    }
-
     for (var group in groups) {
       group.centralUnits = relations
           .where((relation) => relation.groupId == group.groupdID)
@@ -71,7 +65,12 @@ class AppData {
           .toList();
     }
 
-    // TODO: CONTINUE HERE trzeba będzie ogarnac baze danych (wyczyscic) oraz dodac warunek przy tworzeniu że jeżeli jest to localhost to wywalone że już jest takie samo MAC
+    for (var probe in leakProbes) {
+      if (centralsMap.containsKey(probe.centralUnitID)) {
+        centralsMap[probe.centralUnitID]!.leakProbes.add(probe);
+      }
+    }
+
     List<bool> fetchResults = await fetchDataFromApi();
     int successCount = fetchResults.fold(0, (previousValue, element) {
       if (element) {
@@ -79,6 +78,20 @@ class AppData {
       }
       return previousValue;
     });
+
+    for (int i = leakProbes.length - 1; i >= 0; i--) {
+      bool toDelete = true;
+      for (CentralUnit cu in centralUnits) {
+        if (cu.leakProbes.contains(leakProbes[i])) {
+          toDelete = false;
+          break;
+        }
+      }
+      if (toDelete) {
+        await _db.deleteLeakProbe(leakProbes[i].leakProbeID!);
+        leakProbes.removeAt(i);
+      }
+    }
 
     if (centralUnits.isNotEmpty) {
       CustomToast.toast(

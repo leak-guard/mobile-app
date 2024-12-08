@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:leak_guard/models/central_unit.dart';
+import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
@@ -15,6 +17,16 @@ class ManageLeakProbesScreen extends StatefulWidget {
 
 class _ManageLeakProbesScreenState extends State<ManageLeakProbesScreen> {
   final _appData = AppData();
+
+  @override
+  void initState() {
+    List<LeakProbe> leakProbes = [];
+    for (CentralUnit cu in _appData.centralUnits) {
+      leakProbes.addAll(cu.leakProbes);
+    }
+    _appData.leakProbes = leakProbes;
+    super.initState();
+  }
 
   @override
   void setState(fn) {

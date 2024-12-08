@@ -7,8 +7,6 @@ import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/utils/strings.dart';
 
-// TODO: Make all endpoints return type, message if the request was successful or not
-
 class CustomApi {
   static final CustomApi _instance = CustomApi._internal();
   final HttpClient _client;
@@ -132,13 +130,14 @@ class CustomApi {
     List<LeakProbe> probes = [];
 
     (result).forEach((address, data) {
+      int batteryLevel = data['battery_level'] ?? -1;
       probes.add(LeakProbe(
         name: 'Probe $address',
         centralUnitID: null,
         stmId: (data['id'] as List).cast<int>(),
         address: int.parse(address),
-        batteryLevel: data['battery_level'],
-        blocked: data['blocked'],
+        batteryLevel: batteryLevel,
+        isAlarmed: data['is_alarmed'],
       ));
     });
 

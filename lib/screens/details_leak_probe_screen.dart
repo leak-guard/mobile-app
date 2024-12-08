@@ -31,10 +31,12 @@ class _DetailsLeakProbeScreenState extends State<DetailsLeakProbeScreen> {
   late String _initialDescription;
 
   bool _isValid = true;
+  bool _isPoped = false;
 
   @override
   void initState() {
     super.initState();
+    print(widget.leakProbe.stmId);
     _nameController.text = widget.leakProbe.name;
     _descriptionController.text = widget.leakProbe.description ?? '';
     _initialImagePath = widget.leakProbe.imagePath;
@@ -276,27 +278,39 @@ class _DetailsLeakProbeScreenState extends State<DetailsLeakProbeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.leakProbe.blocked) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showDialog(
-            context: context,
-            builder: (context) {
-              Timer(const Duration(seconds: 2), () {
-                Navigator.of(context).pop();
-              });
-              return const Scaffold(
-                backgroundColor: Colors.transparent,
-                body: Center(
-                  child: BlinkingIconWidget(
-                    icon: CustomIcons.leak,
-                    size: 120,
-                    duration: Duration(milliseconds: 500),
+    if (!_isPoped) {
+      if (widget.leakProbe.isAlarmed) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showDialog(
+              context: context,
+              builder: (context) {
+                Timer(const Duration(seconds: 2), () {
+                  if (mounted) {
+                    if (_isPoped) return;
+                    Navigator.of(context).pop();
+                  }
+                });
+                return GestureDetector(
+                  onTap: () {
+                    _isPoped = true;
+                    Navigator.of(context).pop();
+                  },
+                  child: const Scaffold(
+                    backgroundColor: Colors.transparent,
+                    body: Center(
+                      child: BlinkingIconWidget(
+                        icon: CustomIcons.leak,
+                        size: 120,
+                        duration: Duration(milliseconds: 500),
+                      ),
+                    ),
                   ),
-                ),
-              );
-            });
-      });
+                );
+              });
+        });
+      }
     }
+
     return Scaffold(
       appBar: CustomAppBar(
         height: 80,

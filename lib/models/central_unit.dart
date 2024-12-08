@@ -4,6 +4,7 @@ import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/models/photographable.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/services/api_service.dart';
+import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:nsd/nsd.dart';
@@ -293,7 +294,7 @@ class CentralUnit implements Photographable {
   }
 
   int detectedLeaksCount() {
-    return leakProbes.where((probe) => probe.blocked).length;
+    return leakProbes.where((probe) => probe.isAlarmed).length;
   }
 
   Future<bool> refreshConfig() async {
@@ -389,19 +390,63 @@ class CentralUnit implements Photographable {
 
   Future<bool> refreshProbes() async {
     List<LeakProbe>? probes = await _api.getLeakProbes(addressIP);
+
     if (probes == null) {
       return false;
     }
+
+    for (int i = leakProbes.length - 1; i >= 0; i--) {
+      bool toDelete = true;
+      for (LeakProbe probe in probes) {
+        if (leakProbes[i].isSameStmId(probe)) {
+          toDelete = false;
+          break;
+        }
+      }
+      if (toDelete) {
+        _db.deleteLeakProbe(leakProbes[i].leakProbeID!);
+        leakProbes.removeAt(i);
+      }
+    }
+
+    List<Future> futures = [];
+
+    for (LeakProbe leakProbe in leakProbes) {
+      for (LeakProbe probe in probes) {
+        if (leakProbe.isSameStmId(probe)) {
+          leakProbe.address = probe.address;
+          leakProbe.batteryLevel = probe.batteryLevel;
+          leakProbe.isAlarmed = probe.isAlarmed;
+        }
+      }
+      futures.add(_db.updateLeakProbe(leakProbe));
+    }
+
+    List<LeakProbe> newProbes = [];
+
     for (LeakProbe probe in probes) {
-      probe.centralUnitID = centralUnitID;
-    } // TODO: CONTINUE HERE
+      bool toAdd = true;
+      for (LeakProbe leakProbe in leakProbes) {
+        if (leakProbe.isSameStmId(probe)) {
+          toAdd = false;
+          break;
+        }
+      }
+      if (toAdd) {
+        probe.centralUnitID = centralUnitID;
+        newProbes.add(probe);
+        futures.add(_db.addLeakProbe(probe));
+      }
+    }
+    leakProbes.addAll(newProbes);
+
+    await Future.wait(futures);
 
     return true;
   }
 
   Future<bool> getRecentFlows() async {
     Flow? recentFlow = await _db.getLatestFlow(centralUnitID!);
-    // TODO: Change here - ask whats the best history to fetch
     DateTime lastFlowDate =
         recentFlow?.date ?? DateTime.now().subtract(const Duration(days: 1));
 

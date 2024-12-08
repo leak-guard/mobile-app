@@ -27,13 +27,17 @@ class _ProbeWidgetState extends State<ProbeWidget> {
   }
 
   Widget _batteryInfo() {
-    const double size = 40;
+    const double size = 35;
     Icon icon = const Icon(
       Icons.battery_full,
       size: size,
     );
-
-    if (widget.probe.batteryLevel <= 12.5) {
+    if (widget.probe.batteryLevel == -1) {
+      icon = const Icon(
+        Icons.battery_unknown,
+        size: size,
+      );
+    } else if (widget.probe.batteryLevel <= 12.5) {
       icon = const Icon(
         Icons.battery_0_bar,
         size: size,
@@ -70,6 +74,10 @@ class _ProbeWidgetState extends State<ProbeWidget> {
       );
     }
 
+    String batteryPercentage = widget.probe.batteryLevel == -1
+        ? '---'
+        : '${widget.probe.batteryLevel}%';
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -85,7 +93,7 @@ class _ProbeWidgetState extends State<ProbeWidget> {
           width: 80,
           child: Text(
               textAlign: TextAlign.center,
-              "${widget.probe.batteryLevel}%",
+              batteryPercentage,
               style: Theme.of(context).textTheme.displaySmall),
         ),
       ],
@@ -99,7 +107,7 @@ class _ProbeWidgetState extends State<ProbeWidget> {
         const SizedBox(width: 10),
         const Icon(
           Icons.numbers,
-          size: 30,
+          size: 35,
         ),
         const SizedBox(
           width: 5,
@@ -126,7 +134,7 @@ class _ProbeWidgetState extends State<ProbeWidget> {
               widget.probe.name,
               style: Theme.of(context).textTheme.displayMedium),
         ),
-        if (widget.probe.blocked)
+        if (widget.probe.isAlarmed)
           const BlinkingIconWidget(
             icon: CustomIcons.leak,
             size: 30,

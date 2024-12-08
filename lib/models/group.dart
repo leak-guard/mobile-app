@@ -280,12 +280,13 @@ class Group implements Photographable {
     // todays usgae - DONE via main screen refresh
     // block status - DONE
     // new flows info (get from api and to database) - DONE
-    // probe status
+    // probe status - DONE
 
     List<Future<bool>> futures = [];
     for (var unit in centralUnits) {
       futures.add(unit.refreshBlockStatus());
       futures.add(unit.getRecentFlows());
+      futures.add(unit.refreshProbes());
     }
     final result = await Future.wait(futures);
     updateBlockStatus();
