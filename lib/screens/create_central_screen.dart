@@ -6,6 +6,7 @@ import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/strings.dart';
+import 'package:leak_guard/widgets/criteria_widget.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
@@ -43,6 +44,8 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
   final _wifiSsidController = TextEditingController();
   final _wifiPasswordController = TextEditingController();
   final _impulsesController = TextEditingController();
+  final _minimumFlowController = TextEditingController();
+  final _minimumTimeController = TextEditingController();
 
   bool _isCentralFound = false;
   bool _isValveNO = true;
@@ -73,8 +76,14 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
       _impulsesController.text =
           widget.chosenCentral!.impulsesPerLiter.toString();
       _isValveNO = widget.chosenCentral!.isValveNO;
+      _minimumFlowController.text =
+          widget.chosenCentral!.minimumFlowRate.toString();
+      _minimumTimeController.text =
+          widget.chosenCentral!.minimumTime.toString();
     } else {
       _impulsesController.text = '400';
+      _minimumFlowController.text = '5000';
+      _minimumTimeController.text = '300';
     }
   }
 
@@ -92,9 +101,12 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
   Future<void> _checkCentralUnit(String ip) async {
     setState(() {
       _isCentralFound = true;
+      _isCreating = true;
     });
     final idAndMac = await _api.getCentralIdAndMac(ip);
-
+    setState(() {
+      _isCreating = false;
+    });
     if (mounted) {
       if (idAndMac != null) {
         _showDialog('Success', 'Found central unit with MAC:\n${idAndMac.$2}');
@@ -346,6 +358,55 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
           ],
         ),
         const SizedBox(height: 12),
+        CriteriaWidget(
+          flowController: _minimumFlowController,
+          timeController: _minimumTimeController,
+          flowValidator: (value) {
+            int? impulses = int.tryParse(value ?? '');
+            String? errorMessage;
+            if (value == null || value.trim().isEmpty) {
+              errorMessage =
+                  'Please enter a miniumum flow rate for heuristic criteria';
+            }
+
+            if (impulses != null && impulses <= 0) {
+              errorMessage = 'Miniumum flow rate must be a positive number';
+            }
+
+            if (errorMessage != null) {
+              Future.microtask(() {
+                setState(() => _isValid = false);
+                _showDialog('Hardware configuration', errorMessage!);
+              });
+            } else {
+              setState(() => _isValid = true);
+            }
+            return null;
+          },
+          timeValidator: (value) {
+            int? impulses = int.tryParse(value ?? '');
+            String? errorMessage;
+            if (value == null || value.trim().isEmpty) {
+              errorMessage =
+                  'Please enter a miniumum time for heuristic criteria';
+            }
+
+            if (impulses != null && impulses <= 0) {
+              errorMessage = 'Miniumum time must be a positive number';
+            }
+
+            if (errorMessage != null) {
+              Future.microtask(() {
+                setState(() => _isValid = false);
+                _showDialog('Hardware configuration', errorMessage!);
+              });
+            } else {
+              setState(() => _isValid = true);
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 12),
         Text('Electrovalve Type',
             style: Theme.of(context).textTheme.displayMedium),
         const SizedBox(height: 8),
@@ -449,6 +510,16 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     };
 
     if (!(await _api.putConfig(centralUnit.addressIP, config))) return false;
+    await Future.delayed(const Duration(milliseconds: 100));
+    int minimumFlowRate = int.tryParse(_minimumFlowController.text) ?? 5000;
+    minimumFlowRate = minimumFlowRate ~/ 10;
+    String criteria =
+        "T,${minimumFlowRate.toString()},${_minimumTimeController.text},|";
+    Map<String, dynamic> criteriaRequest = {"criteria": criteria};
+
+    if (!(await _api.postCriteria(centralUnit.addressIP, criteriaRequest))) {
+      return false;
+    }
 
     return true;
   }
@@ -468,6 +539,8 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     _central.addressIP = _ipController.text;
     _central.isValveNO = _isValveNO;
     _central.impulsesPerLiter = int.tryParse(_impulsesController.text) ?? 0;
+    _central.minimumFlowRate = int.tryParse(_minimumFlowController.text) ?? 0;
+    _central.minimumTime = int.tryParse(_minimumTimeController.text) ?? 0;
     final idAndMac = await _api.getCentralIdAndMac(_central.addressIP);
 
     if (idAndMac == null) {
@@ -490,6 +563,9 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
           await _api.registerCentralUnit(_central.hardwareID);
       _central.isDeleted = false;
       int centralID = await _db.addCentralUnit(_central);
+      _central.minimumFlowRate =
+          int.tryParse(_minimumFlowController.text) ?? 5000;
+      _central.minimumTime = int.tryParse(_minimumTimeController.text) ?? 300;
       _central.centralUnitID = centralID;
       _central.isOnline = true;
       await _central.refreshData();
@@ -531,10 +607,14 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
           trailingIcon: const Icon(Icons.check),
           onTrailingTap: () {
             if (_isCreating) return;
-            _isCreating = true;
+            setState(() {
+              _isCreating = true;
+            });
 
             _createCentralUnit().then((success) {
-              _isCreating = false;
+              setState(() {
+                _isCreating = false;
+              });
               if (success) {
                 // ignore: use_build_context_synchronously
                 if (mounted) Navigator.pop(context, success);

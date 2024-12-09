@@ -50,7 +50,6 @@ Future<void> setupFlutterNotifications() async {
 }
 
 void showFlutterNotification(RemoteMessage message) {
-  print("message!");
   if (message.data.containsKey('device_id')) {
     String notificationMessage = "We have detected a leak in your system!";
     final db = DatabaseService.instance;

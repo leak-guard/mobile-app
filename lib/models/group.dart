@@ -66,18 +66,13 @@ class Group implements Photographable {
     }
   }
 
-  void block() {
-    for (var unit in centralUnits) {
-      unit.isBlocked = true;
-    }
-    status = BlockStatus.allBlocked;
-  }
+  Future<List<bool>> toggleBlock(bool isBlocked) async {
+    List<Future<bool>> futures = [];
 
-  void unBlock() {
     for (var unit in centralUnits) {
-      unit.isBlocked = false;
+      futures.add(unit.toggleBlock(isBlocked));
     }
-    status = BlockStatus.noBlocked;
+    return await Future.wait(futures);
   }
 
   double flowRate() {

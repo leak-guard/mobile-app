@@ -31,6 +31,8 @@ class CentralUnit implements Photographable {
   String? wifiPassword = "";
   bool isOnline = false;
   int? timezoneId = 37;
+  int minimumFlowRate = 5000;
+  int minimumTime = 300;
 
   bool isValveNO = true;
   int impulsesPerLiter = 1000;
@@ -319,6 +321,8 @@ class CentralUnit implements Photographable {
     if (!await refreshProbes()) return false;
     await Future.delayed(delay);
     if (!await refreshPairingMode()) return false;
+    await Future.delayed(delay);
+    if (!await refreshCriteria()) return false;
     return true;
   }
 
@@ -330,7 +334,19 @@ class CentralUnit implements Photographable {
     if (!await refreshBlockStatus()) return false;
     await Future.delayed(delay);
     if (!await refreshPairingMode()) return false;
+    await Future.delayed(delay);
+    if (!await refreshCriteria()) return false;
 
+    return true;
+  }
+
+  Future<bool> refreshCriteria() async {
+    final result = await _api.getCriteria(addressIP);
+    if (result == null) {
+      return false;
+    }
+    minimumFlowRate = result.$1;
+    minimumTime = result.$2;
     return true;
   }
 
@@ -561,5 +577,17 @@ class CentralUnit implements Photographable {
 
   Future<bool> unRegister() {
     return _api.unRegisterCentralUnit(hardwareID);
+  }
+
+  Future<bool> toggleBlock(bool isBlocked) async {
+    final blockData = {"block": isBlocked ? "active" : "inactive"};
+    final result = await _api.postWaterBlock(addressIP, blockData);
+    if (result) {
+      this.isBlocked = isBlocked;
+      isOnline = true;
+      return true;
+    }
+    isOnline = false;
+    return false;
   }
 }

@@ -94,29 +94,20 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void _handleBlockButtonTap(Group group) {
+  Future<List<bool>> _handleBlockButtonTap(Group group) async {
     setState(() {
-      if (group.status == BlockStatus.noBlocked) {
-        group.block();
-      } else {
-        group.unBlock();
-      }
+      _isLoading = true;
     });
+
+    if (group.status == BlockStatus.noBlocked) {
+      return group.toggleBlock(true);
+    } else {
+      return group.toggleBlock(false);
+    }
   }
 
   void _openDrawer() {
     _scaffoldKey.currentState?.openDrawer();
-  }
-
-  Future<void> _refreshData() async {
-    await _appData.fetchDataFromApi();
-    if (mounted) {
-      setState(() {
-        for (Group group in _appData.groups) {
-          group.updateBlockStatus();
-        }
-      });
-    }
   }
 
   Future<void> _refreshDataRefreshIndicator(Group group) async {
@@ -205,11 +196,26 @@ class _MainScreenState extends State<MainScreen> {
                 child: WaterBlockWidget(
                   group: currentGroup,
                   handleButtonPress: () {
-                    _handleBlockButtonTap(currentGroup);
                     setState(() {
-                      for (Group group in _appData.groups) {
-                        group.updateBlockStatus();
-                      }
+                      _isLoading = true;
+                    });
+                    _handleBlockButtonTap(currentGroup).then((result) {
+                      setState(() {
+                        _isLoading = false;
+                        if (result.contains(false)) {
+                          int blockedCount = 0;
+                          for (bool b in result) {
+                            if (!b) {
+                              blockedCount++;
+                            }
+                          }
+                          CustomToast.toast(
+                              "Failed to block $blockedCount central units");
+                        }
+                        for (Group group in _appData.groups) {
+                          group.updateBlockStatus();
+                        }
+                      });
                     });
                   },
                 ),
