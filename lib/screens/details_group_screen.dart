@@ -347,7 +347,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
               onLongPress: () async {
                 if (_centralChoosen) return;
                 _centralChoosen = true;
-                await central.refreshConfig();
+                await central.refreshStatus();
                 await _db.updateCentralUnit(central);
 
                 if (mounted) {
@@ -380,7 +380,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
               onLongPress: () async {
                 if (_centralChoosen) return;
                 _centralChoosen = true;
-                await central.refreshConfig();
+                await central.refreshStatus();
                 await _db.updateCentralUnit(central);
 
                 Navigator.pushNamed(

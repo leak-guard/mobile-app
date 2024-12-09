@@ -167,9 +167,14 @@ class CustomApi {
     ip = MyStrings.myIp;
 
     final result = await _makeRequest(ip, '/water-block');
-    print(result);
     if (result == null) return null;
     return result['block'] == "active";
+  }
+
+  Future<bool?> getParingMode(String ip) async {
+    final result = await _makeRequest(ip, '/probe/pair');
+    if (result == null) return null;
+    return result['pairing'];
   }
 
   //TODO:

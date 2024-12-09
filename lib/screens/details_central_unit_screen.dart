@@ -790,6 +790,70 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     );
   }
 
+  Widget _buildPairingModeButton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Pairing Mode',
+          style: Theme.of(context).textTheme.displayLarge,
+        ),
+        const SizedBox(height: 16),
+        NeumorphicButton(
+          style: NeumorphicStyle(
+            depth: widget.central.isInParingMode ? 0 : 5,
+            boxShape: NeumorphicBoxShape.roundRect(
+              BorderRadius.circular(12),
+            ),
+            color: widget.central.isInParingMode
+                ? MyColors.lightThemeFont
+                : MyColors.background,
+          ),
+          onPressed: () async {
+            if (!widget.central.isOnline) {
+              CustomToast.toast("Central unit is offline");
+              return;
+            }
+
+            bool success;
+            if (widget.central.isInParingMode) {
+              success = await _api.exitPairingMode(widget.central.addressIP);
+            } else {
+              success = await _api.enterPairingMode(widget.central.addressIP);
+            }
+
+            if (success) {
+              setState(() {
+                widget.central.isInParingMode = !widget.central.isInParingMode;
+              });
+            } else {
+              CustomToast.toast("Failed to change pairing mode");
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  widget.central.isInParingMode
+                      ? 'Exit Pairing Mode'
+                      : 'Enter Pairing Mode',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: widget.central.isInParingMode
+                            ? MyColors.background
+                            : MyColors.lightThemeFont,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -821,6 +885,8 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
               _buildWifiSection(),
               const SizedBox(height: 24),
               _buildHardwareConfigSection(),
+              const SizedBox(height: 24),
+              _buildPairingModeButton(),
               const SizedBox(height: 24),
               _buildLeakProbes(),
               const SizedBox(height: 24),

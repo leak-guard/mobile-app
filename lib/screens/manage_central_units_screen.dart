@@ -75,7 +75,7 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
                   onPressed: () async {
                     if (_centralChosen) return;
                     _centralChosen = true;
-                    await central.refreshConfig();
+                    await central.refreshStatus();
 
                     await _db.updateCentralUnit(central);
 

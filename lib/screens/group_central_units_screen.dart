@@ -50,7 +50,7 @@ class _GroupCentralUnitsScreenState extends State<GroupCentralUnitsScreen> {
                 onPressed: () async {
                   if (_centralChoosen) return;
                   _centralChoosen = true;
-                  await central.refreshConfig();
+                  await central.refreshStatus();
 
                   Navigator.pushNamed(
                     context,

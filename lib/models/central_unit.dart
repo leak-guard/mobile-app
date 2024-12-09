@@ -18,6 +18,7 @@ class CentralUnit implements Photographable {
 
   BlockSchedule blockSchedule = BlockSchedule.defaultSchedule();
   bool isBlocked = false;
+  bool isInParingMode = false;
 
   String addressIP;
   String addressMAC;
@@ -267,18 +268,33 @@ class CentralUnit implements Photographable {
   Future<bool> getBlockSchedule() async {
     final result = await _api.getWaterBlockSchedule(addressIP);
     if (result == null) {
+      isOnline = false;
       return false;
     }
     blockSchedule = result;
+    isOnline = true;
     return true;
   }
 
   Future<bool> refreshBlockStatus() async {
     bool? isBlockedResult = await _api.getWaterBlock(addressIP);
     if (isBlockedResult == null) {
+      isOnline = false;
       return false;
     }
     isBlocked = isBlockedResult;
+    isOnline = true;
+    return true;
+  }
+
+  Future<bool> refreshPairingMode() async {
+    bool? isParing = await _api.getParingMode(addressIP);
+    if (isParing == null) {
+      isOnline = false;
+      return false;
+    }
+    isInParingMode = isParing;
+    isOnline = true;
     return true;
   }
 
@@ -302,16 +318,21 @@ class CentralUnit implements Photographable {
     if (!await getRecentFlows()) return false;
     await Future.delayed(delay);
     if (!await refreshProbes()) return false;
+    await Future.delayed(delay);
+    if (!await refreshPairingMode()) return false;
     return true;
   }
 
-  List<Future<bool>> refreshStatus() {
-    List<Future<bool>> futures = [];
-    futures.add(refreshMacAddress());
-    futures.add(refreshConfig());
-    futures.add(refreshBlockStatus());
+  Future<bool> refreshStatus() async {
+    const Duration delay = Duration(milliseconds: 400);
+    await Future.delayed(delay);
+    if (!await refreshConfig()) return false;
+    await Future.delayed(delay);
+    if (!await refreshBlockStatus()) return false;
+    await Future.delayed(delay);
+    if (!await refreshPairingMode()) return false;
 
-    return futures;
+    return true;
   }
 
   Future<bool> sendBlockSchedule(BlockSchedule blockSchedule) async {

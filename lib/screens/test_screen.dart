@@ -2,7 +2,6 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/services/api_service.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
-import 'package:leak_guard/widgets/wifi_dropdown_widget.dart';
 
 // TODO: to be removed
 

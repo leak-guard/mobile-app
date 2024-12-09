@@ -156,7 +156,7 @@ class NetworkService {
     if (!discoveredCentralUnits
         .any((cu) => _isSameCentralUnit(cu, foundCentralUnit))) {
       bool centralAlreadyInDatabase = false;
-      Future.wait(foundCentralUnit.refreshStatus()).then((success) {
+      foundCentralUnit.refreshStatus().then((success) {
         for (CentralUnit cu in _appData.centralUnits) {
           if (cu.addressMAC == foundCentralUnit.addressMAC) {
             centralAlreadyInDatabase = true;
