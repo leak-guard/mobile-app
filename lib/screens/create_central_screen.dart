@@ -73,6 +73,8 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
       _impulsesController.text =
           widget.chosenCentral!.impulsesPerLiter.toString();
       _isValveNO = widget.chosenCentral!.isValveNO;
+    } else {
+      _impulsesController.text = '400';
     }
   }
 
