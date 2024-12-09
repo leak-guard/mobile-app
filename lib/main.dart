@@ -90,11 +90,6 @@ Future<void> main() async {
   PermissionsService();
   final networkService = NetworkService();
   networkService.fcmToken = await FirebaseMessaging.instance.getToken();
-  if (networkService.fcmToken != null) {
-    print("FNC token: ${networkService.fcmToken}");
-  } else {
-    print('There is no FNC token');
-  }
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await setupFlutterNotifications();

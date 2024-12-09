@@ -77,7 +77,7 @@ class _WaterUsageArcWidgetState extends State<WaterUsageArcWidget>
                 children: [
                   Column(
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         height: 52,
                       ),
                       Text(

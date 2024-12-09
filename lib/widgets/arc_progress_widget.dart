@@ -108,7 +108,7 @@ class ArcProgressPainter extends CustomPainter {
   final double progress;
   final double strokeWidth;
   final Color color;
-  double _onePercentageToRadian = (3 * pi / 2) / 100;
+  final double _onePercentageToRadian = (3 * pi / 2) / 100;
 
   ArcProgressPainter({
     required this.circularProgressSize,

@@ -16,12 +16,10 @@ import 'package:leak_guard/screens/manage_central_units_screen.dart';
 import 'package:leak_guard/screens/manage_groups_screen.dart';
 import 'package:leak_guard/screens/main_screen.dart';
 import 'package:leak_guard/screens/manage_probes_screen.dart';
-import 'package:leak_guard/screens/test_screen.dart';
 import 'package:leak_guard/screens/water_usage_screen.dart';
 
 class Routes {
   static const String main = '/';
-  static const String tests = '/tests';
 
   static const String groupLeakProbes = '/groupLeakProbes';
   static const String groupCentralUnits = '/groupCentralUnits';
@@ -45,10 +43,6 @@ class Routes {
       case main:
         return MaterialPageRoute(
           builder: (_) => const MainScreen(),
-        );
-      case tests:
-        return MaterialPageRoute(
-          builder: (_) => const TestScreen(),
         );
 
       case manageGroups:

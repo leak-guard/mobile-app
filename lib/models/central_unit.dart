@@ -300,10 +300,6 @@ class CentralUnit implements Photographable {
     return true;
   }
 
-  //TODO: Implement fetching data from API:
-  // - Get criteria
-
-  //TODO: probably many request will kill the server - yes :)
   Future<bool> refreshData() async {
     const Duration delay = Duration(milliseconds: 400);
     if (!await refreshMacAddress()) return false;

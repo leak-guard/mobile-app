@@ -184,59 +184,6 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
     }
   }
 
-  Future<bool> _lastGroupDialog() async {
-    return await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: MyColors.background,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        title: Text(
-          'Only one group left',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        content: Text(
-          'Deleting the last group will delete all the central units. Are you sure you want to delete this group?',
-          style: Theme.of(context).textTheme.displaySmall,
-        ),
-        actions: [
-          NeumorphicButton(
-            style: NeumorphicStyle(
-              depth: 2,
-              intensity: 0.8,
-              boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
-            ),
-            onPressed: () {
-              Navigator.pop(context, false);
-            },
-            child: Text(
-              'Cancel',
-              style: Theme.of(context).textTheme.displaySmall,
-            ),
-          ),
-          NeumorphicButton(
-            style: NeumorphicStyle(
-              depth: 2,
-              intensity: 0.8,
-              color: Colors.red[300],
-              boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
-            ),
-            onPressed: () async {
-              Navigator.pop(context, true);
-            },
-            child: Text(
-              'Delete',
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _confirmDelete() async {
     await _db.deleteGroup(widget.group.groupdID!);
     _appData.groups.remove(widget.group);
@@ -394,6 +341,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                 await _db.updateCentralUnit(central);
 
                 Navigator.pushNamed(
+                  // ignore: use_build_context_synchronously
                   context,
                   Routes.detailsCentralUnit,
                   arguments: DetailsCentralUnitScreenArguments(

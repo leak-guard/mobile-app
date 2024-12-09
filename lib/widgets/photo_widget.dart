@@ -16,16 +16,16 @@ class PhotoWidget extends StatelessWidget {
   final _permissionsService = PermissionsService();
 
   PhotoWidget({
-    Key? key,
+    super.key,
     required this.item,
     this.size = 120,
     required this.onPhotoChanged,
-  }) : super(key: key);
+  });
 
   Future<String?> _cropImage(String imagePath) async {
     final croppedFile = await ImageCropper().cropImage(
       sourcePath: imagePath,
-      aspectRatio: CropAspectRatio(ratioX: 5, ratioY: 4),
+      aspectRatio: const CropAspectRatio(ratioX: 5, ratioY: 4),
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: 'Crop Image',
@@ -74,9 +74,11 @@ class PhotoWidget extends StatelessWidget {
               onPressed: () async {
                 if (await _permissionsService
                     .requestPermission(Permission.camera)) {
+                  // ignore: use_build_context_synchronously
                   Navigator.pop(context,
                       await picker.pickImage(source: ImageSource.camera));
                 } else {
+                  // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                   CustomToast.toast('Permission for camera is denied');
                 }
@@ -86,8 +88,8 @@ class PhotoWidget extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.camera_alt),
-                    SizedBox(width: 8),
+                    const Icon(Icons.camera_alt),
+                    const SizedBox(width: 8),
                     Text(
                       'Camera',
                       style: Theme.of(context).textTheme.displaySmall,
@@ -96,7 +98,7 @@ class PhotoWidget extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             NeumorphicButton(
               style: NeumorphicStyle(
                 depth: 2,
@@ -107,9 +109,11 @@ class PhotoWidget extends StatelessWidget {
               onPressed: () async {
                 if (await _permissionsService
                     .requestPermission(Permission.storage)) {
+                  // ignore: use_build_context_synchronously
                   Navigator.pop(context,
                       await picker.pickImage(source: ImageSource.gallery));
                 } else {
+                  // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                   CustomToast.toast('Permission for storage is denied');
                 }
@@ -119,8 +123,8 @@ class PhotoWidget extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.photo_library),
-                    SizedBox(width: 8),
+                    const Icon(Icons.photo_library),
+                    const SizedBox(width: 8),
                     Text(
                       'Gallery',
                       style: Theme.of(context).textTheme.displaySmall,
@@ -211,11 +215,11 @@ class PhotoWidget extends StatelessWidget {
                 BorderRadius.circular(10),
               ),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.camera_alt,
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Text(
             'Add a photo!',
             style: Theme.of(context).textTheme.displaySmall,
@@ -230,7 +234,7 @@ class PhotoWidget extends StatelessWidget {
         intensity: 0.65,
         boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
       ),
-      child: Container(
+      child: SizedBox(
         width: size,
         height: size * 0.8,
         child: Stack(
@@ -258,11 +262,11 @@ class PhotoWidget extends StatelessWidget {
                         BorderRadius.circular(10),
                       ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.delete,
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   NeumorphicButton(
                     padding: const EdgeInsets.all(8),
                     onPressed: () => _pickAndCropImage(context),
@@ -272,7 +276,7 @@ class PhotoWidget extends StatelessWidget {
                         BorderRadius.circular(10),
                       ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.camera_alt,
                     ),
                   ),

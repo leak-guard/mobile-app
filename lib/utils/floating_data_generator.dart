@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/utils/data_generator.dart';
 import 'package:leak_guard/utils/strings.dart';
@@ -95,7 +97,7 @@ class GenerateTestDataButton extends StatelessWidget {
 }
 
 class _ProgressDialog extends StatefulWidget {
-  const _ProgressDialog({Key? key}) : super(key: key);
+  const _ProgressDialog({super.key});
 
   @override
   State<_ProgressDialog> createState() => _ProgressDialogState();

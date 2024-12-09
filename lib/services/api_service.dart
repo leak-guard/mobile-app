@@ -75,7 +75,6 @@ class CustomApi {
       throw HttpException(
           'Request failed \nStatus code: ${response.statusCode}\nContent: $content');
     } catch (e) {
-      print("Error: $e");
       return null;
     }
   }
@@ -234,7 +233,6 @@ class CustomApi {
     return response != null;
   }
 
-  // TODO: wait for documentation
   Future<(int, int)?> getCriteria(String ip) async {
     final result = await _makeRequest(ip, '/criteria');
     if (result == null) return null;
@@ -260,7 +258,6 @@ class CustomApi {
     return response != null;
   }
 
-  //TODO: Wait for documentation
   Future<Map<String, dynamic>?> getCriterion(String ip, String id) async {
     return await _makeRequest(ip, '/criteria/$id');
   }

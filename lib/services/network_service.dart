@@ -21,7 +21,7 @@ class NetworkService {
   final _networkInfo = NetworkInfo();
   Discovery? _discovery;
 
-  AppData _appData = AppData();
+  final AppData _appData = AppData();
   final _db = DatabaseService.instance;
 
   List<WifiNetwork> availableWifiNetworks = [];
@@ -42,7 +42,6 @@ class NetworkService {
 
   Future<void> _initializeNetworkInfo() async {
     await scanWifiNetworks();
-    print('Current WiFi network: $currentWifiName');
     startServiceDiscovery();
   }
 
@@ -95,6 +94,7 @@ class NetworkService {
 
       _wifiStreamController.add(availableWifiNetworks);
     } catch (e) {
+      // ignore: avoid_print
       print('Error scanning WiFi networks: $e');
     } finally {
       isSearchingWifi = false;
@@ -119,7 +119,6 @@ class NetworkService {
       );
 
       _discovery?.addServiceListener((service, status) {
-        print("found service: $service");
         if (status == ServiceStatus.found) {
           _handleFoundService(service);
         } else {
@@ -127,6 +126,7 @@ class NetworkService {
         }
       });
     } catch (e) {
+      // ignore: avoid_print
       print('Error starting service discovery: $e');
       isSearchingServices = false;
     }
@@ -150,7 +150,6 @@ class NetworkService {
   }
 
   void _handleFoundService(Service service) {
-    print(service);
     CentralUnit foundCentralUnit = CentralUnit.fromService(service);
 
     if (!discoveredCentralUnits

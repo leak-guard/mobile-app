@@ -66,8 +66,6 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                           if (_centralChosen) return;
                           _centralChosen = true;
                           await _networkService.getCurrentWifiName();
-                          print(
-                              "Current wifi name: ${_networkService.currentWifiName}");
                           Permission.locationWhenInUse.serviceStatus.isEnabled
                               .then((isEnable) {
                             if (!isEnable) {

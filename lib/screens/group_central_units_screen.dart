@@ -64,6 +64,7 @@ class _GroupCentralUnitsScreenState extends State<GroupCentralUnitsScreen> {
                     await _db.updateCentralUnit(central);
 
                     Navigator.pushNamed(
+                      // ignore: use_build_context_synchronously
                       context,
                       Routes.detailsCentralUnit,
                       arguments: DetailsCentralUnitScreenArguments(

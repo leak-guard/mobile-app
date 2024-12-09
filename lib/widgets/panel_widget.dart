@@ -7,11 +7,11 @@ class PanelWidget extends StatelessWidget {
   final VoidCallback onTap;
 
   const PanelWidget({
-    Key? key,
+    super.key,
     required this.name,
     required this.child,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

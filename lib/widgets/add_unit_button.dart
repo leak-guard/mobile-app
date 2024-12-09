@@ -3,7 +3,7 @@ import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/routes.dart';
 
 class AddUnitButton extends StatelessWidget {
-  AddUnitButton({
+  const AddUnitButton({
     super.key,
     required this.onBack,
   });

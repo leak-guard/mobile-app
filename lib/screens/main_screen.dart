@@ -444,8 +444,6 @@ class _MainScreenState extends State<MainScreen> {
 
                   await _networkService.getCurrentWifiName();
                   await _prefs.setFirstTime(false);
-                  print(
-                      "Current wifi name: ${_networkService.currentWifiName}");
                   Permission.locationWhenInUse.serviceStatus.isEnabled
                       .then((isEnable) {
                     if (!isEnable) {

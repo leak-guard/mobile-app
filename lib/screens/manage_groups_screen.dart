@@ -49,7 +49,9 @@ class _ManageGroupsScreenState extends State<ManageGroupsScreen> {
               group,
             ),
           ).then((_) {
-            _appData.groups.isEmpty ? Navigator.pop(context) : null;
+            if (mounted) {
+              _appData.groups.isEmpty ? Navigator.pop(context) : null;
+            }
             setState(() {});
           });
         },

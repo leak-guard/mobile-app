@@ -6,8 +6,6 @@ import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/models/flow.dart';
 
-// TODO: To Central add valveType, impulsesPerLiter.
-
 /// A singleton service class that manages SQLite database operations for the LeakGuard application.
 ///
 /// Database Structure:

@@ -36,7 +36,6 @@ class _DetailsLeakProbeScreenState extends State<DetailsLeakProbeScreen> {
   @override
   void initState() {
     super.initState();
-    print(widget.leakProbe.stmId);
     _nameController.text = widget.leakProbe.name;
     _descriptionController.text = widget.leakProbe.description ?? '';
     _initialImagePath = widget.leakProbe.imagePath;

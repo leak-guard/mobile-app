@@ -98,6 +98,7 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
 
                       if (!mounted) return;
                       Navigator.pushNamed(
+                        // ignore: use_build_context_synchronously
                         context,
                         Routes.detailsCentralUnit,
                         arguments: DetailsCentralUnitScreenArguments(
@@ -105,6 +106,7 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
                         ),
                       ).then((_) {
                         if (_appData.centralUnits.isEmpty) {
+                          // ignore: use_build_context_synchronously
                           if (mounted) Navigator.pop(context);
                         }
                         setState(() {

@@ -14,6 +14,7 @@ class Flow {
     return date.millisecondsSinceEpoch ~/ 1000;
   }
 
+  @override
   String toString() {
     return 'Flow {volume: $volume, date: $date}';
   }

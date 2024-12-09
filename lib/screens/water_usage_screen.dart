@@ -174,11 +174,6 @@ class _WaterUsageScreenState extends State<WaterUsageScreen> {
           }
 
           Map<String, dynamic> data = snapshot.data!;
-          for (var i = 0; i < data['data'].length; i++) {
-            print(data['data'][i]);
-            print(data['data'][i]);
-          }
-          print(data['data'].length);
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,

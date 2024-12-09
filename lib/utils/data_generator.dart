@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:math';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';

@@ -18,7 +18,6 @@ class PermissionsService {
       Permission.camera: await Permission.camera.request().isGranted,
       Permission.storage: await Permission.storage.request().isGranted,
     };
-    print(_permissionStatus);
   }
 
   Future<bool> requestPermission(Permission permission) async {
@@ -26,16 +25,12 @@ class PermissionsService {
 
     PermissionStatus result = await permission.request();
     _permissionStatus[permission] = result.isGranted;
-    print(
-        'Permission ${permission.toString()} permission status: ${result.name}');
 
     if (!result.isGranted) {
       await AppSettings.openAppSettings();
     }
     result = await permission.request();
     _permissionStatus[permission] = result.isGranted;
-    print(
-        'Permission ${permission.toString()} permission status: ${result.name}');
 
     return result.isGranted;
   }
