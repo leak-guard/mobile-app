@@ -322,6 +322,18 @@ class CentralUnit implements Photographable {
     return true;
   }
 
+  Future<bool> refresh() async {
+    const Duration delay = Duration(milliseconds: 400);
+    if (!await refreshBlockStatus()) return false;
+    await Future.delayed(delay);
+    if (!await getRecentFlows()) return false;
+    await Future.delayed(delay);
+    if (!await refreshProbes()) return false;
+    await Future.delayed(delay);
+    if (!await getBlockSchedule()) return false;
+    return true;
+  }
+
   Future<bool> refreshStatus() async {
     const Duration delay = Duration(milliseconds: 400);
     await Future.delayed(delay);
@@ -387,6 +399,7 @@ class CentralUnit implements Photographable {
           leakProbe.address = probe.address;
           leakProbe.batteryLevel = probe.batteryLevel;
           leakProbe.isAlarmed = probe.isAlarmed;
+          leakProbe.rssi = probe.rssi;
         }
       }
       futures.add(_db.updateLeakProbe(leakProbe));

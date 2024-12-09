@@ -100,6 +100,56 @@ class _ProbeWidgetState extends State<ProbeWidget> {
     );
   }
 
+  Widget _rrsiInfo() {
+    const double size = 35;
+    Icon icon = const Icon(
+      Icons.wifi,
+      size: size,
+    );
+    if (widget.probe.rssi == null) {
+      icon = const Icon(
+        Icons.wifi_off,
+        size: size,
+      );
+    } else if (widget.probe.rssi! >= -60) {
+      icon = const Icon(
+        Icons.wifi,
+        size: size,
+      );
+    } else if (widget.probe.rssi! >= -80) {
+      icon = const Icon(
+        Icons.wifi_2_bar,
+        size: size,
+      );
+    } else {
+      icon = const Icon(
+        Icons.wifi_1_bar,
+        size: size,
+      );
+    }
+
+    String rssiSignal =
+        widget.probe.rssi == null ? '---' : '${widget.probe.rssi}dBm';
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(width: 10),
+        icon,
+        const SizedBox(
+          width: 5,
+        ),
+        SizedBox(
+          width: 80,
+          child: Text(
+              textAlign: TextAlign.center,
+              rssiSignal,
+              style: Theme.of(context).textTheme.displaySmall),
+        ),
+      ],
+    );
+  }
+
   Widget _numberInfo() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -194,6 +244,7 @@ class _ProbeWidgetState extends State<ProbeWidget> {
                     children: [
                       _numberInfo(),
                       _batteryInfo(),
+                      _rrsiInfo(),
                     ],
                   ),
                 ),

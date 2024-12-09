@@ -7,6 +7,7 @@ class LeakProbe implements Photographable {
   List<int> stmId;
   int address;
   int batteryLevel;
+  int? rssi;
   bool isAlarmed;
 
   String? description;
@@ -21,6 +22,7 @@ class LeakProbe implements Photographable {
     this.isAlarmed = false,
     this.description,
     this.imagePath,
+    this.rssi,
   }) {
     if (stmId.length != 3) {
       throw ArgumentError('stmId must be a 3-element list');

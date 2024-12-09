@@ -272,10 +272,7 @@ class Group implements Photographable {
   Future<bool> refreshData() async {
     List<Future<bool>> futures = [];
     for (var unit in centralUnits) {
-      futures.add(unit.refreshBlockStatus());
-      futures.add(unit.getRecentFlows());
-      futures.add(unit.refreshProbes());
-      futures.add(unit.getBlockSchedule());
+      futures.add(unit.refresh());
     }
     final result = await Future.wait(futures);
     updateBlockStatus();

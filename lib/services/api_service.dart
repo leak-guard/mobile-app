@@ -65,6 +65,7 @@ class CustomApi {
       final response = await request.close();
       final content = await response.transform(utf8.decoder).join();
 
+      print('$path: ${response.statusCode} $content');
       if ((response.statusCode >= 200 && response.statusCode < 300) ||
           response.statusCode == 409) {
         if (content.isNotEmpty) {
@@ -131,11 +132,12 @@ class CustomApi {
       int batteryLevel = data['battery_level'] ?? -1;
       probes.add(LeakProbe(
         name: 'Probe $address',
+        rssi: data['last_rssi'],
         centralUnitID: null,
         stmId: (data['id'] as List).cast<int>(),
         address: int.parse(address),
         batteryLevel: batteryLevel,
-        isAlarmed: data['is_alarmed'],
+        isAlarmed: data['is_alerted'],
       ));
     });
 
