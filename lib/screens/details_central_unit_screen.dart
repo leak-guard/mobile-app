@@ -11,6 +11,7 @@ import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/utils/time_zone_helper.dart';
+import 'package:leak_guard/widgets/criteria_widget.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
@@ -39,6 +40,8 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   final _wifiSsidController = TextEditingController();
   final _wifiPasswordController = TextEditingController();
   final _impulsesController = TextEditingController();
+  final _minimumFlowController = TextEditingController();
+  final _minimumTimeController = TextEditingController();
 
   final _db = DatabaseService.instance;
   final _appData = AppData();
@@ -67,6 +70,8 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     _wifiSsidController.text = widget.central.wifiSSID ?? "";
     _wifiPasswordController.text = widget.central.wifiPassword ?? "";
     _impulsesController.text = widget.central.impulsesPerLiter.toString();
+    _minimumFlowController.text = widget.central.minimumFlowRate.toString();
+    _minimumTimeController.text = widget.central.minimumTime.toString();
     _selectedTimeZone =
         TimeZoneHelper.getCurrentTimeZonebyId(widget.central.timezoneId ?? 37);
 
@@ -132,7 +137,13 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   }
 
   Future<void> _checkCentralUnit(String ip) async {
+    setState(() {
+      _isLoading = true;
+    });
     final result = await _api.getCentralIdAndMac(ip);
+    setState(() {
+      _isLoading = false;
+    });
     if (mounted) {
       if (result != null) {
         _showDialog(
@@ -564,6 +575,60 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
           ],
         ),
         const SizedBox(height: 12),
+        CriteriaWidget(
+          flowController: _minimumFlowController,
+          timeController: _minimumTimeController,
+          onTextFieldChanged: () {
+            setState(() {
+              _isConfigurationChanged = true;
+            });
+          },
+          flowValidator: (value) {
+            int? impulses = int.tryParse(value ?? '');
+            String? errorMessage;
+            if (value == null || value.trim().isEmpty) {
+              errorMessage =
+                  'Please enter a miniumum flow rate for heuristic criteria';
+            }
+
+            if (impulses != null && impulses <= 0) {
+              errorMessage = 'Miniumum flow rate must be a positive number';
+            }
+
+            if (errorMessage != null) {
+              Future.microtask(() {
+                setState(() => _isValid = false);
+                _showDialog('Hardware configuration', errorMessage!);
+              });
+            } else {
+              setState(() => _isValid = true);
+            }
+            return null;
+          },
+          timeValidator: (value) {
+            int? impulses = int.tryParse(value ?? '');
+            String? errorMessage;
+            if (value == null || value.trim().isEmpty) {
+              errorMessage =
+                  'Please enter a miniumum time for heuristic criteria';
+            }
+
+            if (impulses != null && impulses <= 0) {
+              errorMessage = 'Miniumum time must be a positive number';
+            }
+
+            if (errorMessage != null) {
+              Future.microtask(() {
+                setState(() => _isValid = false);
+                _showDialog('Hardware configuration', errorMessage!);
+              });
+            } else {
+              setState(() => _isValid = true);
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 12),
         Text('Electrovalve Type',
             style: Theme.of(context).textTheme.displayMedium),
         const SizedBox(height: 8),
@@ -885,9 +950,10 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
           title: 'Edit ${widget.central.name}',
           trailingIcon: const Icon(Icons.check),
           onTrailingTap: () async {
-            await _saveChanges();
-            // ignore: use_build_context_synchronously
-            if (mounted) Navigator.pop(context);
+            if (await _saveChanges()) {
+              // ignore: use_build_context_synchronously
+              if (mounted) Navigator.pop(context);
+            }
           },
         ),
         body: BlurredTopWidget(

@@ -116,13 +116,11 @@ class CustomApi {
 
   Future<(double, double)?> getWaterUsage(String ip) async {
     final result = await _makeRequest(ip, '/water-usage');
-    print(result);
     if (result == null) return null;
     double flowRate = (result['flow_rate'] as int) / 1000.0;
     double todayVolume = (result['today_volume'] as int) / 1000.0;
     return (flowRate, todayVolume);
   }
-  // TODO: Probe endpoints, GET, PUT and DELETE
 
   Future<List<LeakProbe>?> getLeakProbes(String ip) async {
     final result = await _makeRequest(ip, '/probe');
@@ -164,9 +162,6 @@ class CustomApi {
   }
 
   Future<bool?> getWaterBlock(String ip) async {
-    //TODO: If implemented remove next line
-    ip = MyStrings.myIp;
-
     final result = await _makeRequest(ip, '/water-block');
     if (result == null) return null;
     return result['block'] == "active";
@@ -178,11 +173,7 @@ class CustomApi {
     return result['pairing'];
   }
 
-  //TODO:
   Future<bool> postWaterBlock(String ip, Map<String, dynamic> blockData) async {
-    //TODO: If implemented remove next line
-    ip = MyStrings.myIp;
-
     final response = await _makeRequest(
       ip,
       '/water-block',
@@ -195,8 +186,6 @@ class CustomApi {
   Future<BlockSchedule?> getWaterBlockSchedule(String ip) async {
     final response = await _makeRequest(ip, '/water-block/schedule');
     if (response == null) return null;
-
-    if (ip != MyStrings.mockIp) print(response);
 
     final schedule = BlockSchedule(
       sunday: BlockDay(
@@ -232,7 +221,6 @@ class CustomApi {
     return schedule;
   }
 
-  // TODO:
   Future<bool> putWaterBlockSchedule(
     String ip,
     Map<String, dynamic> scheduleData,
@@ -247,8 +235,19 @@ class CustomApi {
   }
 
   // TODO: wait for documentation
-  Future<Map<String, dynamic>?> getCriteria(String ip) async {
-    return await _makeRequest(ip, '/criteria');
+  Future<(int, int)?> getCriteria(String ip) async {
+    final result = await _makeRequest(ip, '/criteria');
+    if (result == null) return null;
+
+    // Parse "T,1,30,|" format
+    final parts = result['criteria'].toString().split(',');
+    if (parts.length < 3) return null;
+
+    int minimumFlowRate = int.tryParse(parts[1]) ?? 500;
+    minimumFlowRate *= 10;
+    int minimumTime = int.tryParse(parts[2]) ?? 300;
+
+    return (minimumFlowRate, minimumTime);
   }
 
   Future<bool> postCriteria(String ip, Map<String, dynamic> criteria) async {
@@ -277,7 +276,6 @@ class CustomApi {
 
   Future<bool> registerCentralUnit(String centralUnitID) async {
     String? fcmToken = _networkService.fcmToken;
-    print(fcmToken);
     if (fcmToken == null) return false;
 
     final result = await _makeRequest(
@@ -291,13 +289,11 @@ class CustomApi {
       user: Credentials.elasticUser,
       password: Credentials.elasticPass,
     );
-    print(result);
     return result != null;
   }
 
   Future<bool> unRegisterCentralUnit(String centralUnitID) async {
     String? fcmToken = _networkService.fcmToken;
-    print(fcmToken);
     if (fcmToken == null) return false;
 
     final result = await _makeRequest(
@@ -311,7 +307,6 @@ class CustomApi {
       user: Credentials.elasticUser,
       password: Credentials.elasticPass,
     );
-    print(result);
     return result != null;
   }
 }
