@@ -86,6 +86,9 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
                         central,
                       ),
                     ).then((_) {
+                      if (_appData.centralUnits.isEmpty) {
+                        if (mounted) Navigator.pop(context);
+                      }
                       setState(() {
                         _centralChosen = false;
                       });

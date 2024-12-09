@@ -130,11 +130,11 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   }
 
   Future<void> _checkCentralUnit(String ip) async {
-    final macAddress = await _api.getCentralIdAndMac(ip);
+    final result = await _api.getCentralIdAndMac(ip);
     if (mounted) {
-      if (macAddress != null) {
+      if (result != null) {
         _showDialog(
-            'Success', 'Connected to central unit with MAC:\n$macAddress');
+            'Success', 'Connected to central unit with MAC:\n${result.$2}');
       } else {
         _showDialog('Error', 'Could not connect to central unit at IP:\n$ip');
       }

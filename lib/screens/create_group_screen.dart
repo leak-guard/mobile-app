@@ -150,6 +150,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   central,
                 ),
               ).then((_) {
+                if (_appData.centralUnits.isEmpty) {
+                  if (mounted) Navigator.pop(context);
+                }
                 setState(() {});
               });
             }
