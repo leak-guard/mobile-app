@@ -10,7 +10,6 @@ import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/services/shared_preferences.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/custom_toast.dart';
-import 'package:leak_guard/utils/floating_data_generator.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
@@ -18,6 +17,7 @@ import 'package:leak_guard/widgets/block_clock_widget.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/widgets/custom_drawer.dart';
 import 'package:leak_guard/widgets/horizontal_list_widget.dart';
+import 'package:leak_guard/widgets/loading_widget.dart';
 import 'package:leak_guard/widgets/panel_widget.dart';
 import 'package:leak_guard/widgets/water_block_widget.dart';
 import 'package:leak_guard/widgets/water_usage_arc_widget.dart';
@@ -37,6 +37,8 @@ class _MainScreenState extends State<MainScreen> {
   final _networkService = NetworkService();
   final _prefs = PreferencesService.I;
   int groupIndex = 0;
+  bool _isLoading = false;
+  bool _swipeLoading = false;
 
   late Timer timer;
 
@@ -73,6 +75,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void _handleGroupChange(int newIndex) {
     setState(() {
+      _swipeLoading = true;
       groupIndex = newIndex;
     });
   }
@@ -116,7 +119,7 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  Future<void> _refreshDataForCentrals(Group group) async {
+  Future<void> _refreshDataRefreshIndicator(Group group) async {
     if (mounted) {
       if (await group.refreshData()) {
         setState(() {
@@ -126,6 +129,27 @@ class _MainScreenState extends State<MainScreen> {
         });
       } else {
         setState(() {
+          CustomToast.toast("Failed to refresh data");
+        });
+      }
+    }
+  }
+
+  Future<void> _refreshDataForCentrals(Group group) async {
+    setState(() {
+      _isLoading = true;
+    });
+    if (mounted) {
+      if (await group.refreshData()) {
+        setState(() {
+          _isLoading = false;
+          for (Group group in _appData.groups) {
+            group.updateBlockStatus();
+          }
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
           CustomToast.toast("Failed to refresh data");
         });
       }
@@ -477,39 +501,6 @@ class _MainScreenState extends State<MainScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              if (false)
-                //TODO: remove it
-                // ignore: dead_code
-                NeumorphicButton(
-                  style: NeumorphicStyle(
-                    depth: 5,
-                    intensity: 0.8,
-                    boxShape: NeumorphicBoxShape.roundRect(
-                      BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () async {
-                    GenerateTestDataButton(
-                      onComplete: _refreshData,
-                    ).generateData(context);
-                  },
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.science_outlined),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Generate test data',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ],
-                  ),
-                ),
             ],
           ),
         ),
@@ -522,64 +513,91 @@ class _MainScreenState extends State<MainScreen> {
 
     Group currentGroup = _appData.groups[groupIndex];
 
-    return GestureDetector(
-      onHorizontalDragEnd: _handleSwipe,
-      child: Scaffold(
-        key: _scaffoldKey,
-        drawer: CustomDrawer(
-          onBack: _onBack,
-        ),
-        appBar: CustomAppBar(
-          leadingIcon: const Icon(Icons.menu),
-          onLeadingTap: _openDrawer,
-          title: MyStrings.appName,
-          trailingIcon: const Icon(Icons.refresh),
-          onTrailingTap: () => _refreshDataForCentrals(currentGroup),
-          onTrailingLongPress: autoRefresh,
-          onUncollapse: cancelAutoRefresh,
-          bottomWidgets: [
-            HorizontalListWidget(
-              items: _appData.groups.map((e) => e.name).toList(),
-              selectedIndex: groupIndex,
-              onIndexChanged: _handleGroupChange,
-            ),
-          ],
-          height: 120,
-        ),
-        backgroundColor: MyColors.background,
-        body: RefreshIndicator(
-          color: MyColors.lightThemeFont,
-          backgroundColor: MyColors.background,
-          onRefresh: () => _refreshDataForCentrals(currentGroup),
-          child: FutureBuilder<Map<String, dynamic>>(
-            future: Future.wait([
-              currentGroup.todaysWaterUsage(),
-              currentGroup.yesterdayWaterUsage(),
-              currentGroup.refreshFlowAndTodaysUsage().then((_) {
-                return currentGroup.getWaterUsageData(11);
-              }),
-            ]).then((results) => {
-                  'todaysUsage': results[0],
-                  'maxUsage': results[1],
-                  'waterUsageData': results[2],
-                  'flowRate': currentGroup.flowRate(),
-                }),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    color: MyColors.lightThemeFont,
+    return FutureBuilder<Map<String, dynamic>>(
+        future: Future.wait([
+          currentGroup.todaysWaterUsage(),
+          currentGroup.yesterdayWaterUsage(),
+          currentGroup.refreshFlowAndTodaysUsage().then((_) {
+            return currentGroup.getWaterUsageData(11);
+          }),
+        ]).then((results) => {
+              'todaysUsage': results[0],
+              'maxUsage': results[1],
+              'waterUsageData': results[2],
+              'flowRate': currentGroup.flowRate(),
+            }),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Scaffold(
+              backgroundColor: MyColors.background,
+              appBar: CustomAppBar(
+                leadingIcon: const Icon(Icons.menu),
+                onLeadingTap: () {},
+                title: MyStrings.appName,
+                trailingIcon: const Icon(Icons.refresh),
+                onTrailingTap: () {},
+                bottomWidgets: [
+                  HorizontalListWidget(
+                    items: _appData.groups.map((e) => e.name).toList(),
+                    selectedIndex: groupIndex,
+                    onIndexChanged: (index) {},
                   ),
-                );
-              }
+                ],
+                height: 120,
+              ),
+              body: Center(
+                child: CircularProgressIndicator(
+                  color: MyColors.lightThemeFont,
+                ),
+              ),
+            );
+          }
 
-              Map<String, dynamic> data = snapshot.data!;
-
-              return _buildScreen(data, currentGroup);
-            },
-          ),
-        ),
-      ),
-    );
+          Map<String, dynamic> data = snapshot.data!;
+          if (snapshot.connectionState == ConnectionState.done) {
+            _isLoading = false;
+            _swipeLoading = false;
+          } else {
+            if (_swipeLoading) {
+              _isLoading = true;
+            }
+          }
+          return LoadingWidget(
+            isLoading: _isLoading,
+            child: GestureDetector(
+              onHorizontalDragEnd: _handleSwipe,
+              child: Scaffold(
+                key: _scaffoldKey,
+                drawer: CustomDrawer(
+                  onBack: _onBack,
+                ),
+                appBar: CustomAppBar(
+                  leadingIcon: const Icon(Icons.menu),
+                  onLeadingTap: _openDrawer,
+                  title: MyStrings.appName,
+                  trailingIcon: const Icon(Icons.refresh),
+                  onTrailingTap: () => _refreshDataForCentrals(currentGroup),
+                  onTrailingLongPress: autoRefresh,
+                  onUncollapse: cancelAutoRefresh,
+                  bottomWidgets: [
+                    HorizontalListWidget(
+                      items: _appData.groups.map((e) => e.name).toList(),
+                      selectedIndex: groupIndex,
+                      onIndexChanged: _handleGroupChange,
+                    ),
+                  ],
+                  height: 120,
+                ),
+                backgroundColor: MyColors.background,
+                body: RefreshIndicator(
+                  color: MyColors.lightThemeFont,
+                  backgroundColor: MyColors.background,
+                  onRefresh: () => _refreshDataRefreshIndicator(currentGroup),
+                  child: _buildScreen(data, currentGroup),
+                ),
+              ),
+            ),
+          );
+        });
   }
 }

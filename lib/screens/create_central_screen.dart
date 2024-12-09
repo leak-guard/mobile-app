@@ -10,6 +10,7 @@ import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/utils/colors.dart';
+import 'package:leak_guard/widgets/loading_widget.dart';
 import 'package:leak_guard/widgets/password_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
 import 'package:leak_guard/widgets/timezone_dropdown_widget.dart';
@@ -451,6 +452,7 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
   }
 
   Future<bool> _createCentralUnit() async {
+    FocusScope.of(context).unfocus();
     bool? isFormValid = _formKey.currentState?.validate();
 
     await Future.microtask(() => null);
@@ -511,44 +513,47 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        height: 80,
-        onLeadingTap: () {
-          if (_isCreating) return;
-          if (widget.chosenCentral != null) {
-            widget.chosenCentral!.name = widget.chosenCentral!.addressIP;
-          }
-          Navigator.pop(context);
-        },
-        title: 'Create Central Unit',
-        trailingIcon: const Icon(Icons.check),
-        onTrailingTap: () {
-          if (_isCreating) return;
-          _isCreating = true;
-
-          _createCentralUnit().then((success) {
-            _isCreating = false;
-            if (success) {
-              // ignore: use_build_context_synchronously
-              if (mounted) Navigator.pop(context, success);
+    return LoadingWidget(
+      isLoading: _isCreating,
+      child: Scaffold(
+        appBar: CustomAppBar(
+          height: 80,
+          onLeadingTap: () {
+            if (_isCreating) return;
+            if (widget.chosenCentral != null) {
+              widget.chosenCentral!.name = widget.chosenCentral!.addressIP;
             }
-          });
-        },
-      ),
-      body: BlurredTopWidget(
-        height: 20,
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _buildCentralUnitInformation(),
-              const SizedBox(height: 16),
-              _buildWifiSection(),
-              const SizedBox(height: 16),
-              _buildHardwareConfigSection(),
-            ],
+            Navigator.pop(context);
+          },
+          title: 'Create Central Unit',
+          trailingIcon: const Icon(Icons.check),
+          onTrailingTap: () {
+            if (_isCreating) return;
+            _isCreating = true;
+
+            _createCentralUnit().then((success) {
+              _isCreating = false;
+              if (success) {
+                // ignore: use_build_context_synchronously
+                if (mounted) Navigator.pop(context, success);
+              }
+            });
+          },
+        ),
+        body: BlurredTopWidget(
+          height: 20,
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _buildCentralUnitInformation(),
+                const SizedBox(height: 16),
+                _buildWifiSection(),
+                const SizedBox(height: 16),
+                _buildHardwareConfigSection(),
+              ],
+            ),
           ),
         ),
       ),

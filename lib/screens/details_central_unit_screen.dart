@@ -14,6 +14,7 @@ import 'package:leak_guard/utils/time_zone_helper.dart';
 import 'package:leak_guard/widgets/custom_text_filed.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
+import 'package:leak_guard/widgets/loading_widget.dart';
 import 'package:leak_guard/widgets/password_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
 import 'package:leak_guard/widgets/probe_widget.dart';
@@ -48,6 +49,7 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
   WifiNetwork? _selectedNetwork;
   late TimeZone _selectedTimeZone;
 
+  bool _isLoading = false;
   bool _isValid = true;
   bool _isValveNO = false;
   bool _isConfigurationChanged = false;
@@ -630,7 +632,14 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
       }
     }
 
+    setState(() {
+      _isLoading = true;
+    });
     final result = await _api.unRegisterCentralUnit(widget.central.hardwareID);
+
+    setState(() {
+      _isLoading = false;
+    });
     if (result) {
       await _db.deleteCentralUnit(widget.central.centralUnitID!);
     } else {
@@ -816,11 +825,17 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
             }
 
             bool success;
+            setState(() {
+              _isLoading = true;
+            });
             if (widget.central.isInParingMode) {
               success = await _api.exitPairingMode(widget.central.addressIP);
             } else {
               success = await _api.enterPairingMode(widget.central.addressIP);
             }
+            setState(() {
+              _isLoading = false;
+            });
 
             if (success) {
               setState(() {
@@ -840,7 +855,7 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
                       ? 'Exit Pairing Mode'
                       : 'Enter Pairing Mode',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
                         color: widget.central.isInParingMode
                             ? MyColors.background
                             : MyColors.lightThemeFont,
@@ -856,68 +871,71 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        height: 80,
-        onLeadingTap: () async {
-          if (await _onWillPop()) {
+    return LoadingWidget(
+      isLoading: _isLoading,
+      child: Scaffold(
+        appBar: CustomAppBar(
+          height: 80,
+          onLeadingTap: () async {
+            if (await _onWillPop()) {
+              // ignore: use_build_context_synchronously
+              if (mounted) Navigator.pop(context);
+            }
+          },
+          title: 'Edit ${widget.central.name}',
+          trailingIcon: const Icon(Icons.check),
+          onTrailingTap: () async {
+            await _saveChanges();
             // ignore: use_build_context_synchronously
             if (mounted) Navigator.pop(context);
-          }
-        },
-        title: 'Edit ${widget.central.name}',
-        trailingIcon: const Icon(Icons.check),
-        onTrailingTap: () async {
-          await _saveChanges();
-          // ignore: use_build_context_synchronously
-          if (mounted) Navigator.pop(context);
-        },
-      ),
-      body: BlurredTopWidget(
-        height: 20,
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _buildInfoSection(),
-              const SizedBox(height: 24),
-              _buildWifiSection(),
-              const SizedBox(height: 24),
-              _buildHardwareConfigSection(),
-              const SizedBox(height: 24),
-              _buildPairingModeButton(),
-              const SizedBox(height: 24),
-              _buildLeakProbes(),
-              const SizedBox(height: 24),
-              NeumorphicButton(
-                style: NeumorphicStyle(
-                  depth: 5,
-                  intensity: 0.8,
-                  boxShape: NeumorphicBoxShape.roundRect(
-                    BorderRadius.circular(12),
+          },
+        ),
+        body: BlurredTopWidget(
+          height: 20,
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _buildInfoSection(),
+                const SizedBox(height: 24),
+                _buildWifiSection(),
+                const SizedBox(height: 24),
+                _buildHardwareConfigSection(),
+                const SizedBox(height: 24),
+                _buildPairingModeButton(),
+                const SizedBox(height: 24),
+                _buildLeakProbes(),
+                const SizedBox(height: 24),
+                NeumorphicButton(
+                  style: NeumorphicStyle(
+                    depth: 5,
+                    intensity: 0.8,
+                    boxShape: NeumorphicBoxShape.roundRect(
+                      BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    _deleteCentralUnit(_confirmDelete);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Delete central unit',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.delete_outline),
+                      ],
+                    ),
                   ),
                 ),
-                onPressed: () {
-                  _deleteCentralUnit(_confirmDelete);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Delete central unit',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.delete_outline),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

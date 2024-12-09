@@ -36,14 +36,9 @@ class AppData {
     centralUnits = centralsMap.values.toList();
 
     for (CentralUnit cu in centralUnits) {
-      await _db.deleteFlowsFromDate(
-          cu.centralUnitID!, DateTime.now().subtract(Duration(days: 1)));
-    }
-
-    for (CentralUnit cu in centralUnits) {
       if (cu.isDeleted) {
         if (cu.isRegistered) {
-          cu.isRegistered = await cu.unRegister();
+          cu.isRegistered = !await cu.unRegister();
           if (!cu.isRegistered) {
             await _db.deleteCentralUnit(cu.centralUnitID!);
           }

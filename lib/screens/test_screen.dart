@@ -1,6 +1,5 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/services/api_service.dart';
-import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 
 // TODO: to be removed
@@ -34,14 +33,24 @@ class _TestScreenState extends State<TestScreen> {
         onLeadingTap: () {
           Navigator.pop(context);
         },
-        title: MyStrings.manageProbes,
+        title: "Test screen",
       ),
       body: Center(
-        child: NeumorphicButton(
-          onPressed: () {
-            _api.registerCentralUnit("this-is-my-id");
-          },
-          child: const Text('Register central'),
+        child: Column(
+          children: [
+            NeumorphicButton(
+              onPressed: () {
+                _api.registerCentralUnit("this-is-my-id");
+              },
+              child: const Text('Register central'),
+            ),
+            NeumorphicButton(
+              onPressed: () {
+                _api.unRegisterCentralUnit("this-is-my-id");
+              },
+              child: const Text('Unregister central'),
+            ),
+          ],
         ),
       ),
     );

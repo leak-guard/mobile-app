@@ -11,6 +11,7 @@ import 'package:leak_guard/widgets/add_unit_button.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/widgets/central_unit_widget.dart';
+import 'package:leak_guard/widgets/loading_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
 
 class CreateGroupScreen extends StatefulWidget {
@@ -28,6 +29,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final _db = DatabaseService.instance;
   final _appData = AppData();
   final newGroup = Group(name: '');
+  bool _isLoading = false;
 
   List<CentralUnit> get chosenCentrals =>
       _appData.centralUnits.where((central) => central.chosen).toList();
@@ -141,7 +143,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             });
           },
           onLongPress: () async {
+            setState(() {
+              _isLoading = true;
+            });
             await central.refreshStatus();
+            await _db.updateCentralUnit(central);
             if (mounted) {
               Navigator.pushNamed(
                 context,
@@ -153,7 +159,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 if (_appData.centralUnits.isEmpty) {
                   if (mounted) Navigator.pop(context);
                 }
-                setState(() {});
+                setState(() {
+                  _isLoading = false;
+                });
               });
             }
           },
@@ -164,76 +172,79 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        height: 80,
-        onLeadingTap: () => Navigator.pop(context),
-        title: MyStrings.createGroup,
-        trailingIcon: const Icon(Icons.check),
-        onTrailingTap: _createGroup,
-      ),
-      body: BlurredTopWidget(
-        height: 20,
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Text('Group name',
-                  style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 8),
-              CustomTextField(
-                controller: _nameController,
-                hintText: 'Enter group name...',
-                validator: (value) {
-                  String? errorMessage;
-                  if (value == null || value.trim().isEmpty) {
-                    errorMessage = 'Please enter a group name';
-                  } else if (_appData.groups.any((g) =>
-                      g.name.toLowerCase() == value.trim().toLowerCase())) {
-                    errorMessage = 'Group name already exists';
-                  }
+    return LoadingWidget(
+      isLoading: _isLoading,
+      child: Scaffold(
+        appBar: CustomAppBar(
+          height: 80,
+          onLeadingTap: () => Navigator.pop(context),
+          title: MyStrings.createGroup,
+          trailingIcon: const Icon(Icons.check),
+          onTrailingTap: _createGroup,
+        ),
+        body: BlurredTopWidget(
+          height: 20,
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Text('Group name',
+                    style: Theme.of(context).textTheme.displayMedium),
+                const SizedBox(height: 8),
+                CustomTextField(
+                  controller: _nameController,
+                  hintText: 'Enter group name...',
+                  validator: (value) {
+                    String? errorMessage;
+                    if (value == null || value.trim().isEmpty) {
+                      errorMessage = 'Please enter a group name';
+                    } else if (_appData.groups.any((g) =>
+                        g.name.toLowerCase() == value.trim().toLowerCase())) {
+                      errorMessage = 'Group name already exists';
+                    }
 
-                  if (errorMessage != null) {
-                    Future.microtask(() {
-                      setState(() => _isValid = false);
-                      _showValidationError('Wrong group name', errorMessage!);
-                    });
-                  } else {
-                    setState(() => _isValid = true);
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              Text('Description',
-                  style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 8),
-              CustomTextField(
-                controller: _descriptionController,
-                hintText: 'Enter description...',
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              Text('Photo', style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 8),
-              PhotoWidget(
-                item: newGroup,
-                size: MediaQuery.of(context).size.width - 32,
-                onPhotoChanged: () {
-                  setState(() {});
-                },
-              ),
-              const SizedBox(height: 24),
-              Text('Chose central units',
-                  style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 8),
-              AddUnitButton(
-                onBack: () => setState(() {}),
-              ),
-              const SizedBox(height: 8),
-              ..._buildCentralUnitsList(),
-            ],
+                    if (errorMessage != null) {
+                      Future.microtask(() {
+                        setState(() => _isValid = false);
+                        _showValidationError('Wrong group name', errorMessage!);
+                      });
+                    } else {
+                      setState(() => _isValid = true);
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                Text('Description',
+                    style: Theme.of(context).textTheme.displayMedium),
+                const SizedBox(height: 8),
+                CustomTextField(
+                  controller: _descriptionController,
+                  hintText: 'Enter description...',
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                Text('Photo', style: Theme.of(context).textTheme.displayMedium),
+                const SizedBox(height: 8),
+                PhotoWidget(
+                  item: newGroup,
+                  size: MediaQuery.of(context).size.width - 32,
+                  onPhotoChanged: () {
+                    setState(() {});
+                  },
+                ),
+                const SizedBox(height: 24),
+                Text('Chose central units',
+                    style: Theme.of(context).textTheme.displayMedium),
+                const SizedBox(height: 8),
+                AddUnitButton(
+                  onBack: () => setState(() {}),
+                ),
+                const SizedBox(height: 8),
+                ..._buildCentralUnitsList(),
+              ],
+            ),
           ),
         ),
       ),

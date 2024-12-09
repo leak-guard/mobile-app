@@ -9,6 +9,7 @@ import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
 import 'package:leak_guard/widgets/blurred_top_widget.dart';
 import 'package:leak_guard/widgets/central_unit_widget.dart';
+import 'package:leak_guard/widgets/loading_widget.dart';
 import 'package:leak_guard/widgets/photo_widget.dart';
 
 class DetailsGroupScreen extends StatefulWidget {
@@ -27,6 +28,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
   final _appData = AppData();
   bool _isValid = true;
   bool _centralChoosen = false;
+  bool _isLoading = false;
 
   late String? _initialImagePath;
   late String _initialDescription;
@@ -347,6 +349,9 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
               onLongPress: () async {
                 if (_centralChoosen) return;
                 _centralChoosen = true;
+                setState(() {
+                  _isLoading = true;
+                });
                 await central.refreshStatus();
                 await _db.updateCentralUnit(central);
 
@@ -366,6 +371,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
                     }
                     setState(() {
                       _centralChoosen = false;
+                      _isLoading = false;
                     });
                   });
                 }
@@ -380,6 +386,10 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
               onLongPress: () async {
                 if (_centralChoosen) return;
                 _centralChoosen = true;
+
+                setState(() {
+                  _isLoading = true;
+                });
                 await central.refreshStatus();
                 await _db.updateCentralUnit(central);
 
@@ -399,6 +409,7 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
 
                   setState(() {
                     _centralChoosen = false;
+                    _isLoading = false;
                   });
                 });
               },
@@ -409,110 +420,113 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        height: 80,
-        onLeadingTap: () {
-          _onWillPop().then((onValue) {
-            if (onValue) {
+    return LoadingWidget(
+      isLoading: _isLoading,
+      child: Scaffold(
+        appBar: CustomAppBar(
+          height: 80,
+          onLeadingTap: () {
+            _onWillPop().then((onValue) {
+              if (onValue) {
+                // ignore: use_build_context_synchronously
+                if (mounted) Navigator.pop(context);
+              }
+            });
+          },
+          title: 'Edit ${widget.group.name}',
+          trailingIcon: const Icon(Icons.check),
+          onTrailingTap: () {
+            _saveChanges().then((success) {
               // ignore: use_build_context_synchronously
-              if (mounted) Navigator.pop(context);
-            }
-          });
-        },
-        title: 'Edit ${widget.group.name}',
-        trailingIcon: const Icon(Icons.check),
-        onTrailingTap: () {
-          _saveChanges().then((success) {
-            // ignore: use_build_context_synchronously
-            if (mounted && success) Navigator.pop(context);
-          });
-        },
-      ),
-      body: BlurredTopWidget(
-        height: 20,
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Text('Group name',
-                  style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 8),
-              CustomTextField(
-                controller: _nameController,
-                hintText: 'Enter group name...',
-                validator: (value) {
-                  String? errorMessage;
-                  if (value == null || value.trim().isEmpty) {
-                    errorMessage = 'Please enter a group name';
-                  } else if (_appData.groups.any((g) =>
-                      g.name.toLowerCase() == value.trim().toLowerCase() &&
-                      g.groupdID != widget.group.groupdID)) {
-                    errorMessage = 'Group name already exists';
-                  }
+              if (mounted && success) Navigator.pop(context);
+            });
+          },
+        ),
+        body: BlurredTopWidget(
+          height: 20,
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Text('Group name',
+                    style: Theme.of(context).textTheme.displayMedium),
+                const SizedBox(height: 8),
+                CustomTextField(
+                  controller: _nameController,
+                  hintText: 'Enter group name...',
+                  validator: (value) {
+                    String? errorMessage;
+                    if (value == null || value.trim().isEmpty) {
+                      errorMessage = 'Please enter a group name';
+                    } else if (_appData.groups.any((g) =>
+                        g.name.toLowerCase() == value.trim().toLowerCase() &&
+                        g.groupdID != widget.group.groupdID)) {
+                      errorMessage = 'Group name already exists';
+                    }
 
-                  if (errorMessage != null) {
-                    Future.microtask(() {
-                      setState(() => _isValid = false);
-                      _showValidationError('Wrong group name', errorMessage!);
-                    });
-                  } else {
-                    setState(() => _isValid = true);
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              Text('Description',
-                  style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 8),
-              CustomTextField(
-                controller: _descriptionController,
-                hintText: 'Enter description...',
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              Text('Photo', style: Theme.of(context).textTheme.displayMedium),
-              const SizedBox(height: 8),
-              PhotoWidget(
-                item: widget.group,
-                size: MediaQuery.of(context).size.width - 32,
-                onPhotoChanged: () {
-                  setState(() {});
-                },
-              ),
-              const SizedBox(height: 16),
-              Text('Central units',
-                  style: Theme.of(context).textTheme.displayMedium),
-              ..._buildCentralUnitsList(),
-              const SizedBox(height: 12),
-              NeumorphicButton(
-                style: NeumorphicStyle(
-                  depth: 5,
-                  intensity: 0.8,
-                  boxShape: NeumorphicBoxShape.roundRect(
-                    BorderRadius.circular(12),
+                    if (errorMessage != null) {
+                      Future.microtask(() {
+                        setState(() => _isValid = false);
+                        _showValidationError('Wrong group name', errorMessage!);
+                      });
+                    } else {
+                      setState(() => _isValid = true);
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                Text('Description',
+                    style: Theme.of(context).textTheme.displayMedium),
+                const SizedBox(height: 8),
+                CustomTextField(
+                  controller: _descriptionController,
+                  hintText: 'Enter description...',
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                Text('Photo', style: Theme.of(context).textTheme.displayMedium),
+                const SizedBox(height: 8),
+                PhotoWidget(
+                  item: widget.group,
+                  size: MediaQuery.of(context).size.width - 32,
+                  onPhotoChanged: () {
+                    setState(() {});
+                  },
+                ),
+                const SizedBox(height: 16),
+                Text('Central units',
+                    style: Theme.of(context).textTheme.displayMedium),
+                ..._buildCentralUnitsList(),
+                const SizedBox(height: 12),
+                NeumorphicButton(
+                  style: NeumorphicStyle(
+                    depth: 5,
+                    intensity: 0.8,
+                    boxShape: NeumorphicBoxShape.roundRect(
+                      BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () => _deleteGroup(_confirmDelete),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Delete group',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.delete_outline),
+                      ],
+                    ),
                   ),
                 ),
-                onPressed: () => _deleteGroup(_confirmDelete),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Delete group',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.delete_outline),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

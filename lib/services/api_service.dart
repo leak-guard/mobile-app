@@ -72,7 +72,8 @@ class CustomApi {
         }
         return {"message": "Request successful"};
       }
-      throw HttpException('Request failed with status: ${response.statusCode}');
+      throw HttpException(
+          'Request failed \nStatus code: ${response.statusCode}\nContent: $content');
     } catch (e) {
       print("Error: $e");
       return null;

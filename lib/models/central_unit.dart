@@ -299,7 +299,6 @@ class CentralUnit implements Photographable {
   }
 
   //TODO: Implement fetching data from API:
-  // - Fetch Probes data for each central unit
   // - Get criteria
 
   //TODO: probably many request will kill the server - yes :)
@@ -344,6 +343,14 @@ class CentralUnit implements Photographable {
 
     if (probes == null) {
       return false;
+    }
+
+    if (addressIP == MyStrings.mockIp) {
+      for (LeakProbe lp in probes) {
+        for (int i = 0; i < lp.stmId.length; i++) {
+          lp.stmId[i] -= centralUnitID!;
+        }
+      }
     }
 
     for (int i = leakProbes.length - 1; i >= 0; i--) {
