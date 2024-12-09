@@ -125,7 +125,9 @@ class _MainScreenState extends State<MainScreen> {
           }
         });
       } else {
-        CustomToast.toast("Failed to refresh data");
+        setState(() {
+          CustomToast.toast("Failed to refresh data");
+        });
       }
     }
   }

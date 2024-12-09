@@ -1,3 +1,4 @@
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/group_central_relation.dart';
@@ -34,6 +35,11 @@ class AppData {
     leakProbes = futures[3] as List<LeakProbe>;
 
     centralUnits = centralsMap.values.toList();
+
+    for (CentralUnit cu in centralUnits) {
+      await _db.deleteFlowsFromDate(
+          cu.centralUnitID!, DateTime.now().subtract(Duration(days: 1)));
+    }
 
     for (CentralUnit cu in centralUnits) {
       if (cu.isDeleted) {

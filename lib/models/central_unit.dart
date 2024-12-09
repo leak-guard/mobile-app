@@ -4,7 +4,6 @@ import 'package:leak_guard/models/leak_probe.dart';
 import 'package:leak_guard/models/photographable.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/services/api_service.dart';
-import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:nsd/nsd.dart';
@@ -85,14 +84,12 @@ class CentralUnit implements Photographable {
   DateTime? _lastTodaysUsageUpdate;
   double? _cachedYesterdayUsage;
   DateTime? _lastYesterdayUsageDate;
-  List<WaterUsageData>? _cachedWaterUsageData;
 
   void invalidateCache() {
     _cachedTodaysUsage = null;
     _lastTodaysUsageUpdate = null;
     _cachedYesterdayUsage = null;
     _lastYesterdayUsageDate = null;
-    _cachedWaterUsageData = null;
   }
 
   static const _flowRateCacheDuration = Duration(minutes: 1);
@@ -178,98 +175,31 @@ class CentralUnit implements Photographable {
     final now = DateTime.now();
     final currentHour = DateTime(now.year, now.month, now.day, now.hour);
 
-    if (_cachedWaterUsageData == null) {
-      final startTime = currentHour.subtract(Duration(hours: hoursToFetch - 1));
-      final flows = await _getFlowData(startTime, now);
+    final startTime = currentHour.subtract(Duration(hours: hoursToFetch - 1));
+    final flows = await _getFlowData(startTime, now);
 
-      List<WaterUsageData> result = [];
-      for (int i = hoursToFetch - 1; i >= 0; i--) {
-        final time = currentHour.subtract(Duration(hours: i));
-        final hourFlows = flows
-            .where((flow) =>
-                flow.date.year == time.year &&
-                flow.date.month == time.month &&
-                flow.date.day == time.day &&
-                flow.date.hour == time.hour)
-            .toList();
-
-        final usage = hourFlows.isEmpty
-            ? 0.0
-            : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
-
-        result.add(WaterUsageData(
-          time,
-          usage,
-        ));
-      }
-
-      _cachedWaterUsageData = result;
-      return result;
-    }
-
-    if (_cachedWaterUsageData!.last.date.hour != currentHour.hour) {
-      final lastCachedHour = _cachedWaterUsageData!.last.date;
-
-      final startTime = lastCachedHour;
-      final flows = await _getFlowData(startTime, now);
-
-      final lastHourFlows = flows
+    List<WaterUsageData> result = [];
+    for (int i = hoursToFetch - 1; i >= 0; i--) {
+      final time = currentHour.subtract(Duration(hours: i));
+      final hourFlows = flows
           .where((flow) =>
-              flow.date.year == lastCachedHour.year &&
-              flow.date.month == lastCachedHour.month &&
-              flow.date.day == lastCachedHour.day &&
-              flow.date.hour == lastCachedHour.hour)
+              flow.date.year == time.year &&
+              flow.date.month == time.month &&
+              flow.date.day == time.day &&
+              flow.date.hour == time.hour)
           .toList();
 
-      if (lastHourFlows.isNotEmpty) {
-        final lastHourUsage = lastHourFlows.fold(
-            0.0, (sum, flow) => sum + flow.volume.toDouble());
-        _cachedWaterUsageData!.last = WaterUsageData(
-          lastCachedHour,
-          lastHourUsage,
-        );
-      }
+      final usage = hourFlows.isEmpty
+          ? 0.0
+          : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
 
-      final hoursToAdd = currentHour.difference(lastCachedHour).inHours;
-      for (int i = hoursToAdd; i > 0; i--) {
-        final time = currentHour.subtract(Duration(hours: i - 1));
-        final hourFlows = flows
-            .where((flow) =>
-                flow.date.year == time.year &&
-                flow.date.month == time.month &&
-                flow.date.day == time.day &&
-                flow.date.hour == time.hour)
-            .toList();
-
-        final usage = hourFlows.isEmpty
-            ? 0.0
-            : hourFlows.fold(0.0, (sum, flow) => sum + flow.volume.toDouble());
-
-        _cachedWaterUsageData!.add(WaterUsageData(
-          time,
-          usage,
-        ));
-      }
-
-      while (_cachedWaterUsageData!.length > hoursToFetch) {
-        _cachedWaterUsageData!.removeAt(0);
-      }
-
-      return _cachedWaterUsageData!;
+      result.add(WaterUsageData(
+        time,
+        usage,
+      ));
     }
 
-    final currentHourFlows = await _getFlowData(currentHour, now);
-    final usage = currentHourFlows.isEmpty
-        ? 0.0
-        : currentHourFlows.fold(
-            0.0, (sum, flow) => sum + flow.volume.toDouble());
-
-    _cachedWaterUsageData!.last = WaterUsageData(
-      currentHour,
-      usage,
-    );
-
-    return _cachedWaterUsageData!;
+    return result;
   }
 
   @override
