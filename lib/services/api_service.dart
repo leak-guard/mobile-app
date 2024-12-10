@@ -65,7 +65,6 @@ class CustomApi {
       final response = await request.close();
       final content = await response.transform(utf8.decoder).join();
 
-      print('$path: ${response.statusCode} $content');
       if ((response.statusCode >= 200 && response.statusCode < 300) ||
           response.statusCode == 409) {
         if (content.isNotEmpty) {
@@ -100,14 +99,30 @@ class CustomApi {
         await _makeRequest(ip, '/water-usage/$fromTimestamp/$toTimestamp');
     if (result == null) return null;
 
-    final Map<String, double> usages =
-        Map<String, double>.from(result['usages']);
+    final Map<String, int> usages = Map<String, int>.from(result['usages']);
     if (usages.isEmpty) return [];
 
     return usages.entries
         .map((entry) => Flow(
               centralUnitID: null,
-              volume: entry.value,
+              volume: (entry.value.toDouble() / 1000),
+              date: DateTime.fromMillisecondsSinceEpoch(
+                  int.parse(entry.key) * 1000),
+            ))
+        .toList();
+  }
+
+  Future<List<Flow>?> getTodaysFlows(String ip) async {
+    final result = await _makeRequest(ip, '/water-usage/today');
+    if (result == null) return null;
+
+    final Map<String, int> usages = Map<String, int>.from(result['usages']);
+    if (usages.isEmpty) return [];
+
+    return usages.entries
+        .map((entry) => Flow(
+              centralUnitID: null,
+              volume: (entry.value.toDouble() / 1000),
               date: DateTime.fromMillisecondsSinceEpoch(
                   int.parse(entry.key) * 1000),
             ))

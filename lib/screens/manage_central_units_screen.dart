@@ -32,6 +32,11 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
       _isLoading = true;
     });
     await Future.delayed(const Duration(seconds: 2));
+    List<Future<bool>> futures = [];
+    for (var central in _appData.centralUnits) {
+      futures.add(central.refreshForWidget());
+    }
+    await Future.wait(futures);
     setState(() {
       _isLoading = false;
     });
@@ -40,6 +45,11 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
   Future<void> _refreshIndicator() async {
     _networkService.startServiceDiscovery();
     await Future.delayed(const Duration(seconds: 2));
+    List<Future<bool>> futures = [];
+    for (var central in _appData.centralUnits) {
+      futures.add(central.refreshForWidget());
+    }
+    await Future.wait(futures);
   }
 
   @override

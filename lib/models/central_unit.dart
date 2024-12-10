@@ -15,6 +15,7 @@ class CentralUnit implements Photographable {
   String? imagePath;
   String password = "admin";
   String hardwareID;
+  Duration delay = const Duration(milliseconds: 400);
 
   BlockSchedule blockSchedule = BlockSchedule.defaultSchedule();
   bool isBlocked = false;
@@ -301,7 +302,6 @@ class CentralUnit implements Photographable {
   }
 
   Future<bool> refreshData() async {
-    const Duration delay = Duration(milliseconds: 400);
     if (!await refreshMacAddress()) return false;
     await Future.delayed(delay);
     if (!await refreshConfig()) return false;
@@ -323,7 +323,6 @@ class CentralUnit implements Photographable {
   }
 
   Future<bool> refresh() async {
-    const Duration delay = Duration(milliseconds: 400);
     if (!await refreshBlockStatus()) return false;
     await Future.delayed(delay);
     if (!await getRecentFlows()) return false;
@@ -334,8 +333,14 @@ class CentralUnit implements Photographable {
     return true;
   }
 
+  Future<bool> refreshForWidget() async {
+    if (!await refreshBlockStatus()) return false;
+    await Future.delayed(delay);
+    if (!await refreshProbes()) return false;
+    return true;
+  }
+
   Future<bool> refreshStatus() async {
-    const Duration delay = Duration(milliseconds: 400);
     await Future.delayed(delay);
     if (!await refreshConfig()) return false;
     await Future.delayed(delay);
@@ -344,6 +349,19 @@ class CentralUnit implements Photographable {
     if (!await refreshPairingMode()) return false;
     await Future.delayed(delay);
     if (!await refreshCriteria()) return false;
+    await Future.delayed(delay);
+    if (!await refreshProbes()) return false;
+
+    return true;
+  }
+
+  Future<bool> getStatus() async {
+    await Future.delayed(delay);
+    if (!await refreshMacAddress()) return false;
+    await Future.delayed(delay);
+    if (!await refreshConfig()) return false;
+    await Future.delayed(delay);
+    if (!await getProbes()) return false;
 
     return true;
   }
@@ -360,6 +378,17 @@ class CentralUnit implements Photographable {
 
   Future<bool> sendBlockSchedule(BlockSchedule blockSchedule) async {
     return _api.putWaterBlockSchedule(addressIP, blockSchedule.toJson());
+  }
+
+  Future<bool> getProbes() async {
+    List<LeakProbe>? probes = await _api.getLeakProbes(addressIP);
+
+    if (probes == null) {
+      return false;
+    }
+    leakProbes = probes;
+
+    return true;
   }
 
   Future<bool> refreshProbes() async {
@@ -434,16 +463,31 @@ class CentralUnit implements Photographable {
         recentFlow?.date ?? DateTime.now().subtract(const Duration(days: 1));
 
     List<Flow>? flows = await _api.getRecentFlows(addressIP, lastFlowDate);
+
     if (flows == null) {
       return false;
-    }
-    if (flows.isEmpty) {
-      return true;
     }
 
     for (var flow in flows) {
       flow.centralUnitID = centralUnitID;
     }
+    await _db.addCentralUnitsFlows(centralUnitID!, flows);
+    await Future.delayed(const Duration(milliseconds: 200));
+    flows = await _api.getTodaysFlows(addressIP);
+
+    if (flows == null) {
+      return false;
+    }
+
+    if (flows == []) {
+      return true;
+    }
+    for (var flow in flows) {
+      flow.centralUnitID = centralUnitID;
+    }
+    DateTime today = DateTime.now();
+    await _db.deleteFlowsFromDate(
+        centralUnitID!, DateTime(today.year, today.month, today.day));
     await _db.addCentralUnitsFlows(centralUnitID!, flows);
 
     return true;

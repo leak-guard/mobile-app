@@ -95,10 +95,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<List<bool>> _handleBlockButtonTap(Group group) async {
-    setState(() {
-      _isLoading = true;
-    });
-
     if (group.status == BlockStatus.noBlocked) {
       return group.toggleBlock(true);
     } else {
@@ -196,12 +192,8 @@ class _MainScreenState extends State<MainScreen> {
                 child: WaterBlockWidget(
                   group: currentGroup,
                   handleButtonPress: () {
-                    setState(() {
-                      _isLoading = true;
-                    });
                     _handleBlockButtonTap(currentGroup).then((result) {
                       setState(() {
-                        _isLoading = false;
                         if (result.contains(false)) {
                           int blockedCount = 0;
                           for (bool b in result) {
@@ -313,14 +305,28 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
             onTap: () {
-              Navigator.pushNamed(
-                context,
-                Routes.groupLeakProbes,
-                arguments: GroupLeakProbesScreenArguments(
-                  currentGroup,
-                ),
-              ).then((_) {
-                setState(() {});
+              setState(() {
+                _isLoading = true;
+              });
+              List<Future> futures = [];
+              for (CentralUnit central in currentGroup.centralUnits) {
+                futures.add(central.refreshProbes());
+              }
+              Future.wait(futures).then((_) {
+                setState(() {
+                  _isLoading = false;
+                });
+                if (mounted) {
+                  Navigator.pushNamed(
+                    context,
+                    Routes.groupLeakProbes,
+                    arguments: GroupLeakProbesScreenArguments(
+                      currentGroup,
+                    ),
+                  ).then((_) {
+                    setState(() {});
+                  });
+                }
               });
             },
           ),
@@ -381,18 +387,28 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
             onTap: () {
-              Navigator.pushNamed(
-                context,
-                Routes.groupCentralUnits,
-                arguments: GroupCentralUnitsScreenArguments(
-                  currentGroup,
-                ),
-              ).then((_) {
+              setState(() {
+                _isLoading = true;
+              });
+              List<Future> futures = [];
+              for (CentralUnit central in currentGroup.centralUnits) {
+                futures.add(central.refreshForWidget());
+              }
+              Future.wait(futures).then((_) {
                 setState(() {
-                  for (Group group in _appData.groups) {
-                    group.updateBlockStatus();
-                  }
+                  _isLoading = false;
                 });
+                if (mounted) {
+                  Navigator.pushNamed(
+                    context,
+                    Routes.groupCentralUnits,
+                    arguments: GroupCentralUnitsScreenArguments(
+                      currentGroup,
+                    ),
+                  ).then((_) {
+                    setState(() {});
+                  });
+                }
               });
             },
           ),

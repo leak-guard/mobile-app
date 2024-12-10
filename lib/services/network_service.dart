@@ -155,9 +155,11 @@ class NetworkService {
     if (!discoveredCentralUnits
         .any((cu) => _isSameCentralUnit(cu, foundCentralUnit))) {
       bool centralAlreadyInDatabase = false;
-      foundCentralUnit.refreshStatus().then((success) {
+      foundCentralUnit.getStatus().then((success) {
+        print(foundCentralUnit);
         for (CentralUnit cu in _appData.centralUnits) {
           if (cu.addressMAC == foundCentralUnit.addressMAC) {
+            print("znalazłem!");
             centralAlreadyInDatabase = true;
             if (cu.addressIP != foundCentralUnit.addressIP) {
               cu.addressIP = foundCentralUnit.addressIP;
