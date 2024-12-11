@@ -49,9 +49,8 @@ class _DetailsGroupScreenState extends State<DetailsGroupScreen> {
 
   bool _hasUnsavedChanges() {
     bool imagePathDif = widget.group.imagePath != _initialImagePath;
-    bool nameDif = widget.group.name != _nameController.text.trim();
-    bool descriptionDif =
-        _initialDescription != _descriptionController.text.trim();
+    bool nameDif = widget.group.name != _nameController.text;
+    bool descriptionDif = _initialDescription != _descriptionController.text;
     bool centralUnitsDif =
         widget.group.centralUnits.length != chosenCentrals.length;
     bool centralUnitsContentDif =

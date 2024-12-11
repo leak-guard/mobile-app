@@ -501,7 +501,7 @@ class _MainScreenState extends State<MainScreen> {
                   Navigator.pushNamed(
                     // ignore: use_build_context_synchronously
                     context,
-                    Routes.createCentralUnit,
+                    Routes.findCentralUnit,
                   ).then((_) {
                     _networkService.startServiceDiscovery();
                     setState(() {});

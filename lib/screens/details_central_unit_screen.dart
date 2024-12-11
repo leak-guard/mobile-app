@@ -92,9 +92,8 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
 
   bool _hasUnsavedChanges() {
     bool imagePathDif = widget.central.imagePath != _initialImagePath;
-    bool nameDif = widget.central.name != _nameController.text.trim();
-    bool descriptionDif =
-        _initialDescription != _descriptionController.text.trim();
+    bool nameDif = widget.central.name != _nameController.text;
+    bool descriptionDif = _initialDescription != _descriptionController.text;
 
     bool ipDif = widget.central.addressIP != _ipController.text;
 
@@ -403,6 +402,20 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
       "valve_type": _isValveNO ? "no" : "nc",
       "timezone_id": _selectedTimeZone.timeZoneId,
     };
+
+    int minimumFlowRate = int.tryParse(_minimumFlowController.text) ?? 5000;
+    minimumFlowRate = minimumFlowRate ~/ 10;
+    String criteria =
+        "T,${minimumFlowRate.toString()},${_minimumTimeController.text},|";
+    Map<String, dynamic> criteriaRequest = {"criteria": criteria};
+    print(criteria);
+
+    if (!(await _api.postCriteria(widget.central.addressIP, criteriaRequest))) {
+      CustomToast.toast(
+          'Could not connect to central unit\nConfiguration not sent');
+      return false;
+    }
+
     if (await _api.putConfig(_ipController.text, config)) {
       widget.central.wifiSSID = _wifiSsidController.text;
       widget.central.wifiPassword = _wifiPasswordController.text;

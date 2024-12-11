@@ -323,13 +323,25 @@ class CentralUnit implements Photographable {
   }
 
   Future<bool> refresh() async {
-    if (!await refreshBlockStatus()) return false;
+    if (!await refreshBlockStatus()) {
+      print("Failed to refresh block status");
+      return false;
+    }
     await Future.delayed(delay);
-    if (!await getRecentFlows()) return false;
+    if (!await getRecentFlows()) {
+      print("Failed to get recent flows");
+      return false;
+    }
     await Future.delayed(delay);
-    if (!await refreshProbes()) return false;
+    if (!await refreshProbes()) {
+      print("Failed to refresh probes");
+      return false;
+    }
     await Future.delayed(delay);
-    if (!await getBlockSchedule()) return false;
+    if (!await getBlockSchedule()) {
+      print("Failed to get block schedule");
+      return false;
+    }
     return true;
   }
 

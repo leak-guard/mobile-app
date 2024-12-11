@@ -1,13 +1,12 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/utils/colors.dart';
-import 'package:leak_guard/utils/routes.dart';
 
 class AddUnitButton extends StatelessWidget {
   const AddUnitButton({
     super.key,
-    required this.onBack,
+    required this.onPressed,
   });
-  final VoidCallback onBack;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +28,7 @@ class AddUnitButton extends StatelessWidget {
             BorderRadius.circular(12),
           ),
         ),
-        onPressed: () {
-          Navigator.pushNamed(
-            context,
-            Routes.findCentralUnit,
-          ).then((_) {
-            onBack();
-          });
-        },
+        onPressed: onPressed,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),

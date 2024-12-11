@@ -508,9 +508,6 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
       "valve_type": centralUnit.isValveNO ? "no" : "nc",
       "timezone_id": centralUnit.timezoneId,
     };
-
-    if (!(await _api.putConfig(centralUnit.addressIP, config))) return false;
-    await Future.delayed(const Duration(milliseconds: 100));
     int minimumFlowRate = int.tryParse(_minimumFlowController.text) ?? 5000;
     minimumFlowRate = minimumFlowRate ~/ 10;
     String criteria =
@@ -518,6 +515,14 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     Map<String, dynamic> criteriaRequest = {"criteria": criteria};
 
     if (!(await _api.postCriteria(centralUnit.addressIP, criteriaRequest))) {
+      print('Error sending criteria');
+      return false;
+    }
+
+    await Future.delayed(const Duration(milliseconds: 400));
+
+    if (!(await _api.putConfig(centralUnit.addressIP, config))) {
+      print('Error sending config');
       return false;
     }
 
@@ -568,7 +573,6 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
       _central.minimumTime = int.tryParse(_minimumTimeController.text) ?? 300;
       _central.centralUnitID = centralID;
       _central.isOnline = true;
-      await _central.refreshData();
       _appData.centralUnits.add(_central);
       if (_appData.groups.isEmpty) {
         Group defaultGroup = Group(
