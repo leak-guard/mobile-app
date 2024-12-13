@@ -408,7 +408,6 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
     String criteria =
         "T,${minimumFlowRate.toString()},${_minimumTimeController.text},|";
     Map<String, dynamic> criteriaRequest = {"criteria": criteria};
-    print(criteria);
 
     if (!(await _api.postCriteria(widget.central.addressIP, criteriaRequest))) {
       CustomToast.toast(

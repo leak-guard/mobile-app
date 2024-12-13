@@ -160,16 +160,13 @@ class DataGenerator {
     final now = DateTime.now();
     final startDate = DateTime(
       now.year,
-      now.month,
+      now.month - 3,
       now.day,
     );
     final endDate = DateTime(
       now.year,
       now.month,
-      now.day,
-      now.hour,
-      now.minute,
-      now.second,
+      now.day + 7,
     );
 
     final totalDays = endDate.difference(startDate).inDays;

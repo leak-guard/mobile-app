@@ -515,14 +515,12 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     Map<String, dynamic> criteriaRequest = {"criteria": criteria};
 
     if (!(await _api.postCriteria(centralUnit.addressIP, criteriaRequest))) {
-      print('Error sending criteria');
       return false;
     }
 
     await Future.delayed(const Duration(milliseconds: 400));
 
     if (!(await _api.putConfig(centralUnit.addressIP, config))) {
-      print('Error sending config');
       return false;
     }
 

@@ -49,23 +49,38 @@ Future<void> setupFlutterNotifications() async {
       ?.createNotificationChannel(channel);
 }
 
+// {"alert_type": "leak", "alert_data": {"reason": "flow_rate_exceeded"}}
+// {"alert_type": "leak", "alert_data": {"reason": "probe_detected_leak", "probe_id": "deadbeef-cafebabe-1a2b3c4d"}}
+
 void showFlutterNotification(RemoteMessage message) {
   if (message.data.containsKey('device_id')) {
-    String notificationMessage = "We have detected a leak in your system!";
+    String header = "We have detected a leak in your system!";
+    String body = "Please check the app for more details.";
     final db = DatabaseService.instance;
     final data = message.data;
     final deviceID = data['device_id'];
     db.getCentralUnits().then((value) {
       for (var cu in value) {
         if (cu.hardwareID == deviceID) {
-          notificationMessage = "Leak detected in ${cu.name}";
+          header = "Leak detected in ${cu.name}";
           break;
         }
       }
+      if (message.data.containsKey("data")) {
+        String dataForSplit = message.data["data"];
+        String reason = dataForSplit.split(":")[1].trim().split('"')[1];
+        if (reason == "flow_rate_exceeded") {
+          body = "Flow rate exceeded!";
+        } else if (reason == "probe_detected_leak") {
+          String probeID = dataForSplit.split(":")[2].trim().split('}')[0];
+          body = "Probe $probeID detected a leak!";
+        }
+      }
+
       flutterLocalNotificationsPlugin.show(
         message.hashCode,
-        "Leak detected",
-        notificationMessage,
+        header,
+        body,
         NotificationDetails(
           android: AndroidNotificationDetails(
             channel.id,

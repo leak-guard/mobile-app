@@ -193,7 +193,7 @@ class DatabaseService {
     final databasePath = join(databaseDirPath, "leak_guard.db");
     final database = await openDatabase(
       databasePath,
-      version: 6,
+      version: 7,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,
@@ -309,6 +309,41 @@ class DatabaseService {
         $_leakProbesDescriptionColumnName TEXT,
         $_leakProbesImagePathColumnName TEXT,
         UNIQUE($_leakProbesCentralUnitIDColumnName, $_leakProbesSTMID1ColumnName, $_leakProbesSTMID2ColumnName, $_leakProbesSTMID3ColumnName),
+        FOREIGN KEY ($_leakProbesCentralUnitIDColumnName) 
+          REFERENCES $_centralUnitsTableName ($_centralUnitsCentralUnitIDColumnName) 
+          ON DELETE CASCADE
+      )
+    ''');
+
+      await db.execute('''
+      INSERT INTO ${_leakProbesTableName}_temp 
+      SELECT * FROM $_leakProbesTableName
+    ''');
+
+      await db.execute('DROP TABLE $_leakProbesTableName');
+
+      await db.execute('''
+      ALTER TABLE ${_leakProbesTableName}_temp 
+      RENAME TO $_leakProbesTableName
+    ''');
+    }
+
+    if (oldVersion < 7) {
+      // Add new columns to central_units table
+      await db.execute('''
+      CREATE TABLE ${_leakProbesTableName}_temp (
+        $_leakProbesLeakProbeIDColumnName INTEGER PRIMARY KEY,
+        $_leakProbesCentralUnitIDColumnName INTEGER NOT NULL,
+        $_leakProbesNameColumnName TEXT NOT NULL,
+        $_leakProbesSTMID1ColumnName INTEGER NOT NULL,
+        $_leakProbesSTMID2ColumnName INTEGER NOT NULL,
+        $_leakProbesSTMID3ColumnName INTEGER NOT NULL,
+        $_leakProbesAddressColumnName INTEGER NOT NULL,
+        $_leakProbesBatteryLevelColumnName INTEGER NOT NULL DEFAULT 100,
+        $_leakProbesBlockedColumnName INTEGER NOT NULL DEFAULT 0,
+        $_leakProbesDescriptionColumnName TEXT,
+        $_leakProbesImagePathColumnName TEXT,
+        UNIQUE($_leakProbesCentralUnitIDColumnName, $_leakProbesAddressColumnName, $_leakProbesSTMID1ColumnName, $_leakProbesSTMID2ColumnName, $_leakProbesSTMID3ColumnName),
         FOREIGN KEY ($_leakProbesCentralUnitIDColumnName) 
           REFERENCES $_centralUnitsTableName ($_centralUnitsCentralUnitIDColumnName) 
           ON DELETE CASCADE

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:leak_guard/custom_icons.dart';
 import 'package:leak_guard/models/block_schedule.dart';
@@ -10,6 +11,7 @@ import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/services/shared_preferences.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/custom_toast.dart';
+import 'package:leak_guard/utils/floating_data_generator.dart';
 import 'package:leak_guard/utils/routes.dart';
 import 'package:leak_guard/utils/strings.dart';
 import 'package:leak_guard/widgets/custom_app_bar.dart';
@@ -122,7 +124,7 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  Future<void> _refreshDataForCentrals(Group group) async {
+  void _refreshDataForCentrals(Group group) async {
     setState(() {
       _isLoading = true;
     });
@@ -521,6 +523,39 @@ class _MainScreenState extends State<MainScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 16),
+              if (kDebugMode)
+                NeumorphicButton(
+                  style: NeumorphicStyle(
+                    depth: 5,
+                    intensity: 0.8,
+                    boxShape: NeumorphicBoxShape.roundRect(
+                      BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () async {
+                    GenerateTestDataButton(
+                      onComplete: () {
+                        setState(() {});
+                      },
+                    ).generateData(context);
+                  },
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.science_outlined),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Generate test data',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),

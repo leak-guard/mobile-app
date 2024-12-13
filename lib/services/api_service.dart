@@ -90,8 +90,6 @@ class CustomApi {
   }
 
   Future<List<Flow>?> getRecentFlows(String ip, DateTime lastFlowDate) async {
-    //TODO: If implemented remove next line
-    ip = MyStrings.myIp;
     final fromTimestamp = lastFlowDate.millisecondsSinceEpoch ~/ 1000;
     final toTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 

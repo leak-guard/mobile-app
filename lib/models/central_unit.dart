@@ -15,7 +15,7 @@ class CentralUnit implements Photographable {
   String? imagePath;
   String password = "admin";
   String hardwareID;
-  Duration delay = const Duration(milliseconds: 400);
+  Duration delay = const Duration(milliseconds: 300);
 
   BlockSchedule blockSchedule = BlockSchedule.defaultSchedule();
   bool isBlocked = false;
@@ -324,22 +324,18 @@ class CentralUnit implements Photographable {
 
   Future<bool> refresh() async {
     if (!await refreshBlockStatus()) {
-      print("Failed to refresh block status");
       return false;
     }
     await Future.delayed(delay);
     if (!await getRecentFlows()) {
-      print("Failed to get recent flows");
       return false;
     }
     await Future.delayed(delay);
     if (!await refreshProbes()) {
-      print("Failed to refresh probes");
       return false;
     }
     await Future.delayed(delay);
     if (!await getBlockSchedule()) {
-      print("Failed to get block schedule");
       return false;
     }
     return true;
@@ -501,7 +497,6 @@ class CentralUnit implements Photographable {
     await _db.deleteFlowsFromDate(
         centralUnitID!, DateTime(today.year, today.month, today.day));
     await _db.addCentralUnitsFlows(centralUnitID!, flows);
-
     return true;
   }
 
