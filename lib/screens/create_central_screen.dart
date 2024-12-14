@@ -60,8 +60,6 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     password: "admin1",
     addressMAC: '',
     timezoneId: 37,
-    isRegistered: false,
-    isDeleted: false,
     hardwareID: "",
   );
 
@@ -562,9 +560,6 @@ class _CreateCentralScreenState extends State<CreateCentralScreen> {
     }
 
     if (await _sendConfiguration(_central)) {
-      _central.isRegistered =
-          await _api.registerCentralUnit(_central.hardwareID);
-      _central.isDeleted = false;
       int centralID = await _db.addCentralUnit(_central);
       _central.minimumFlowRate =
           int.tryParse(_minimumFlowController.text) ?? 5000;

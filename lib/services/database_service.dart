@@ -63,8 +63,6 @@ class DatabaseService {
   final String _centralUnitsAddressIPColumnName = "addressIP";
   final String _centralUnitsAddressMACColumnName = "addressMAC";
   final String _centralUnitsHardwareIDColumnName = "hardwareID";
-  final String _centralUnitsIsRegisteredColumnName = "isRegistered";
-  final String _centralUnitsIsDeletedColumnName = "isDeleted";
   final String _centralUnitsIsValveNOColumnName = "isValveNO";
   final String _centralUnitsImpulsesPerLiterColumnName = "impulsesPerLiter";
   final String _centralUnitsPasswordColumnName = "password";
@@ -133,9 +131,7 @@ class DatabaseService {
         $_centralUnitsImagePathColumnName TEXT,
         $_centralUnitsIsValveNOColumnName INTEGER NOT NULL DEFAULT 0,
         $_centralUnitsImpulsesPerLiterColumnName INTEGER NOT NULL DEFAULT 1,
-        $_centralUnitsHardwareIDColumnName TEXT NOT NULL DEFAULT '',
-        $_centralUnitsIsRegisteredColumnName INTEGER NOT NULL DEFAULT 0,
-        $_centralUnitsIsDeletedColumnName INTEGER NOT NULL DEFAULT 0
+        $_centralUnitsHardwareIDColumnName TEXT NOT NULL DEFAULT ''
       )
     ''');
 
@@ -193,175 +189,11 @@ class DatabaseService {
     final databasePath = join(databaseDirPath, "leak_guard.db");
     final database = await openDatabase(
       databasePath,
-      version: 7,
+      version: 1,
       onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,
     );
     return database;
-  }
-
-  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await db.execute('''
-        ALTER TABLE $_groupsTableName 
-        ADD COLUMN $_groupsDescriptionColumnName TEXT
-      ''');
-
-      await db.execute('''
-        ALTER TABLE $_groupsTableName 
-        ADD COLUMN $_groupsImagePathColumnName TEXT
-      ''');
-    }
-
-    if (oldVersion < 3) {
-      await db.execute('''
-        ALTER TABLE $_centralUnitsTableName 
-        ADD COLUMN $_centralUnitsIsValveNOColumnName INTEGER NOT NULL DEFAULT 0
-      ''');
-
-      await db.execute('''
-        ALTER TABLE $_centralUnitsTableName 
-        ADD COLUMN $_centralUnitsImpulsesPerLiterColumnName INTEGER NOT NULL DEFAULT 1
-      ''');
-    }
-
-    if (oldVersion < 4) {
-      await db.execute('''
-        CREATE TABLE ${_leakProbesTableName}_temp (
-          $_leakProbesLeakProbeIDColumnName INTEGER PRIMARY KEY,
-          $_leakProbesCentralUnitIDColumnName INTEGER NOT NULL,
-          $_leakProbesNameColumnName TEXT NOT NULL,
-          $_leakProbesSTMID1ColumnName INTEGER NOT NULL,
-          $_leakProbesSTMID2ColumnName INTEGER NOT NULL,
-          $_leakProbesSTMID3ColumnName INTEGER NOT NULL,
-          $_leakProbesAddressColumnName INTEGER NOT NULL,
-          $_leakProbesBatteryLevelColumnName INTEGER NOT NULL DEFAULT 100,
-          $_leakProbesBlockedColumnName INTEGER NOT NULL DEFAULT 0,
-          $_leakProbesDescriptionColumnName TEXT,
-          $_leakProbesImagePathColumnName TEXT,
-          UNIQUE($_leakProbesSTMID1ColumnName, $_leakProbesSTMID2ColumnName, $_leakProbesSTMID3ColumnName),
-          FOREIGN KEY ($_leakProbesCentralUnitIDColumnName) 
-            REFERENCES $_centralUnitsTableName ($_centralUnitsCentralUnitIDColumnName) 
-            ON DELETE CASCADE
-        )
-      ''');
-
-      await db.execute('''
-        INSERT INTO ${_leakProbesTableName}_temp (
-          $_leakProbesLeakProbeIDColumnName,
-          $_leakProbesCentralUnitIDColumnName,
-          $_leakProbesNameColumnName,
-          $_leakProbesDescriptionColumnName,
-          $_leakProbesImagePathColumnName,
-          $_leakProbesSTMID1ColumnName,
-          $_leakProbesSTMID2ColumnName,
-          $_leakProbesSTMID3ColumnName,
-          $_leakProbesAddressColumnName,
-        ) 
-        SELECT 
-          $_leakProbesLeakProbeIDColumnName,
-          $_leakProbesCentralUnitIDColumnName,
-          $_leakProbesNameColumnName,
-          $_leakProbesDescriptionColumnName,
-          $_leakProbesImagePathColumnName,
-          0, 0, 0, 0
-        FROM $_leakProbesTableName
-      ''');
-
-      await db.execute('DROP TABLE $_leakProbesTableName');
-
-      await db.execute(
-          'ALTER TABLE ${_leakProbesTableName}_temp RENAME TO $_leakProbesTableName');
-    }
-
-    if (oldVersion < 5) {
-      // Add new columns to central_units table
-      await db.execute('''
-      ALTER TABLE $_centralUnitsTableName 
-      ADD COLUMN $_centralUnitsHardwareIDColumnName TEXT NOT NULL DEFAULT ''
-    ''');
-
-      await db.execute('''
-      ALTER TABLE $_centralUnitsTableName 
-      ADD COLUMN $_centralUnitsIsRegisteredColumnName INTEGER NOT NULL DEFAULT 0
-    ''');
-
-      await db.execute('''
-      ALTER TABLE $_centralUnitsTableName 
-      ADD COLUMN $_centralUnitsIsDeletedColumnName INTEGER NOT NULL DEFAULT 0
-    ''');
-    }
-
-    if (oldVersion < 6) {
-      // Add new columns to central_units table
-      await db.execute('''
-      CREATE TABLE ${_leakProbesTableName}_temp (
-        $_leakProbesLeakProbeIDColumnName INTEGER PRIMARY KEY,
-        $_leakProbesCentralUnitIDColumnName INTEGER NOT NULL,
-        $_leakProbesNameColumnName TEXT NOT NULL,
-        $_leakProbesSTMID1ColumnName INTEGER NOT NULL,
-        $_leakProbesSTMID2ColumnName INTEGER NOT NULL,
-        $_leakProbesSTMID3ColumnName INTEGER NOT NULL,
-        $_leakProbesAddressColumnName INTEGER NOT NULL,
-        $_leakProbesBatteryLevelColumnName INTEGER NOT NULL DEFAULT 100,
-        $_leakProbesBlockedColumnName INTEGER NOT NULL DEFAULT 0,
-        $_leakProbesDescriptionColumnName TEXT,
-        $_leakProbesImagePathColumnName TEXT,
-        UNIQUE($_leakProbesCentralUnitIDColumnName, $_leakProbesSTMID1ColumnName, $_leakProbesSTMID2ColumnName, $_leakProbesSTMID3ColumnName),
-        FOREIGN KEY ($_leakProbesCentralUnitIDColumnName) 
-          REFERENCES $_centralUnitsTableName ($_centralUnitsCentralUnitIDColumnName) 
-          ON DELETE CASCADE
-      )
-    ''');
-
-      await db.execute('''
-      INSERT INTO ${_leakProbesTableName}_temp 
-      SELECT * FROM $_leakProbesTableName
-    ''');
-
-      await db.execute('DROP TABLE $_leakProbesTableName');
-
-      await db.execute('''
-      ALTER TABLE ${_leakProbesTableName}_temp 
-      RENAME TO $_leakProbesTableName
-    ''');
-    }
-
-    if (oldVersion < 7) {
-      // Add new columns to central_units table
-      await db.execute('''
-      CREATE TABLE ${_leakProbesTableName}_temp (
-        $_leakProbesLeakProbeIDColumnName INTEGER PRIMARY KEY,
-        $_leakProbesCentralUnitIDColumnName INTEGER NOT NULL,
-        $_leakProbesNameColumnName TEXT NOT NULL,
-        $_leakProbesSTMID1ColumnName INTEGER NOT NULL,
-        $_leakProbesSTMID2ColumnName INTEGER NOT NULL,
-        $_leakProbesSTMID3ColumnName INTEGER NOT NULL,
-        $_leakProbesAddressColumnName INTEGER NOT NULL,
-        $_leakProbesBatteryLevelColumnName INTEGER NOT NULL DEFAULT 100,
-        $_leakProbesBlockedColumnName INTEGER NOT NULL DEFAULT 0,
-        $_leakProbesDescriptionColumnName TEXT,
-        $_leakProbesImagePathColumnName TEXT,
-        UNIQUE($_leakProbesCentralUnitIDColumnName, $_leakProbesAddressColumnName, $_leakProbesSTMID1ColumnName, $_leakProbesSTMID2ColumnName, $_leakProbesSTMID3ColumnName),
-        FOREIGN KEY ($_leakProbesCentralUnitIDColumnName) 
-          REFERENCES $_centralUnitsTableName ($_centralUnitsCentralUnitIDColumnName) 
-          ON DELETE CASCADE
-      )
-    ''');
-
-      await db.execute('''
-      INSERT INTO ${_leakProbesTableName}_temp 
-      SELECT * FROM $_leakProbesTableName
-    ''');
-
-      await db.execute('DROP TABLE $_leakProbesTableName');
-
-      await db.execute('''
-      ALTER TABLE ${_leakProbesTableName}_temp 
-      RENAME TO $_leakProbesTableName
-    ''');
-    }
   }
 
   // Group CRUD operations
@@ -516,8 +348,6 @@ class DatabaseService {
         _centralUnitsIsValveNOColumnName: unit.isValveNO ? 1 : 0,
         _centralUnitsImpulsesPerLiterColumnName: unit.impulsesPerLiter,
         _centralUnitsHardwareIDColumnName: unit.hardwareID,
-        _centralUnitsIsRegisteredColumnName: unit.isRegistered ? 1 : 0,
-        _centralUnitsIsDeletedColumnName: unit.isDeleted ? 1 : 0,
       },
     );
   }
@@ -537,9 +367,6 @@ class DatabaseService {
               description: e[_centralUnitsDescriptionColumnName] as String?,
               imagePath: e[_centralUnitsImagePathColumnName] as String?,
               hardwareID: e[_centralUnitsHardwareIDColumnName] as String,
-              isRegistered:
-                  (e[_centralUnitsIsRegisteredColumnName] as int) == 1,
-              isDeleted: (e[_centralUnitsIsDeletedColumnName] as int) == 1,
             )..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int)
         .toList();
   }
@@ -559,8 +386,6 @@ class DatabaseService {
         description: e[_centralUnitsDescriptionColumnName] as String?,
         imagePath: e[_centralUnitsImagePathColumnName] as String?,
         hardwareID: e[_centralUnitsHardwareIDColumnName] as String,
-        isRegistered: (e[_centralUnitsIsRegisteredColumnName] as int) == 1,
-        isDeleted: (e[_centralUnitsIsDeletedColumnName] as int) == 1,
       )..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int;
 
       map[unit.centralUnitID!] = unit;
@@ -590,9 +415,6 @@ class DatabaseService {
               description: e[_centralUnitsDescriptionColumnName] as String?,
               imagePath: e[_centralUnitsImagePathColumnName] as String?,
               hardwareID: e[_centralUnitsHardwareIDColumnName] as String,
-              isRegistered:
-                  (e[_centralUnitsIsRegisteredColumnName] as int) == 1,
-              isDeleted: (e[_centralUnitsIsDeletedColumnName] as int) == 1,
             )..centralUnitID = e[_centralUnitsCentralUnitIDColumnName] as int)
         .toList();
   }
@@ -631,9 +453,6 @@ class DatabaseService {
       description: data.first[_centralUnitsDescriptionColumnName] as String?,
       imagePath: data.first[_centralUnitsImagePathColumnName] as String?,
       hardwareID: data.first[_centralUnitsHardwareIDColumnName] as String,
-      isRegistered:
-          (data.first[_centralUnitsIsRegisteredColumnName] as int) == 1,
-      isDeleted: (data.first[_centralUnitsIsDeletedColumnName] as int) == 1,
     )..centralUnitID = data.first[_centralUnitsCentralUnitIDColumnName] as int;
   }
 
@@ -651,8 +470,6 @@ class DatabaseService {
         _centralUnitsDescriptionColumnName: unit.description,
         _centralUnitsImagePathColumnName: unit.imagePath,
         _centralUnitsHardwareIDColumnName: unit.hardwareID,
-        _centralUnitsIsRegisteredColumnName: unit.isRegistered ? 1 : 0,
-        _centralUnitsIsDeletedColumnName: unit.isDeleted ? 1 : 0,
       },
       where: '$_centralUnitsCentralUnitIDColumnName = ?',
       whereArgs: [unit.centralUnitID],

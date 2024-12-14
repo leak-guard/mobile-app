@@ -24,10 +24,6 @@ class CentralUnit implements Photographable {
   String addressIP;
   String addressMAC;
 
-  // helpers for registration central unit in AWS
-  bool isRegistered;
-  bool isDeleted;
-
   String? wifiSSID = "";
   String? wifiPassword = "";
   bool isOnline = false;
@@ -51,8 +47,6 @@ class CentralUnit implements Photographable {
       required this.password,
       required this.isValveNO,
       required this.impulsesPerLiter,
-      required this.isRegistered,
-      required this.isDeleted,
       required this.hardwareID,
       this.timezoneId,
       this.description,
@@ -69,8 +63,6 @@ class CentralUnit implements Photographable {
             ? "no_ip_addresses"
             : service.addresses!.first.address,
         addressMAC = MyStrings.noHost,
-        isRegistered = false,
-        isDeleted = false,
         hardwareID = "";
 
   List<LeakProbe> leakProbes = [];
@@ -629,14 +621,6 @@ class CentralUnit implements Photographable {
       ));
     }
     return result;
-  }
-
-  Future<bool> register() {
-    return _api.registerCentralUnit(hardwareID);
-  }
-
-  Future<bool> unRegister() {
-    return _api.unRegisterCentralUnit(hardwareID);
   }
 
   Future<bool> toggleBlock(bool isBlocked) async {

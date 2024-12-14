@@ -7,7 +7,6 @@ import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/models/group.dart';
 import 'package:leak_guard/models/water_usage_data.dart';
 import 'package:leak_guard/services/app_data.dart';
-import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/services/shared_preferences.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/custom_toast.dart';
@@ -36,7 +35,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _appData = AppData();
-  final _networkService = NetworkService();
   final _prefs = PreferencesService.I;
   int groupIndex = 0;
   bool _isLoading = false;
@@ -460,7 +458,6 @@ class _MainScreenState extends State<MainScreen> {
                     return;
                   }
 
-                  await _networkService.getCurrentWifiName();
                   await _prefs.setFirstTime(false);
                   Permission.locationWhenInUse.serviceStatus.isEnabled
                       .then((isEnable) {
@@ -470,42 +467,11 @@ class _MainScreenState extends State<MainScreen> {
                     }
                   });
 
-                  if ((_networkService.currentWifiName ?? "") ==
-                      "LeakGuardConfig") {
-                    CentralUnit newCentral = CentralUnit(
-                      name: "",
-                      addressIP: "192.168.4.1",
-                      addressMAC: '',
-                      password: '',
-                      isValveNO: true,
-                      impulsesPerLiter: 477,
-                      timezoneId: 37,
-                      isRegistered: false,
-                      isDeleted: false,
-                      hardwareID: "",
-                    );
-                    if (mounted) {
-                      Navigator.pushNamed(
-                        // ignore: use_build_context_synchronously
-                        context,
-                        Routes.createCentralUnit,
-                        arguments: CreateCentralScreenArguments(newCentral),
-                      ).then((_) {
-                        _networkService.startServiceDiscovery();
-                        setState(() {});
-                      });
-
-                      CustomToast.toast("Connected to LeakGuardConfig!");
-                      return;
-                    }
-                  }
-
                   Navigator.pushNamed(
                     // ignore: use_build_context_synchronously
                     context,
                     Routes.findCentralUnit,
                   ).then((_) {
-                    _networkService.startServiceDiscovery();
                     setState(() {});
                   });
                 },

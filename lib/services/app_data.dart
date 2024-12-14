@@ -35,28 +35,6 @@ class AppData {
 
     centralUnits = centralsMap.values.toList();
 
-    for (CentralUnit cu in centralUnits) {
-      if (cu.isDeleted) {
-        if (cu.isRegistered) {
-          cu.isRegistered = !await cu.unRegister();
-          if (!cu.isRegistered) {
-            await _db.deleteCentralUnit(cu.centralUnitID!);
-          }
-        } else {
-          await _db.deleteCentralUnit(cu.centralUnitID!);
-        }
-      } else if (!cu.isRegistered) {
-        cu.isRegistered = await cu.register();
-        await _db.updateCentralUnit(cu);
-      }
-    }
-
-    for (int i = centralUnits.length - 1; i >= 0; i--) {
-      if (centralUnits[i].isDeleted) {
-        centralUnits.removeAt(i);
-      }
-    }
-
     for (var group in groups) {
       group.centralUnits = relations
           .where((relation) => relation.groupId == group.groupdID)

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:leak_guard/models/central_unit.dart';
 import 'package:leak_guard/services/app_data.dart';
 import 'package:leak_guard/services/database_service.dart';
-import 'package:leak_guard/services/network_service.dart';
 import 'package:leak_guard/utils/colors.dart';
 import 'package:leak_guard/utils/custom_toast.dart';
 import 'package:leak_guard/utils/routes.dart';
@@ -25,12 +23,10 @@ class ManageCentralUnitsScreen extends StatefulWidget {
 class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
   final _appData = AppData();
   bool _centralChosen = false;
-  final _networkService = NetworkService();
   bool _isLoading = false;
   final _db = DatabaseService.instance;
 
   Future<void> _refresh() async {
-    _networkService.startServiceDiscovery();
     setState(() {
       _isLoading = true;
     });
@@ -46,7 +42,6 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
   }
 
   Future<void> _refreshIndicator() async {
-    _networkService.startServiceDiscovery();
     await Future.delayed(const Duration(seconds: 2));
     List<Future<bool>> futures = [];
     for (var central in _appData.centralUnits) {
@@ -88,12 +83,11 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                     child: AddUnitButton(
-                      onPressed: () async {
+                      onPressed: () {
                         setState(() {
                           _isLoading = true;
                         });
 
-                        await _networkService.getCurrentWifiName();
                         Permission.locationWhenInUse.serviceStatus.isEnabled
                             .then((isEnable) {
                           if (!isEnable) {
@@ -101,45 +95,11 @@ class _ManageCentralUnitsScreenState extends State<ManageCentralUnitsScreen> {
                                 'Please turn on location on your phone');
                           }
                         });
-
-                        if ((_networkService.currentWifiName ?? "") ==
-                            "LeakGuardConfig") {
-                          CentralUnit newCentral = CentralUnit(
-                            name: "",
-                            addressIP: "192.168.4.1",
-                            addressMAC: '',
-                            password: '',
-                            isValveNO: true,
-                            impulsesPerLiter: 477,
-                            timezoneId: 37,
-                            isRegistered: false,
-                            isDeleted: false,
-                            hardwareID: "",
-                          );
-                          if (mounted) {
-                            Navigator.pushNamed(
-                              // ignore: use_build_context_synchronously
-                              context,
-                              Routes.createCentralUnit,
-                              arguments:
-                                  CreateCentralScreenArguments(newCentral),
-                            ).then((_) {
-                              _networkService.startServiceDiscovery();
-                              setState(() {
-                                _isLoading = false;
-                              });
-                            });
-
-                            CustomToast.toast("Connected to LeakGuardConfig!");
-                            return;
-                          }
-                        }
                         Navigator.pushNamed(
                           // ignore: use_build_context_synchronously
                           context,
                           Routes.findCentralUnit,
                         ).then((_) {
-                          _networkService.startServiceDiscovery();
                           setState(() {
                             _isLoading = false;
                           });

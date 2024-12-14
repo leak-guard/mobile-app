@@ -709,20 +709,7 @@ class _DetailsCentralUnitScreenState extends State<DetailsCentralUnitScreen> {
       }
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-    final result = await _api.unRegisterCentralUnit(widget.central.hardwareID);
-
-    setState(() {
-      _isLoading = false;
-    });
-    if (result) {
-      await _db.deleteCentralUnit(widget.central.centralUnitID!);
-    } else {
-      widget.central.isDeleted = true;
-      await _db.updateCentralUnit(widget.central);
-    }
+    await _db.deleteCentralUnit(widget.central.centralUnitID!);
 
     _appData.centralUnits.remove(widget.central);
 

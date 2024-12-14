@@ -244,8 +244,6 @@ class DataGenerator {
         description: 'Test unit ${i + 1} description',
         imagePath: null,
         timezoneId: 37,
-        isRegistered: false,
-        isDeleted: false,
         hardwareID: '',
       );
 
@@ -275,15 +273,6 @@ class DataGenerator {
         'Group 1',
         'Group 2',
         'Group 3',
-        // 'Duży salon',
-        // 'Mały salon',
-        // 'Kuchnia',
-        // 'Sypialnia',
-        // 'Łazienka',
-        // 'Garaż',
-        // 'Piwnica',
-        // 'Taras',
-        // 'Ogród'
       ];
 
       for (int i = 0; i < groupNames.length; i++) {

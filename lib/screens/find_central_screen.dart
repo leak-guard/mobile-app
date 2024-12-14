@@ -84,8 +84,6 @@ class _FindCentralScreenState extends State<FindCentralScreen> {
                               isValveNO: true,
                               impulsesPerLiter: 477,
                               timezoneId: 37,
-                              isRegistered: false,
-                              isDeleted: false,
                               hardwareID: "",
                             );
                             if (mounted) {
