@@ -92,14 +92,15 @@ When first launching the app, users need to grant permissions for:
 - Internal storage access (for gallery image selection)
 - Camera access (for taking photos)
 
-![Initial Screen](/docs/images/screenshots/first_open.jpg)
+<img src="/docs/images/screenshots/first_open.jpg" width="300"/>
 
 Adding your first Central Unit requires:
 1. Connecting to the Central Unit's "LeakGuardConfig" hotspot
 2. Enabling location for WiFi name retrieval
 3. Pressing "Add your first device"
 
-![Configuration Connection](/docs/images/screenshots/central_unit_create_connect_to_LeakGuardConfig.jpg)
+
+<img src="/docs/images/screenshots/central_unit_create_connect_to_LeakGuardConfig.jpg" width="300"/>
 
 
 Central Unit configuration requires:
@@ -115,15 +116,17 @@ Central Unit configuration requires:
     - Duration of minimum flow level
   - Valve type (NO/NC)
 
-
-![Default Configuration](/docs/images/screenshots/central_unit_create_default_input.jpg) ![Unit Parameters](/docs/images/screenshots/create_customization.jpg)
+<p float="left">
+  <img src="/docs/images/screenshots/central_unit_create_default_input.jpg" width="300"/>
+  <img src="/docs/images/screenshots/create_customization.jpg" width="300"/>
+</p>
 
 After successful unit addition:
 1. A default group named "Default" is created
 2. User is redirected to the main screen
 3. App automatically scans local network for the configured unit's new IP address
 
-![Main Screen](/docs/images/screenshots/main_screen_default.jpg)
+<img src="/docs/images/screenshots/main_screen_default.jpg" width="300"/>
 
 ### Main Screen Features
 The main interface provides comprehensive system overview with several key functionalities:
@@ -142,18 +145,22 @@ The "Water usage" panel shows:
   - Recent days
   - Recent months
 
-![Water Usage Details](/docs/images/screenshots/water_usage_details.jpg)
 
-![Block Panel](/docs/images/screenshots/main_screen_block_panel.jpg)
+<img src="/docs/images/screenshots/water_usage_details.jpg" width="300"/>
+<img src="/docs/images/screenshots/main_screen_block_panel.jpg" width="300"/>
 
 #### Blocking Schedule
 The "Block time" panel enables:
 - Basic blocking schedule configuration
 - Advanced settings with day-by-day configuration
 
-![Block Schedule](/docs/images/screenshots/block_schedule_details.jpg) ![All Days Schedule](/docs/images/screenshots/block_schedule_details_all.jpg)
+<p float="left">
+  <img src="/docs/images/screenshots/block_schedule_details.jpg" width="300"/>
+  <img src="/docs/images/screenshots/block_schedule_details_all.jpg" width="300"/>
+</p>
 
-![Device Monitoring](/docs/images/screenshots/main_screen_leak_probes_and_central_unit_panels.jpg)
+<img src="/docs/images/screenshots/main_screen_leak_probes_and_central_unit_panels.jpg" width="300"/>
+
 
 #### Device Monitoring
 Leak Probes panel shows:
@@ -169,19 +176,25 @@ Central Units panel displays:
 #### Access to other screens
 Open group management screen, central unit management screen or leak probe screen via application drawer.
 
-![Application drawer](/docs/images/screenshots/drawer.jpg)
+<img src="/docs/images/screenshots/drawer.jpg" width="300"/>
 
 ### Group Management
 The group management screen enables organizing Central Units into logical groups.
 
-![Group Management](/docs/images/screenshots/manage_groups.jpg) ![Group Reordering](/docs/images/screenshots/groups_moving.jpg)
+<p float="left">
+  <img src="/docs/images/screenshots/manage_groups.jpg" width="300"/>
+  <img src="/docs/images/screenshots/groups_moving.jpg" width="300"/>
+</p>
 
 Features include:
 - Creating new groups
 - Displaying groups as tiles with basic information
 - Reordering groups
 
-![Group Creation](/docs/images/screenshots/create_group.jpg) ![Unit Selection](/docs/images/screenshots/create_group_centrals.jpg)
+<p float="left">
+  <img src="/docs/images/screenshots/create_group.jpg" width="300"/>
+  <img src="/docs/images/screenshots/create_group_centrals.jpg" width="300"/>
+</p>
 
 #### Creating a New Group
 To create a group, you need to:
@@ -189,7 +202,10 @@ To create a group, you need to:
 - Select at least one Central Unit
 - Optionally add an image and description
 
-![Group 3 Creation](/docs/images/screenshots/create_group_3.jpg) ![Group 3 Created](/docs/images/screenshots/group_created.jpg)
+<p float="left">
+  <img src="/docs/images/screenshots/create_group_3.jpg" width="300"/>
+  <img src="/docs/images/screenshots/group_created.jpg" width="300"/>
+</p>
 
 #### Group Editing
 The group editing screen allows:
@@ -197,7 +213,10 @@ The group editing screen allows:
 - Modifying the set of Central Units in the group
 - Deleting the group
 
-![Group Editing](/docs/images/screenshots/edit_group.jpg) ![Group Deletion](/docs/images/screenshots/delete_group.jpg)
+<p float="left">
+  <img src="/docs/images/screenshots/edit_group.jpg" width="300"/>
+  <img src="/docs/images/screenshots/delete_group.jpg" width="300"/>
+</p>
 
 ### Central Unit Management
 The Central Unit management screen enables:
@@ -205,14 +224,14 @@ The Central Unit management screen enables:
 - Managing existing units
 - Refreshing connection status and scanning network with mDNS protocol to update IP addresses of units that received new addresses from DHCP server
 
-![Central Unit Management](/docs/images/screenshots/manage_central_units.jpg)
+<img src="/docs/images/screenshots/manage_central_units.jpg" width="300"/>
 
 #### Adding New Central Unit
 You can add a Central Unit in two ways:
 - Manual search by providing IP address and all required fields
 - Selecting a unit from those found in the network via mDNS protocol
 
-![Unit Search](/docs/images/screenshots/find_central_unit.jpg)
+<img src="/docs/images/screenshots/find_central_unit.jpg" width="300"/>
 
 #### Central Unit Editing
 The editing screen allows:
@@ -221,7 +240,10 @@ The editing screen allows:
 - Enabling pairing mode
 - Deleting the unit
 
-![Unit Editing](/docs/images/screenshots/edit_central_unit.jpg) ![Unit Pairing](/docs/images/screenshots/edit_paring_and_leak_probes.jpg)
+<p float="left">
+  <img src="/docs/images/screenshots/edit_central_unit.jpg" width="300"/>
+  <img src="/docs/images/screenshots/edit_paring_and_leak_probes.jpg" width="300"/>
+</p>
 
 ### Leak Module Management
 The leak module management screen provides:
@@ -230,6 +252,4 @@ The leak module management screen provides:
 
 Leak modules are automatically removed when their associated Central Unit is deleted.
 
-![Leak Module Management](/docs/images/screenshots/manage_leak_probes.jpg)
-
-
+<img src="/docs/images/screenshots/manage_leak_probes.jpg" width="300"/>
